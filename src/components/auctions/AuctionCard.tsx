@@ -57,18 +57,30 @@ export default function AuctionCard({ item, onEdit, onView }: Props) {
 
           <Row gutter={16} style={{ marginTop: "16px" }}>
             <Col span={8}>
-              <div style={{ color: "#8c8c8c", fontSize: "14px" }}>
-                {item.marketPrice ? "market Price" : "Current Price"}
+              <div
+                style={{
+                  color: "black",
+                  fontSize: "14px",
+                  fontWeight: "semibold",
+                }}
+              >
+                Market Price
               </div>
               <div style={{ fontWeight: "bold", fontSize: "16px" }}>
-                {item.marketPrice || item.currentPrice}
+                {item.marketPrice}
               </div>
             </Col>
             <Col
               span={8}
               style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}
             >
-              <div style={{ color: "#8c8c8c", fontSize: "14px" }}>
+              <div
+                style={{
+                  color: "black",
+                  fontSize: "14px",
+                  fontWeight: "semibold",
+                }}
+              >
                 Auction Price
               </div>
               <div style={{ fontWeight: "bold", fontSize: "16px" }}>
@@ -79,7 +91,15 @@ export default function AuctionCard({ item, onEdit, onView }: Props) {
               span={8}
               style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}
             >
-              <div style={{ color: "#8c8c8c", fontSize: "14px" }}>Category</div>
+              <div
+                style={{
+                  color: "black",
+                  fontSize: "14px",
+                  fontWeight: "semibold",
+                }}
+              >
+                Category
+              </div>
               <div style={{ fontWeight: "bold", fontSize: "16px" }}>
                 {item.category}
               </div>

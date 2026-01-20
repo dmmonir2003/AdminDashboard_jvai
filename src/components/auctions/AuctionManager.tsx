@@ -27,7 +27,7 @@ const auctionsData = [
     title: "Macbook Pro",
     time: "2h 34m",
     participants: 45,
-    currentPrice: "SAR 895",
+    marketPrice: "SAR 895",
     auctionPrice: "SAR 400",
     category: "Laptop",
     image:
@@ -39,7 +39,7 @@ const auctionsData = [
     title: "BMW Car",
     time: "2h 34m",
     participants: 45,
-    currentPrice: "SAR 895",
+    marketPrice: "SAR 895",
     auctionPrice: "SAR 320",
     category: "Car",
     image:
@@ -51,7 +51,7 @@ const auctionsData = [
     title: "BMW Car",
     time: "2h 34m",
     participants: 45,
-    currentPrice: "SAR 895",
+    marketPrice: "SAR 895",
     auctionPrice: "SAR 320",
     category: "Car",
     image:
@@ -63,7 +63,7 @@ const auctionsData = [
     title: "BMW Car",
     time: "2h 34m",
     participants: 45,
-    currentPrice: "SAR 895",
+    marketPrice: "SAR 895",
     auctionPrice: "SAR 320",
     category: "Car",
     image:
@@ -75,7 +75,7 @@ const auctionsData = [
     title: "BMW Car",
     time: "2h 34m",
     participants: 45,
-    currentPrice: "SAR 895",
+    marketPrice: "SAR 895",
     auctionPrice: "SAR 320",
     category: "Car",
     image:
@@ -87,7 +87,7 @@ const auctionsData = [
     title: "BMW Car",
     time: "2h 34m",
     participants: 45,
-    currentPrice: "SAR 895",
+    marketPrice: "SAR 895",
     auctionPrice: "SAR 320",
     category: "Car",
     image:
@@ -99,7 +99,7 @@ const auctionsData = [
     title: "BMW Car",
     time: "2h 34m",
     participants: 45,
-    currentPrice: "SAR 895",
+    marketPrice: "SAR 895",
     auctionPrice: "SAR 320",
     category: "Car",
     image:
@@ -111,7 +111,7 @@ const auctionsData = [
     title: "BMW Car",
     time: "2h 34m",
     participants: 45,
-    currentPrice: "SAR 895",
+    marketPrice: "SAR 895",
     auctionPrice: "SAR 320",
     category: "Car",
     image:
