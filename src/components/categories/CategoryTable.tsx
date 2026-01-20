@@ -26,17 +26,34 @@ interface CategoryTableProps {
 }
 
 export default function CategoryTable({
-  categories,
+  categories: initialCategories, // Rename prop to avoid conflict
   onEdit,
   onAdd,
 }: CategoryTableProps) {
   const [searchText, setSearchText] = useState("");
+  // Initialize state with the passed categories array
+  const [categoryData, setCategoryData] = useState<any[]>(initialCategories);
 
+  // --- Fixed Toggle Logic ---
+  const handleToggleStatus = (key: string) => {
+    setCategoryData((prev) =>
+      prev.map((item) =>
+        item.key === key
+          ? {
+              ...item,
+              status: item.status === "Active" ? "Deactive" : "Active",
+            }
+          : item,
+      ),
+    );
+  };
+
+  // Update filter to use the local state (categoryData)
   const filteredData = useMemo(() => {
-    return categories.filter((item) =>
+    return categoryData.filter((item) =>
       item.categoryName.toLowerCase().includes(searchText.toLowerCase()),
     );
-  }, [categories, searchText]);
+  }, [categoryData, searchText]);
 
   const columns = [
     {
@@ -56,8 +73,15 @@ export default function CategoryTable({
       dataIndex: "status",
       key: "status",
       align: "center" as const,
-      render: (status: boolean) => (
-        <Switch defaultChecked={status} aria-label="Toggle Status" />
+      render: (_: any, record: any) => (
+        <Switch
+          checked={record.status === "Active"}
+          onChange={() => handleToggleStatus(record.key)}
+          style={{
+            // Green color when active, standard grey when inactive
+            backgroundColor: record.status === "Active" ? "#16A34A" : "#d9d9d9",
+          }}
+        />
       ),
     },
     {
@@ -95,7 +119,7 @@ export default function CategoryTable({
       >
         <Col span={18}>
           <Input
-            placeholder="Search Products"
+            placeholder="Search Categories"
             prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
             style={{ borderRadius: "8px", height: "45px" }}
             onChange={(e) => setSearchText(e.target.value)}
@@ -103,10 +127,10 @@ export default function CategoryTable({
         </Col>
         <Col>
           <Button
+            onClick={onAdd}
             type="primary"
             icon={<PlusOutlined />}
             size="large"
-            onClick={onAdd}
             style={{ borderRadius: "8px", height: "45px", fontWeight: "bold" }}
           >
             Add Category

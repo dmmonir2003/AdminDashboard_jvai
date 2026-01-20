@@ -15,7 +15,7 @@ import {
   Layers,
   Users,
   Coins,
-  ShoppingBag,
+  ShoppingCart,
 } from "lucide-react";
 
 const { Sider } = Layout;
@@ -60,7 +60,7 @@ export default function Sidebar({
     },
     {
       key: "/orders",
-      icon: <ShoppingBag size={18} />,
+      icon: <ShoppingCart size={18} />,
       label: <Link href="/orders">Orders</Link>,
     },
   ];

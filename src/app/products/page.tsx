@@ -91,9 +91,7 @@ const productsData = [
 export default function ProductsPage() {
   return (
     <DashboardLayout>
-      <div style={{ padding: "24px" }}>
-        <ProductTable products={productsData} />
-      </div>
+      <ProductTable products={productsData} />
     </DashboardLayout>
   );
 }
