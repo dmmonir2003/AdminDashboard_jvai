@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Layout } from 'antd';
-import Sidebar from './Sidebar';
-import Header from './Header';
+import React, { useState } from "react";
+import { Layout } from "antd";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
 
 const { Content } = Layout;
 
@@ -19,16 +19,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: "100vh" }}>
       <Sidebar collapsed={collapsed} />
-      <Layout style={{ marginLeft: collapsed ? 80 : 200 }}>
+      <Layout
+        style={{
+          minHeight: "100vh",
+          background: "#F4F4F4",
+          marginLeft: collapsed ? 80 : 200,
+        }}
+      >
         <Header collapsed={collapsed} onToggle={toggleCollapsed} />
         <Content
           style={{
-            margin: '24px 16px',
+            margin: "24px 16px",
             padding: 24,
-            background: '#fff',
-            borderRadius: '8px',
+            borderRadius: "8px",
           }}
         >
           {children}

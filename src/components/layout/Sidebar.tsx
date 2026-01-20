@@ -1,69 +1,118 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Layout, Menu } from 'antd';
+import React from "react";
+import { Layout, Menu, ConfigProvider } from "antd";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation"; // 1. Import usePathname
+import logo from "../../../public/images/Luqtaa_logo-removebg-preview 1.svg";
+
+// 2. Import diverse Lucide icons
 import {
-  DashboardOutlined,
-  UserOutlined,
-  SettingOutlined,
-  LogoutOutlined,
-} from '@ant-design/icons';
-import Link from 'next/link';
+  LayoutDashboard,
+  Gavel,
+  Package,
+  Layers,
+  Users,
+  Coins,
+  ShoppingBag,
+} from "lucide-react";
 
 const { Sider } = Layout;
 
-interface SidebarProps {
+export default function Sidebar({
+  collapsed = false,
+}: {
   collapsed?: boolean;
-}
+}) {
+  const pathname = usePathname(); // 3. Get the current URL path
 
-export default function Sidebar({ collapsed = false }: SidebarProps) {
   const menuItems = [
     {
-      key: '1',
-      icon: <DashboardOutlined />,
-      label: <Link href="/dashboard">Dashboard</Link>,
+      key: "/dashboard",
+      icon: <LayoutDashboard size={18} />,
+      label: <Link href="/dashboard">Overview</Link>,
     },
     {
-      key: '2',
-      icon: <UserOutlined />,
+      key: "/auctions",
+      icon: <Gavel size={18} />,
+      label: <Link href="/auctions">Auctions</Link>,
+    },
+    {
+      key: "/products",
+      icon: <Package size={18} />,
+      label: <Link href="/products">Products</Link>,
+    },
+    {
+      key: "/categories",
+      icon: <Layers size={18} />,
+      label: <Link href="/categories">Categories</Link>,
+    },
+    {
+      key: "/users",
+      icon: <Users size={18} />,
       label: <Link href="/users">Users</Link>,
     },
     {
-      key: '3',
-      icon: <SettingOutlined />,
-      label: <Link href="/settings">Settings</Link>,
+      key: "/coins",
+      icon: <Coins size={18} />,
+      label: <Link href="/coins">Coins</Link>,
     },
     {
-      key: '4',
-      icon: <LogoutOutlined />,
-      label: 'Logout',
+      key: "/orders",
+      icon: <ShoppingBag size={18} />,
+      label: <Link href="/orders">Orders</Link>,
     },
   ];
 
   return (
     <Sider
-      trigger={null}
       collapsible
       collapsed={collapsed}
+      trigger={null}
       width={200}
-      theme="dark"
       style={{
-        height: '100vh',
-        position: 'fixed',
-        left: 0,
-        top: 0,
-        bottom: 0,
+        background: "#ffffff",
+        height: "100vh",
+        position: "fixed",
+        borderRight: "1px solid #f0f0f0",
       }}
     >
-      <div style={{ padding: '16px', color: 'white', fontWeight: 'bold' }}>
-        Admin Panel
+      <div
+        style={{ padding: "16px", display: "flex", justifyContent: "center" }}
+      >
+        <Image
+          src={logo}
+          alt="Logo"
+          width={collapsed ? 40 : 150}
+          height={collapsed ? 40 : 100}
+          priority
+          style={{ objectFit: "contain" }}
+        />
       </div>
-      <Menu
-        theme="dark"
-        mode="inline"
-        defaultSelectedKeys={['1']}
-        items={menuItems}
-      />
+
+      <ConfigProvider
+        theme={{
+          components: {
+            Menu: {
+              itemSelectedBg: "#0060DE",
+              itemSelectedColor: "#ffffff",
+              itemHoverBg: "#0060DE",
+              itemHoverColor: "#ffffff",
+              itemColor: "#000000",
+              // Ensure icons also turn white when selected
+            },
+          },
+        }}
+      >
+        <Menu
+          mode="inline"
+          // 4. Use selectedKeys (controlled) instead of defaultSelectedKeys
+          selectedKeys={[pathname]}
+          items={menuItems}
+          style={{ borderRight: 0 }}
+        />
+      </ConfigProvider>
     </Sider>
   );
 }
