@@ -58,8 +58,13 @@ export default function AuctionOrderTable({ data, onView }: AuctionTableProps) {
       key: "status",
       render: (status: string) => (
         <Tag
-          color={status === "Delivered" ? "green" : "black"}
-          style={{ borderRadius: "4px" }}
+          // color={status === "Delivered" ? "green" : "black"}
+          style={{
+            borderRadius: "4px",
+
+            backgroundColor: status === "Delivered" ? "green" : "black",
+            color: "#ffffff",
+          }}
         >
           {status}
         </Tag>

@@ -56,6 +56,8 @@ export default function UserView({ user, onBack }: UserViewProps) {
           <Tag
             color="black"
             style={{
+              backgroundColor: "#000000",
+              color: "#ffffff",
               borderRadius: "6px",
               padding: "4px 16px",
               fontSize: "14px",
@@ -173,9 +175,12 @@ export default function UserView({ user, onBack }: UserViewProps) {
                 </Text>
                 <div>
                   <Tag
-                    color={user.status === "Active" ? "#2ecc71" : "#000"}
+                    // color={user.status === "Active" ? "#2ecc71" : "#000"}
                     style={{
+                      backgroundColor:
+                        user.status === "Active" ? "#2ecc71" : "#000000",
                       borderRadius: "6px",
+                      color: "#ffffff",
                       padding: "4px 16px",
                       fontWeight: 600,
                       border: "none",

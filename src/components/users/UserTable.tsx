@@ -222,8 +222,11 @@ export default function UserTable({
       key: "status",
       render: (status: string) => (
         <Tag
-          color={status === "Active" ? "#2ecc71" : "#000"}
           style={{
+            // Logic for background color
+            backgroundColor: status === "Active" ? "#2ecc71" : "#000000",
+            // Force text color to white
+            color: "#ffffff",
             borderRadius: "6px",
             padding: "2px 12px",
             fontWeight: 600,
