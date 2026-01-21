@@ -40,18 +40,18 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const baseQuery = fetchBaseQuery({
   // Ensure the production URL is the priority
-  baseUrl:
-    process.env.NEXT_PUBLIC_API_URL ||
-    "https://admin-dashboard-jvai.vercel.app/api",
-  prepareHeaders: (headers) => {
-    // Check if token exists in localStorage (Client-side only)
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
-    if (token) {
-      headers.set("authorization", `Bearer ${token}`);
-    }
-    return headers;
-  },
+  // baseUrl:
+  //   process.env.NEXT_PUBLIC_API_URL ||
+  //   "https://admin-dashboard-jvai.vercel.app/api",
+  // prepareHeaders: (headers) => {
+  //   // Check if token exists in localStorage (Client-side only)
+  //   const token =
+  //     typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+  //   if (token) {
+  //     headers.set("authorization", `Bearer ${token}`);
+  //   }
+  //   return headers;
+  // },
 });
 
 export const baseApi = createApi({
