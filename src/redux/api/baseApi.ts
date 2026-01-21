@@ -1,7 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api",
+  baseUrl:
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:3000/api" ||
+    "https://admin-dashboard-jvai.vercel.app",
   prepareHeaders: (headers) => {
     const token =
       typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
