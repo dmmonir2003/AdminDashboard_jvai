@@ -2,6 +2,7 @@
 "use client";
 
 import { Form, Button } from "antd";
+import Link from "next/link";
 
 interface AuthFormProps {
   title: string;
@@ -26,7 +27,7 @@ export default function AuthForm({
       </h1>
 
       <Form layout="vertical" onFinish={onSubmit} requiredMark={false}>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-1">
           {fields.map((field) => (
             <Form.Item
               key={field.name}
@@ -41,6 +42,17 @@ export default function AuthForm({
               {field.component}
             </Form.Item>
           ))}
+          {title === "Sign in" && (
+            <div className=" text-right">
+              <Link
+                href="/forgot-password"
+                title="Forgot password?"
+                className="text-gray-400"
+              >
+                Forgot password?
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Action Button: Match the 67px height and #00aeef color */}
@@ -50,7 +62,7 @@ export default function AuthForm({
           block
           loading={loading}
           style={{
-            height: "67px",
+            height: "55px",
             backgroundColor: "#00aeef",
             borderRadius: "8px",
             fontSize: "18px",

@@ -75,9 +75,9 @@ export default function AuctionDetailView({
       render: (status: string) =>
         status === "Winner" ? (
           <Tag
-            color="#2ecc71"
             icon={<TrophyFilled />}
             style={{
+              backgroundColor: "#FFF7E6",
               borderRadius: "6px",
               padding: "4px 12px",
               fontWeight: "bold",
@@ -125,8 +125,13 @@ export default function AuctionDetailView({
       dataIndex: "winningBids",
       render: (val: number) => (
         <Tag
-          color="black"
-          style={{ borderRadius: "6px", padding: "4px 16px", fontSize: "14px" }}
+          style={{
+            borderRadius: "6px",
+            padding: "4px 16px",
+            fontSize: "14px",
+            backgroundColor: "black",
+            color: "white",
+          }}
         >
           {val} Bids
         </Tag>
@@ -195,12 +200,41 @@ export default function AuctionDetailView({
             </div>
           </Col>
           <Col span={4} style={{ textAlign: "right" }}>
-            <Tag
+            {/* <Tag
               style={{
                 background: "#d9d9d9",
                 border: "none",
                 padding: "4px 12px",
                 borderRadius: "4px",
+              }}
+            >
+              {auction.status}
+            </Tag> */}
+
+            <Tag
+              style={{
+                // Logic for Solid Background Color
+                backgroundColor:
+                  auction.status === "live" || auction.status === "invalid"
+                    ? "#DC2626" // Dark Red
+                    : auction.status === "upcoming"
+                      ? "#000000" // Black
+                      : "#d9d9d9", // Grey (Ended/Default)
+
+                // Logic for Text Color (White for dark backgrounds)
+                color:
+                  auction.status === "live" ||
+                  auction.status === "invalid" ||
+                  auction.status === "upcoming"
+                    ? "#ffffff"
+                    : "#595959",
+
+                border: "none",
+                padding: "4px 16px",
+                borderRadius: "8px",
+                fontWeight: "bold",
+                textTransform: "capitalize",
+                margin: 0,
               }}
             >
               {auction.status}
@@ -236,6 +270,62 @@ export default function AuctionDetailView({
           rowClassName={() => "custom-table-row"}
         />
       </ConfigProvider>
+
+      {/* NEW: End Auction Button Logic */}
+      {(auction.status === "live" ||
+        auction.status === "upcoming" ||
+        auction.status === "invalid") && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginTop: "24px",
+          }}
+        >
+          <Button
+            danger
+            type="primary"
+            size="large"
+            style={{
+              backgroundColor: "#DC2626", // Dark Red
+              borderColor: "#DC2626",
+              borderRadius: "8px",
+              padding: "0 40px",
+              height: "45px",
+              fontWeight: "bold",
+            }}
+            onClick={() => console.log("Auction Ended")}
+          >
+            End Auction
+          </Button>
+        </div>
+      )}
+
+      {/* Logic for "Ended" status view (Grey disabled button as seen in image) */}
+      {auction.status === "ended" && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginTop: "24px",
+          }}
+        >
+          <Button
+            disabled
+            size="large"
+            style={{
+              borderRadius: "8px",
+              padding: "0 40px",
+              height: "45px",
+              backgroundColor: "#e0e0e0",
+              color: "#a0a0a0",
+              border: "none",
+            }}
+          >
+            End Auction
+          </Button>
+        </div>
+      )}
 
       <style jsx global>{`
         .custom-table-row td {

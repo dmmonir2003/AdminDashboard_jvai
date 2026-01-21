@@ -2,7 +2,7 @@
 
 import { Input } from "antd";
 import { MailOutlined } from "@ant-design/icons";
-import Link from "next/link";
+
 import { useAuth } from "@/src/hooks/useAuth";
 import AuthLayout from "@/src/components/auth/AuthLayout";
 import AuthForm from "@/src/components/auth/AuthForm";
@@ -20,9 +20,9 @@ export default function ForgotPasswordPage() {
       ],
       component: (
         <Input
-          prefix={<MailOutlined />}
+          prefix={<MailOutlined style={{ color: "#9ca3af" }} />}
           placeholder="Enter email"
-          size="large"
+          style={{ padding: "14px 12px" }}
         />
       ),
     },
@@ -38,11 +38,11 @@ export default function ForgotPasswordPage() {
           buttonLabel="Continue"
           fields={fields}
         />
-        <div className="mt-6">
+        {/* <div className="mt-6">
           <Link href="/login" className="text-blue-500 font-semibold">
             Back to login
           </Link>
-        </div>
+        </div> */}
       </div>
     </AuthLayout>
   );

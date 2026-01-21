@@ -19,9 +19,10 @@ export default function ResetPasswordPage() {
       rules: [{ required: true, message: "Password is required" }],
       component: (
         <Input.Password
-          prefix={<LockOutlined />}
+          prefix={<LockOutlined style={{ color: "#9ca3af" }} />}
           placeholder="Enter password"
           size="large"
+          style={{ padding: "14px 12px" }}
         />
       ),
     },
@@ -42,9 +43,9 @@ export default function ResetPasswordPage() {
       ],
       component: (
         <Input.Password
-          prefix={<LockOutlined />}
+          prefix={<LockOutlined style={{ color: "#9ca3af" }} />}
           placeholder="Enter password"
-          size="large"
+          style={{ padding: "14px 12px" }}
         />
       ),
     },

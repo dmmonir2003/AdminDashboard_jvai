@@ -58,7 +58,7 @@
 import React from "react";
 import { Input } from "antd";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
-import Link from "next/link";
+
 import { useAuth } from "@/src/hooks/useAuth";
 import AuthLayout from "@/src/components/auth/AuthLayout";
 import AuthForm from "@/src/components/auth/AuthForm";
@@ -76,9 +76,9 @@ export default function LoginPage() {
       ],
       component: (
         <Input
-          prefix={<MailOutlined />}
+          prefix={<MailOutlined style={{ color: "#9ca3af" }} />}
           placeholder="Enter email"
-          size="large"
+          style={{ padding: "14px 12px" }}
         />
       ),
     },
@@ -88,9 +88,9 @@ export default function LoginPage() {
       rules: [{ required: true, message: "Password is required" }],
       component: (
         <Input.Password
-          prefix={<LockOutlined />}
+          prefix={<LockOutlined style={{ color: "#9ca3af" }} />}
           placeholder="Enter password"
-          size="large"
+          style={{ padding: "14px 12px" }}
         />
       ),
     },
@@ -105,15 +105,6 @@ export default function LoginPage() {
           buttonLabel="Sign in"
           fields={fields}
         />
-        <div className="mt-4 text-right">
-          <Link
-            href="/forgot-password"
-            title="Forgot password?"
-            className="text-gray-400"
-          >
-            Forgot password?
-          </Link>
-        </div>
       </div>
     </AuthLayout>
   );

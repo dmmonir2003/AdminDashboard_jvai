@@ -119,13 +119,7 @@ export default function AuctionCard({ item, onEdit, onView }: Props) {
           }}
         >
           <Tag
-            color={
-              item.status === "live" || item.status === "invalid"
-                ? "#f5222d"
-                : item.status === "upcoming"
-                  ? "#000000"
-                  : "#bfbfbf"
-            }
+            // Remove the hex from here to prevent Ant Design's default transparency logic
             style={{
               borderRadius: "8px",
               padding: "4px 16px",
@@ -133,6 +127,20 @@ export default function AuctionCard({ item, onEdit, onView }: Props) {
               textTransform: "capitalize",
               border: "none",
               margin: 0,
+              // Move background logic here for solid colors
+              backgroundColor:
+                item.status === "live" || item.status === "invalid"
+                  ? "#DC2626" // Solid Dark Red
+                  : item.status === "upcoming"
+                    ? "#000000" // Solid Black
+                    : "#bfbfbf", // Solid Grey
+              // Solid white text for specific statuses
+              color:
+                item.status === "live" ||
+                item.status === "invalid" ||
+                item.status === "upcoming"
+                  ? "#ffffff"
+                  : "#000000", // Change this to whatever you want for the "Ended" text
             }}
           >
             {item.status}
