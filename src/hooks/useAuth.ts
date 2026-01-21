@@ -17,8 +17,11 @@ export const useAuth = () => {
       // TODO: Replace with actual API call
       console.log("Logging in with:", values);
 
-      localStorage.setItem("authToken", "mock-token");
-      localStorage.setItem("userEmail", values.email);
+      // localStorage.setItem("authToken", "mock-token");
+      // localStorage.setItem("userEmail", values.email);
+
+      document.cookie = "authToken=test123; path=/; max-age=86400";
+      window.location.href = "/dashboard";
 
       message.success("Login successful");
       router.push("/dashboard");

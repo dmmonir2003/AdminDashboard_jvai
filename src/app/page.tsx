@@ -1,37 +1,45 @@
-"use client";
+// "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { Spin } from "antd";
+// import { useRouter } from "next/navigation";
+// import { useEffect } from "react";
+// import { Spin } from "antd";
+
+// export default function Home() {
+//   const router = useRouter();
+
+//   useEffect(() => {
+//     // Redirect to dashboard or login based on auth status
+//     const authToken = localStorage.getItem("authToken");
+//     if (authToken) {
+//       router.push("/dashboard");
+//     } else {
+//       router.push("/login");
+//     }
+//   }, [router]);
+
+//   return (
+//     <div
+//       style={{
+//         display: "flex",
+//         justifyContent: "center",
+//         alignItems: "center",
+//         height: "100vh",
+//       }}
+//     >
+//       <Spin size="large" />
+//     </div>
+//   );
+// }
+
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  const router = useRouter();
+  const token = cookies().get("authToken");
 
-  useEffect(() => {
-    // Redirect to dashboard or login based on auth status
-    const authToken = localStorage.getItem("authToken");
-    if (authToken) {
-      router.push("/dashboard");
-    } else {
-      router.push("/login");
-    }
-  }, [router]);
+  if (token) {
+    redirect("/dashboard");
+  }
 
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-      }}
-    >
-      <Spin size="large" />
-    </div>
-  );
+  redirect("/login");
 }
-
-// app/page.tsx (SERVER COMPONENT)
-// export default function Home() {
-//   return null;
-// }

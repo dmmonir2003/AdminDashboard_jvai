@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Card, List, Badge } from "antd";
+import { Card, Badge } from "antd";
 import { ClockCircleOutlined, TeamOutlined } from "@ant-design/icons";
 
 const liveAuctionsData = [
@@ -63,67 +63,64 @@ export default function LiveAuctions() {
       <div
         style={{ maxHeight: "300px", overflowY: "auto", overflowX: "hidden" }}
       >
-        <List
-          dataSource={liveAuctionsData}
-          renderItem={(item) => (
-            <List.Item
-              style={{
-                borderBottom: "1px solid #f0f0f0",
-                padding: "16px 12px",
-              }}
-            >
+        {liveAuctionsData.map((item) => (
+          <div
+            key={item.id}
+            style={{
+              borderBottom: "1px solid #f0f0f0",
+              padding: "16px 12px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            {/* Left side */}
+            <div>
               <div
                 style={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
+                  fontWeight: "bold",
+                  fontSize: "16px",
+                  marginBottom: "4px",
                 }}
               >
-                <div>
-                  <div
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "16px",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    {item.title}
-                  </div>
-                  <div style={{ color: "#8c8c8c", fontSize: "14px" }}>
-                    <ClockCircleOutlined style={{ marginRight: "4px" }} />{" "}
-                    {item.time}
-                    <TeamOutlined
-                      style={{ marginLeft: "12px", marginRight: "4px" }}
-                    />{" "}
-                    {item.participants}
-                  </div>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <div
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "16px",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    {item.price}
-                  </div>
-                  <Badge
-                    count="Live"
-                    style={{
-                      backgroundColor: "#fff",
-                      color: "#000",
-                      border: "1.5px solid #000",
-                      fontWeight: "bold",
-                      padding: "0 10px",
-                    }}
-                  />
-                </div>
+                {item.title}
               </div>
-            </List.Item>
-          )}
-        />
+
+              <div style={{ color: "#8c8c8c", fontSize: "14px" }}>
+                <ClockCircleOutlined style={{ marginRight: "4px" }} />
+                {item.time}
+                <TeamOutlined
+                  style={{ marginLeft: "12px", marginRight: "4px" }}
+                />
+                {item.participants}
+              </div>
+            </div>
+
+            {/* Right side */}
+            <div style={{ textAlign: "right" }}>
+              <div
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "16px",
+                  marginBottom: "8px",
+                }}
+              >
+                {item.price}
+              </div>
+
+              <Badge
+                count="Live"
+                style={{
+                  backgroundColor: "#fff",
+                  color: "#000",
+                  border: "1.5px solid #000",
+                  fontWeight: "bold",
+                  padding: "0 10px",
+                }}
+              />
+            </div>
+          </div>
+        ))}
       </div>
     </Card>
   );

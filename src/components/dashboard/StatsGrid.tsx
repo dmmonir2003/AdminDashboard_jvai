@@ -79,10 +79,12 @@ export default function StatsGrid() {
               }
               value={stat.value}
               prefix={stat.prefix}
-              valueStyle={{
-                color: "#000",
-                fontWeight: "800",
-                fontSize: "24px",
+              styles={{
+                content: {
+                  color: "#000",
+                  fontWeight: 800,
+                  fontSize: "24px",
+                },
               }}
             />
           </Card>
