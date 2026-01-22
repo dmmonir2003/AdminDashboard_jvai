@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { redirect } from "next/navigation";
 import { message } from "antd";
 import { authService } from "../api/services/authService";
+import { useRouter } from "next/navigation";
 
 // interface AuthFlowData {
 //   type: "login" | "forgot-password" | "verify-code" | "reset-password";
@@ -10,6 +10,7 @@ import { authService } from "../api/services/authService";
 // }
 
 export const useAuth = () => {
+  const router = useRouter();
   const login = async (values: any) => {
     try {
       // 1. Call the actual authService
@@ -19,7 +20,7 @@ export const useAuth = () => {
 
       // 2. Redirect to dashboard
       // Note: authService already handles cookie storage
-      redirect("/dashboard");
+      router.push("/dashboard");
     } catch (error: any) {
       // error here will be the "customError" string from your apiClient interceptor
       message.error(typeof error === "string" ? error : "Login failed");
