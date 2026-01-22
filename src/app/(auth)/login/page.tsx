@@ -56,39 +56,37 @@
 //   );
 // }
 "use client";
-import React from "react";
-import { Input, message } from "antd"; // Import message for feedback
-// Import useRouter
+import React, { useEffect, useState } from "react";
+import { Input, message } from "antd";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
-
+import { useRouter } from "next/navigation";
 import AuthLayout from "@/src/components/auth/AuthLayout";
 import AuthForm from "@/src/components/auth/AuthForm";
 import { authService } from "@/src/api/services/authService";
-import { useRouter } from "next/navigation";
-
-// import { redirect } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
-  // Create a handler for the form submission
+  const [loading, setLoading] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("resetEmail");
+    if (savedEmail) setUserEmail(savedEmail);
+  }, []);
+
   const handleLogin = async (values: any) => {
+    setLoading(true);
     try {
       const response = await authService.login(values);
-
       if (response.access) {
-        message.success("Login successful! Redirecting...");
+        message.success("Login successful!");
+        localStorage.removeItem("resetEmail"); // Cleanup
         router.push("/dashboard");
-
-        // Option A: Standard SPA redirect
-        // redirect("/dashboard");
-
-        // Option B: Full page refresh redirect (recommended if middleware
-        // needs to detect the new cookie immediately)
-        // window.location.href = "/dashboard";
       }
     } catch (error: any) {
-      console.error("Login failed:", error);
-      message.error(error || "Invalid email or password");
+      message.error(error || "Invalid credentials");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,27 +94,25 @@ export default function LoginPage() {
     {
       name: "email",
       label: "Email",
-      rules: [
-        { required: true, message: "Email is required" },
-        { type: "email", message: "Please enter a valid email" },
-      ],
+      initialValue: userEmail, // Pass the saved email here
+      rules: [{ required: true, message: "Email required" }, { type: "email" }],
       component: (
         <Input
-          prefix={<MailOutlined style={{ color: "#9ca3af" }} />}
-          placeholder="Enter email"
-          style={{ padding: "14px 12px" }}
+          prefix={<MailOutlined />}
+          placeholder="Email"
+          style={{ padding: "12px" }}
         />
       ),
     },
     {
       name: "password",
       label: "Password",
-      rules: [{ required: true, message: "Password is required" }],
+      rules: [{ required: true, message: "Password required" }],
       component: (
         <Input.Password
-          prefix={<LockOutlined style={{ color: "#9ca3af" }} />}
-          placeholder="Enter password"
-          style={{ padding: "14px 12px" }}
+          prefix={<LockOutlined />}
+          placeholder="Password"
+          style={{ padding: "12px" }}
         />
       ),
     },
@@ -125,11 +121,13 @@ export default function LoginPage() {
   return (
     <AuthLayout>
       <div className="max-w-md mx-auto mt-20 p-6">
+        {/* The 'key' forces the form to re-render once userEmail is loaded */}
         <AuthForm
+          key={userEmail}
           title="Sign in"
-          onSubmit={handleLogin} // Use the new handler here
-          buttonLabel="Sign in"
+          onSubmit={handleLogin}
           fields={fields}
+          loading={loading}
         />
       </div>
     </AuthLayout>

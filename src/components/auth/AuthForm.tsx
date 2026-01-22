@@ -1,6 +1,83 @@
+// "use client";
+
+// import { Form, Button } from "antd";
+// import Link from "next/link";
+
+// interface AuthFormProps {
+//   title: string;
+//   fields: any[];
+//   onSubmit: (values: any) => void;
+//   loading?: boolean;
+//   buttonLabel?: string;
+// }
+
+// export default function AuthForm({
+//   title,
+//   fields,
+//   onSubmit,
+//   loading,
+//   buttonLabel = "Sign in",
+// }: AuthFormProps) {
+//   return (
+//     <div className="w-full">
+//       {/* Title Styling */}
+//       <h1 className="text-[32px] font-bold text-[#1a1a1a] text-center mb-10">
+//         {title}
+//       </h1>
+
+//       <Form layout="vertical" onFinish={onSubmit} requiredMark={false}>
+//         <div className="flex flex-col gap-1">
+//           {fields.map((field) => (
+//             <Form.Item
+//               key={field.name}
+//               name={field.name}
+//               label={
+//                 <span className="text-[16px] font-semibold text-[#333]">
+//                   {field.label}
+//                 </span>
+//               }
+//               rules={field.rules}
+//             >
+//               {field.component}
+//             </Form.Item>
+//           ))}
+//           {title === "Sign in" && (
+//             <div className=" text-right">
+//               <Link
+//                 href="/forgot-password"
+//                 title="Forgot password?"
+//                 className="text-gray-400"
+//               >
+//                 Forgot password?
+//               </Link>
+//             </div>
+//           )}
+//         </div>
+
+//         {/* Action Button: Match the 67px height and #00aeef color */}
+//         <Button
+//           type="primary"
+//           htmlType="submit"
+//           block
+//           loading={loading}
+//           style={{
+//             height: "55px",
+//             backgroundColor: "#00aeef",
+//             borderRadius: "8px",
+//             fontSize: "18px",
+//             fontWeight: "600",
+//             border: "none",
+//           }}
+//         >
+//           {buttonLabel}
+//         </Button>
+//       </Form>
+//     </div>
+//   );
+// }
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import { Form, Button } from "antd";
 import Link from "next/link";
 
@@ -19,14 +96,24 @@ export default function AuthForm({
   loading,
   buttonLabel = "Sign in",
 }: AuthFormProps) {
+  // Logic to collect initialValues from the fields array
+  const initialValues = fields.reduce((acc, field) => {
+    if (field.initialValue) acc[field.name] = field.initialValue;
+    return acc;
+  }, {} as any);
+
   return (
     <div className="w-full">
-      {/* Title Styling */}
       <h1 className="text-[32px] font-bold text-[#1a1a1a] text-center mb-10">
         {title}
       </h1>
 
-      <Form layout="vertical" onFinish={onSubmit} requiredMark={false}>
+      <Form
+        layout="vertical"
+        onFinish={onSubmit}
+        requiredMark={false}
+        initialValues={initialValues} // CRITICAL: This enables auto-fill
+      >
         <div className="flex flex-col gap-1">
           {fields.map((field) => (
             <Form.Item
@@ -42,8 +129,9 @@ export default function AuthForm({
               {field.component}
             </Form.Item>
           ))}
+
           {title === "Sign in" && (
-            <div className=" text-right">
+            <div className="text-right">
               <Link
                 href="/forgot-password"
                 title="Forgot password?"
@@ -55,7 +143,6 @@ export default function AuthForm({
           )}
         </div>
 
-        {/* Action Button: Match the 67px height and #00aeef color */}
         <Button
           type="primary"
           htmlType="submit"
@@ -68,6 +155,7 @@ export default function AuthForm({
             fontSize: "18px",
             fontWeight: "600",
             border: "none",
+            marginTop: "20px",
           }}
         >
           {buttonLabel}
