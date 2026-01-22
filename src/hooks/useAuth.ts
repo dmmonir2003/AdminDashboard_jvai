@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { message } from "antd";
-import { authService } from "../api/services/authService";
+
 import { useRouter } from "next/navigation";
+import { authService } from "../services/authService";
 
 // interface AuthFlowData {
 //   type: "login" | "forgot-password" | "verify-code" | "reset-password";

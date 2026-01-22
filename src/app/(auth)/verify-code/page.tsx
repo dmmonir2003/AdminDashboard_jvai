@@ -53,7 +53,7 @@ import { Input, message } from "antd";
 import { useRouter } from "next/navigation";
 import AuthLayout from "@/src/components/auth/AuthLayout";
 import AuthForm from "@/src/components/auth/AuthForm";
-import { authService } from "@/src/api/services/authService";
+import { authService } from "@/src/services/authService";
 
 export default function VerifyCodePage() {
   const router = useRouter();

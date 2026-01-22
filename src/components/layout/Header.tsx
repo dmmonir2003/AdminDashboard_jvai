@@ -4,8 +4,7 @@ import { Layout, Button, Avatar, Space } from "antd";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-import { authService } from "@/src/api/services/authService";
+import { authService } from "@/src/services/authService";
 
 const { Header } = Layout;
 
