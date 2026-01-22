@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
 
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { message } from "antd";
+import { authService } from "../api/services/authService";
 
 // interface AuthFlowData {
 //   type: "login" | "forgot-password" | "verify-code" | "reset-password";
@@ -10,23 +10,19 @@ import { message } from "antd";
 // }
 
 export const useAuth = () => {
-  const router = useRouter();
-
   const login = async (values: any) => {
     try {
-      // TODO: Replace with actual API call
-      console.log("Logging in with:", values);
-
-      // localStorage.setItem("authToken", "mock-token");
-      // localStorage.setItem("userEmail", values.email);
-
-      document.cookie = "authToken=test123; path=/; max-age=86400";
-      window.location.href = "/dashboard";
+      // 1. Call the actual authService
+      await authService.login(values);
 
       message.success("Login successful");
-      router.push("/dashboard");
-    } catch (error) {
-      message.error("Login failed");
+
+      // 2. Redirect to dashboard
+      // Note: authService already handles cookie storage
+      redirect("/dashboard");
+    } catch (error: any) {
+      // error here will be the "customError" string from your apiClient interceptor
+      message.error(typeof error === "string" ? error : "Login failed");
       console.error(error);
     }
   };

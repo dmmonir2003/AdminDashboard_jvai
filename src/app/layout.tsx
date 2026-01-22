@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Providers from "../redux/Providers";
+
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 
 export const metadata: Metadata = {
@@ -16,9 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AntdRegistry>
-          <Providers>{children}</Providers>
-        </AntdRegistry>
+        <AntdRegistry>{children}</AntdRegistry>
       </body>
     </html>
   );

@@ -2,13 +2,16 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
-  // const cookieStore = await cookies();
-  // const token = cookieStore.get("authToken");
+  const cookieStore = await cookies();
+  // Changed "authToken" to "accessToken"
+  const token = cookieStore.get("accessToken");
 
-  // if (token) {
-  //   redirect("/dashboard");
-  // }
+  if (token) {
+    redirect("/dashboard");
+  }
 
-  // redirect("/login");
-  return <div>Hello World</div>;
+  redirect("/login");
+
+  // This part is rarely reached but good for TS
+  return null;
 }

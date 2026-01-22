@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
 import { Layout, Button, Avatar, Space } from "antd";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useAppDispatch, useAppSelector } from "@/src/redux/hooks";
+
+import { authService } from "@/src/api/services/authService";
 
 const { Header } = Layout;
 
@@ -15,13 +15,16 @@ interface HeaderProps {
 }
 
 export default function DashboardHeader({ collapsed, onToggle }: HeaderProps) {
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   const router = useRouter();
-  const user = useAppSelector((state) => state.auth.user);
+
+  const { logout } = authService;
 
   const handleLogout = () => {
-    dispatch(logout());
-    localStorage.removeItem("authToken");
+    logout();
+
+    // dispatch(logout);
+    // localStorage.removeItem("authToken");
     router.push("/login");
   };
 
@@ -71,7 +74,7 @@ export default function DashboardHeader({ collapsed, onToggle }: HeaderProps) {
 
       <Space size={16}>
         <Avatar
-          src={user?.avatar || "https://i.pravatar.cc/150"}
+          src={"https://i.pravatar.cc/150"}
           size={40}
           style={{
             border: "2px solid #00B2FF",
@@ -97,9 +100,4 @@ export default function DashboardHeader({ collapsed, onToggle }: HeaderProps) {
       </Space>
     </Header>
   );
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function logout(): any {
-  return { type: "auth/logout" };
 }
