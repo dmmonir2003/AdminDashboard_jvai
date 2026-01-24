@@ -8,9 +8,14 @@ export const API_ENDPOINTS = {
   LOGOUT: "/auth/logout/",
   FORGOT_PASSWORD: "/auth/forgot-password/",
 
-  // User
   ME: "/users/me",
   UPDATE_PROFILE: "/users/update",
+
+  // categories
+  GET_CATEGORIES: "/admin/categories/",
+  CREATE_CATEGORY: "/admin/categories",
+  EDIT_CATEGORY: "/admin/categories/edit/",
+  DELETE_CATEGORY: "/admin/categories/delete/",
 
   PRODUCTS: "/products",
   PRODUCT_DETAILS: (id: string) => `/products/${id}`,
