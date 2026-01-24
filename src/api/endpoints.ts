@@ -12,7 +12,6 @@ export const API_ENDPOINTS = {
   ME: "/users/me",
   UPDATE_PROFILE: "/users/update",
 
-  // Resources (Example)
   PRODUCTS: "/products",
   PRODUCT_DETAILS: (id: string) => `/products/${id}`,
 } as const;
