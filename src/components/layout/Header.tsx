@@ -1,12 +1,116 @@
+// "use client";
+
+// import { Layout, Button, Avatar, Space } from "antd";
+// import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
+// import { LogOut } from "lucide-react";
+// import { useRouter } from "next/navigation";
+// import { authService } from "@/src/services/authService";
+
+// const { Header } = Layout;
+
+// interface HeaderProps {
+//   collapsed: boolean;
+//   onToggle: () => void;
+// }
+
+// export default function DashboardHeader({ collapsed, onToggle }: HeaderProps) {
+//   // const dispatch = useAppDispatch();
+//   const router = useRouter();
+
+//   const { logout } = authService;
+
+//   const handleLogout = () => {
+//     logout();
+
+//     // dispatch(logout);
+//     // localStorage.removeItem("authToken");
+//     router.push("/login");
+//   };
+
+//   return (
+//     <Header
+//       style={{
+//         padding: "0 24px",
+//         background: "#F4F4F4",
+//         display: "flex",
+//         justifyContent: "space-between",
+//         alignItems: "center",
+//         height: "64px",
+//         boxShadow: "none",
+//         position: "relative", // Required for the absolute positioned line
+//       }}
+//     >
+//       {/* Horizontal Line with Left/Right Padding */}
+//       <div
+//         style={{
+//           position: "absolute",
+//           bottom: 0,
+//           left: "24px", // Matches the header padding
+//           right: "24px", // Matches the header padding
+//           height: "1px",
+//           backgroundColor: "#E5E7EB",
+//         }}
+//       />
+
+//       <Space size="middle">
+//         <Button
+//           type="text"
+//           icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+//           onClick={onToggle}
+//           style={{ fontSize: "16px" }}
+//         />
+//         <span
+//           style={{
+//             fontSize: "18px",
+//             fontWeight: 600,
+//             color: "#111827",
+//             fontFamily: "inherit",
+//           }}
+//         >
+//           Luqtaa Dashboard
+//         </span>
+//       </Space>
+
+//       <Space size={16}>
+//         <Avatar
+//           src={"https://i.pravatar.cc/150"}
+//           size={40}
+//           style={{
+//             border: "2px solid #00B2FF",
+//             cursor: "pointer",
+//           }}
+//           onClick={() => router.push("/profile")}
+//         />
+
+//         <div
+//           onClick={handleLogout}
+//           style={{
+//             display: "flex",
+//             alignItems: "center",
+//             gap: "8px",
+//             cursor: "pointer",
+//             color: "#1f2937",
+//             fontWeight: 500,
+//           }}
+//         >
+//           <LogOut size={20} />
+//           <span>Logout</span>
+//         </div>
+//       </Space>
+//     </Header>
+//   );
+// }
+
 "use client";
 
-import { Layout, Button, Avatar, Space } from "antd";
+import { Layout, Button, Avatar, Space, Grid } from "antd";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/src/services/authService";
 
 const { Header } = Layout;
+const { useBreakpoint } = Grid;
 
 interface HeaderProps {
   collapsed: boolean;
@@ -14,89 +118,117 @@ interface HeaderProps {
 }
 
 export default function DashboardHeader({ collapsed, onToggle }: HeaderProps) {
-  // const dispatch = useAppDispatch();
   const router = useRouter();
-
+  const screens = useBreakpoint();
   const { logout } = authService;
+
+  const isMobile = screens.md === false;
+  const isVerySmall = screens.xs === true;
 
   const handleLogout = () => {
     logout();
-
-    // dispatch(logout);
-    // localStorage.removeItem("authToken");
     router.push("/login");
   };
 
   return (
     <Header
       style={{
-        padding: "0 24px",
+        padding: isMobile ? "0 12px" : "0 24px",
         background: "#F4F4F4",
         display: "flex",
-        justifyContent: "space-between",
         alignItems: "center",
         height: "64px",
         boxShadow: "none",
-        position: "relative", // Required for the absolute positioned line
+        position: "relative",
       }}
     >
-      {/* Horizontal Line with Left/Right Padding */}
+      {/* Bottom Border Line */}
       <div
         style={{
           position: "absolute",
           bottom: 0,
-          left: "24px", // Matches the header padding
-          right: "24px", // Matches the header padding
+          left: isMobile ? "12px" : "24px",
+          right: isMobile ? "12px" : "24px",
           height: "1px",
           backgroundColor: "#E5E7EB",
         }}
       />
 
-      <Space size="middle">
+      {/* 1. MENU BUTTON */}
+      <div style={{ display: "flex", alignItems: "center" }}>
         <Button
           type="text"
           icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           onClick={onToggle}
-          style={{ fontSize: "16px" }}
+          style={{ fontSize: "18px" }}
         />
+      </div>
+
+      {/* 2. TITLE SECTION (Responsive Alignment) */}
+      <div
+        style={{
+          flex: isMobile ? 1 : "none", // Takes full space on mobile to center
+          textAlign: isMobile ? "center" : "left",
+          marginLeft: isMobile ? "0px" : "12px", // Space from button on desktop
+          overflow: "hidden",
+        }}
+      >
         <span
           style={{
-            fontSize: "18px",
+            fontSize: isVerySmall ? "13px" : "18px",
             fontWeight: 600,
             color: "#111827",
-            fontFamily: "inherit",
+            whiteSpace: "nowrap",
           }}
         >
-          Luqtaa Dashboard
+          {isVerySmall ? "Luqtaa Dashboard" : "Luqtaa Dashboard"}
         </span>
-      </Space>
+      </div>
 
-      <Space size={16}>
-        <Avatar
-          src={"https://i.pravatar.cc/150"}
-          size={40}
-          style={{
-            border: "2px solid #00B2FF",
-            cursor: "pointer",
-          }}
-          onClick={() => router.push("/profile")}
-        />
+      {/* 3. SPACER (Desktop Only) 
+          This pushes the right section to the end of the header on desktop 
+      */}
+      {!isMobile && <div style={{ flex: 1 }} />}
 
-        <div
-          onClick={handleLogout}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            cursor: "pointer",
-            color: "#1f2937",
-            fontWeight: 500,
-          }}
-        >
-          <LogOut size={20} />
-          <span>Logout</span>
-        </div>
-      </Space>
+      {/* 4. RIGHT SECTION (Avatar & Logout) */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          marginRight: isMobile ? "8px" : "0px",
+        }}
+      >
+        <Space size={isMobile ? 8 : 16}>
+          <Avatar
+            src={"https://i.pravatar.cc/150"}
+            size={isMobile ? 30 : 40}
+            style={{
+              border: "2px solid #00B2FF",
+              cursor: "pointer",
+              flexShrink: 0,
+            }}
+            onClick={() => router.push("/profile")}
+          />
+
+          <div
+            onClick={handleLogout}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              cursor: "pointer",
+              color: "#1f2937",
+              fontWeight: 500,
+              fontSize: isMobile ? "12px" : "14px",
+              flexShrink: 0,
+            }}
+          >
+            <LogOut size={isMobile ? 16 : 20} />
+            {!isVerySmall && <span>Logout</span>}
+          </div>
+        </Space>
+      </div>
     </Header>
   );
 }
