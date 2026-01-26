@@ -1,0 +1,38 @@
+/* Desktop: Show table, hide cards */
+.desktop-table-view {
+  display: block;
+}
+
+.mobile-card-view {
+  display: none;
+}
+
+/* Add margin to Next button in pagination */
+.desktop-table-view .ant-pagination-next {
+  margin-right: 16px;
+}
+
+/* Mobile: Hide table, show cards */
+@media (max-width: 768px) {
+  .announcements-container {
+    padding: 20px !important;
+  }
+
+  .desktop-table-view {
+    display: none !important;
+  }
+
+  .mobile-card-view {
+    display: block !important;
+  }
+
+  .header-content {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px;
+  }
+
+  .header-content button {
+    width: 100%;
+  }
+}

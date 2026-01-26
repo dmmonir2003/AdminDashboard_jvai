@@ -134,7 +134,9 @@ import {
   Users,
   Coins,
   ShoppingCart,
-  Menu as MenuIcon, // Hamburger icon
+  Menu as MenuIcon,
+  UserStar,
+  Megaphone, // Hamburger icon
 } from "lucide-react";
 
 const { Sider } = Layout;
@@ -187,6 +189,16 @@ export default function Sidebar({
       key: "/orders",
       icon: <ShoppingCart size={18} />,
       label: <Link href="/orders">Orders</Link>,
+    },
+    {
+      key: "/announcements",
+      icon: <Megaphone size={18} />,
+      label: <Link href="/announcements">Announcements</Link>,
+    },
+    {
+      key: "/reviews",
+      icon: <UserStar size={18} />,
+      label: <Link href="/reviews">Reviews</Link>,
     },
   ];
 

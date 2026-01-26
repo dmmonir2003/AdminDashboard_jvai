@@ -19,6 +19,8 @@ export function proxy(request: NextRequest) {
     pathname.startsWith("/coins") ||
     pathname.startsWith("/orders") ||
     pathname.startsWith("/users") ||
+    // pathname.startsWith("/announcements") ||
+    // pathname.startsWith("/reviews") ||
     pathname.startsWith("/profile");
 
   const isAuthRoute = pathname === "/login" || pathname === "/register";
