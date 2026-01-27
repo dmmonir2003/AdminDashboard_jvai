@@ -2,12 +2,12 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Input, Button, Empty } from "antd";
+import { Input, Button, Empty, Grid } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import AuctionOrderTable from "@/src/components/orders/AuctionOrderTable";
 import ShopOrderTable from "@/src/components/orders/ShopOrderTable";
 import OrderDetailView from "@/src/components/orders/OrderDetailView";
-
+const { useBreakpoint } = Grid;
 // Mock Data
 const auctionOrders = [
   {
@@ -69,6 +69,9 @@ export default function OrderManager() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [searchText, setSearchText] = useState("");
 
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
+
   const filteredData = useMemo(() => {
     const dataToFilter = activeTab === "auction" ? auctionOrders : shopOrders;
     if (!searchText) return dataToFilter;
@@ -77,7 +80,6 @@ export default function OrderManager() {
     );
   }, [searchText, activeTab]);
 
-  // Handle Detail View
   if (selectedOrder) {
     return (
       <OrderDetailView
@@ -88,7 +90,7 @@ export default function OrderManager() {
   }
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div style={{ padding: isMobile ? "16px" : "24px" }}>
       {/* Search Bar */}
       <Input
         placeholder="Search by order id"
@@ -98,79 +100,87 @@ export default function OrderManager() {
           height: "50px",
           marginBottom: "24px",
           background: "#fcfcfc",
+          width: "100%",
         }}
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
       />
 
-      {/* Custom Tab Navigation */}
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-          marginBottom: "24px",
-          background: "#f0f2f5",
-          width: "fit-content",
-          padding: "4px",
-          borderRadius: "25px",
-        }}
-      >
-        <Button
-          onClick={() => {
-            setActiveTab("auction");
-            setSearchText("");
-          }}
-          style={{
-            borderRadius: "20px",
-            border: "none",
-            background: activeTab === "auction" ? "#fff" : "transparent",
-            boxShadow:
-              activeTab === "auction" ? "0 2px 4px rgba(0,0,0,0.1)" : "none",
-            fontWeight: 600,
-            padding: "0 24px",
-          }}
-        >
-          Auction order
-        </Button>
-        <Button
-          onClick={() => {
-            setActiveTab("shop");
-            setSearchText("");
-          }}
-          style={{
-            borderRadius: "20px",
-            border: "none",
-            background: activeTab === "shop" ? "#fff" : "transparent",
-            boxShadow:
-              activeTab === "shop" ? "0 2px 4px rgba(0,0,0,0.1)" : "none",
-            fontWeight: 600,
-            padding: "0 24px",
-          }}
-        >
-          Shop order
-        </Button>
+      {/* Responsive Custom Tab Navigation */}
+      <div className="tab-container">
+        <div className="tab-scroll-wrapper">
+          <Button
+            onClick={() => {
+              setActiveTab("auction");
+              setSearchText("");
+            }}
+            style={{
+              borderRadius: "20px",
+              border: "none",
+              background: activeTab === "auction" ? "#fff" : "transparent",
+              boxShadow:
+                activeTab === "auction" ? "0 2px 4px rgba(0,0,0,0.1)" : "none",
+              fontWeight: 600,
+              padding: "0 24px",
+              flexShrink: 0,
+            }}
+          >
+            Auction order
+          </Button>
+          <Button
+            onClick={() => {
+              setActiveTab("shop");
+              setSearchText("");
+            }}
+            style={{
+              borderRadius: "20px",
+              border: "none",
+              background: activeTab === "shop" ? "#fff" : "transparent",
+              boxShadow:
+                activeTab === "shop" ? "0 2px 4px rgba(0,0,0,0.1)" : "none",
+              fontWeight: 600,
+              padding: "0 24px",
+              flexShrink: 0,
+            }}
+          >
+            Shop order
+          </Button>
+        </div>
       </div>
 
-      {/* Dynamic Table Selection */}
       <div style={{ marginTop: "16px" }}>
-        {activeTab === "auction" ? (
-          filteredData.length > 0 ? (
-            <AuctionOrderTable
-              data={filteredData}
-              onView={(record) => setSelectedOrder(record)}
-            />
+        {filteredData.length > 0 ? (
+          activeTab === "auction" ? (
+            <AuctionOrderTable data={filteredData} onView={setSelectedOrder} />
           ) : (
-            <Empty description="No matching Auction Orders" />
+            <ShopOrderTable data={filteredData} onView={setSelectedOrder} />
           )
-        ) : filteredData.length > 0 ? (
-          <ShopOrderTable
-            data={filteredData}
-            onView={(record) => setSelectedOrder(record)}
-          />
         ) : (
-          <Empty description="No matching Shop Orders" />
+          <Empty
+            description={`No matching ${activeTab === "auction" ? "Auction" : "Shop"} Orders`}
+          />
         )}
       </div>
+
+      <style jsx>{`
+        .tab-container {
+          background: #f0f2f5;
+          width: ${isMobile ? "100%" : "fit-content"};
+          padding: 4px;
+          border-radius: 25px;
+          margin-bottom: 24px;
+          overflow: hidden;
+        }
+        .tab-scroll-wrapper {
+          display: flex;
+          gap: 10px;
+          overflow-x: auto;
+          scrollbar-width: none;
+        }
+        .tab-scroll-wrapper::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 }

@@ -1,3 +1,5 @@
+//
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -10,15 +12,23 @@ import {
   ConfigProvider,
   Space,
   message,
+  Grid,
+  Card,
+  Row,
+  Col,
 } from "antd";
 import { PlusOutlined, EditOutlined } from "@ant-design/icons";
 import CoinPricingModal from "@/src/components/coins/CoinPricingModal";
 
 const { Title, Text } = Typography;
+const { useBreakpoint } = Grid;
 
 export default function CoinPricingManager() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
+
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
 
   const [dataSource, setDataSource] = useState([
     { key: "1", packageName: "100 Coin", price: "SAR 100", status: "Active" },
@@ -62,7 +72,7 @@ export default function CoinPricingManager() {
             fontWeight: 600,
             fontSize: "12px",
             width: "70px",
-            textAlign: "center" as const,
+            textAlign: "center",
           }}
         >
           {status}
@@ -96,52 +106,137 @@ export default function CoinPricingManager() {
   ];
 
   return (
-    <>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          marginBottom: "20px",
-          marginTop: "32px",
-        }}
+    <div style={{ padding: isMobile ? "0" : "0px" }}>
+      {/* Header Section */}
+      <Row
+        gutter={[16, 16]}
+        justify="space-between"
+        align="bottom"
+        style={{ marginBottom: "20px", marginTop: isMobile ? "16px" : "32px" }}
       >
-        <div>
-          <Title level={3} style={{ margin: 0 }}>
+        <Col xs={24} sm={16}>
+          <Title level={isMobile ? 4 : 3} style={{ margin: 0 }}>
             Wallet & Coins
           </Title>
           <Text type="secondary">Manage wallet system and coin pricing</Text>
-        </div>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          size="large"
-          onClick={() => {
-            setSelectedPackage(null);
-            setIsModalOpen(true);
-          }}
-          style={{ borderRadius: "8px", height: "45px", fontWeight: "bold" }}
-        >
-          Coin Pricing
-        </Button>
-      </div>
+        </Col>
+        <Col xs={24} sm={8} style={{ textAlign: isMobile ? "left" : "right" }}>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            size="large"
+            block={isMobile}
+            onClick={() => {
+              setSelectedPackage(null);
+              setIsModalOpen(true);
+            }}
+            style={{ borderRadius: "8px", height: "45px", fontWeight: "bold" }}
+          >
+            Coin Pricing
+          </Button>
+        </Col>
+      </Row>
 
-      <ConfigProvider
-        theme={{ components: { Table: { headerBg: "#fafafa" } } }}
-      >
-        <Table
-          columns={columns}
-          dataSource={dataSource}
-          pagination={false}
-          scroll={{ y: 400 }}
-          style={{
-            background: "#fff",
-            borderRadius: "12px",
-            overflow: "hidden",
-            border: "1px solid #f0f0f0",
-          }}
-        />
-      </ConfigProvider>
+      {!isMobile ? (
+        /* DESKTOP VIEW: TABLE */
+        <ConfigProvider
+          theme={{ components: { Table: { headerBg: "#fafafa" } } }}
+        >
+          <Table
+            columns={columns}
+            dataSource={dataSource}
+            pagination={false}
+            scroll={{ y: 400 }}
+            style={{
+              background: "#fff",
+              borderRadius: "12px",
+              overflow: "hidden",
+              border: "1px solid #f0f0f0",
+            }}
+          />
+        </ConfigProvider>
+      ) : (
+        /* MOBILE VIEW: CARDS */
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {dataSource.map((item) => (
+            <Card
+              key={item.key}
+              style={{
+                borderRadius: "12px",
+                border: "none",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+              }}
+              styles={{ body: { padding: "16px" } }}
+            >
+              <Row
+                justify="space-between"
+                align="middle"
+                style={{ marginBottom: "16px" }}
+              >
+                <Col>
+                  <Text strong style={{ fontSize: "16px", display: "block" }}>
+                    {item.packageName}
+                  </Text>
+                  <Text
+                    type="secondary"
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      color: "#2ecc71",
+                    }}
+                  >
+                    {item.price}
+                  </Text>
+                </Col>
+                <Col>
+                  <Button
+                    icon={<EditOutlined />}
+                    onClick={() => {
+                      setSelectedPackage(item);
+                      setIsModalOpen(true);
+                    }}
+                    style={{ borderRadius: "8px" }}
+                  />
+                </Col>
+              </Row>
+
+              <Row justify="space-between" align="middle">
+                <Col>
+                  <div
+                    style={{
+                      background: item.status === "Active" ? "#2ecc71" : "#000",
+                      color: "#fff",
+                      borderRadius: "6px",
+                      padding: "4px 12px",
+                      fontWeight: 600,
+                      fontSize: "12px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {item.status}
+                  </div>
+                </Col>
+                <Col>
+                  <Space>
+                    <Text type="secondary" style={{ fontSize: "12px" }}>
+                      Status
+                    </Text>
+                    <Switch
+                      size="small"
+                      checked={item.status === "Active"}
+                      onChange={(checked) => handleToggleStatus(checked, item)}
+                      style={{
+                        backgroundColor:
+                          item.status === "Active" ? "#2ecc71" : undefined,
+                      }}
+                    />
+                  </Space>
+                </Col>
+              </Row>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <CoinPricingModal
         open={isModalOpen}
@@ -152,6 +247,6 @@ export default function CoinPricingManager() {
           setIsModalOpen(false);
         }}
       />
-    </>
+    </div>
   );
 }
