@@ -17,6 +17,24 @@ const categoriesData = [
     productCount: 400,
     status: false,
   },
+  {
+    key: "5",
+    categoryName: "Home Appliance",
+    productCount: 400,
+    status: false,
+  },
+  {
+    key: "6",
+    categoryName: "Home Appliance",
+    productCount: 400,
+    status: false,
+  },
+  {
+    key: "7",
+    categoryName: "Home Appliance",
+    productCount: 400,
+    status: false,
+  },
 ];
 
 export default function CategoriesPage() {

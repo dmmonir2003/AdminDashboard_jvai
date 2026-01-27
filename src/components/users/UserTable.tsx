@@ -154,8 +154,16 @@ import {
   Tag,
   ConfigProvider,
   message,
+  Grid,
+  Card,
+  Typography,
+  Row,
+  Col,
 } from "antd";
 import { SearchOutlined, EyeOutlined } from "@ant-design/icons";
+
+const { useBreakpoint } = Grid;
+const { Text } = Typography;
 
 interface UserTableProps {
   users: any[];
@@ -166,31 +174,25 @@ export default function UserTable({
   users: initialUsers,
   onView,
 }: UserTableProps) {
-  // 1. Initialize local state with the props data
   const [dataSource, setDataSource] = useState(initialUsers);
   const [searchText, setSearchText] = useState("");
 
-  // Sync state if props change (e.g., after an API refresh)
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
+
   useEffect(() => {
     setDataSource(initialUsers);
   }, [initialUsers]);
 
-  // 2. Handler to toggle status
   const handleToggleStatus = (checked: boolean, record: any) => {
     const newStatus = checked ? "Active" : "Blocked";
-
-    // Update local state
     const updatedData = dataSource.map((user) =>
       user.id === record.id ? { ...user, status: newStatus } : user,
     );
-
     setDataSource(updatedData);
-
-    // Optional: Add feedback or API call here
     message.success(`User ${record.name} is now ${newStatus}`);
   };
 
-  // 3. Filtering logic now uses the state (dataSource)
   const filteredData = useMemo(() => {
     return dataSource.filter(
       (item) =>
@@ -223,9 +225,7 @@ export default function UserTable({
       render: (status: string) => (
         <Tag
           style={{
-            // Logic for background color
             backgroundColor: status === "Active" ? "#2ecc71" : "#000000",
-            // Force text color to white
             color: "#ffffff",
             borderRadius: "6px",
             padding: "2px 12px",
@@ -245,11 +245,9 @@ export default function UserTable({
       render: (_: any, record: any) => (
         <Space size="middle">
           <Switch
-            // Change from defaultChecked to checked to make it a controlled component
             checked={record.status === "Active"}
             onChange={(checked) => handleToggleStatus(checked, record)}
             style={{
-              // Keep green color when active
               backgroundColor:
                 record.status === "Active" ? "#2ecc71" : undefined,
             }}
@@ -268,12 +266,13 @@ export default function UserTable({
   return (
     <div
       style={{
-        background: "#fff",
-        padding: "24px",
+        background: isMobile ? "transparent" : "#fff",
+        padding: isMobile ? "0" : "24px",
         borderRadius: "12px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+        boxShadow: isMobile ? "none" : "0 2px 8px rgba(0,0,0,0.05)",
       }}
     >
+      {/* Responsive Search Input */}
       <Input
         placeholder="Search users"
         prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
@@ -287,37 +286,119 @@ export default function UserTable({
         onChange={(e) => setSearchText(e.target.value)}
       />
 
-      <ConfigProvider
-        theme={{
-          components: {
-            Table: { headerBg: "#fafafa", headerColor: "#000" },
-            // Ensure switch handle/track defaults align with your brand
-            Switch: { colorPrimary: "#2ecc71" },
-          },
-        }}
-      >
-        <Table
-          columns={columns}
-          dataSource={filteredData}
-          pagination={{
-            pageSize: 5,
-            position: ["bottomRight"],
-            showSizeChanger: false,
-            showTotal: (total, range) => (
-              <span style={{ fontWeight: 500, color: "#666" }}>
-                Showing {range[0]} to {range[1]} of {total} results
-              </span>
-            ),
+      {!isMobile ? (
+        /* DESKTOP VIEW */
+        <ConfigProvider
+          theme={{
+            components: {
+              Table: { headerBg: "#fafafa", headerColor: "#000" },
+              Switch: { colorPrimary: "#2ecc71" },
+            },
           }}
-          rowKey="id"
-          style={{
-            border: "1px solid #f0f0f0",
-            borderRadius: "12px",
-            overflow: "hidden",
-          }}
-          rowClassName="user-table-row"
-        />
-      </ConfigProvider>
+        >
+          <Table
+            columns={columns}
+            dataSource={filteredData}
+            pagination={{
+              pageSize: 5,
+              position: ["bottomRight"],
+              showTotal: (total, range) => (
+                <span style={{ fontWeight: 500, color: "#666" }}>
+                  Showing {range[0]} to {range[1]} of {total} results
+                </span>
+              ),
+            }}
+            rowKey="id"
+            style={{
+              border: "1px solid #f0f0f0",
+              borderRadius: "12px",
+              overflow: "hidden",
+            }}
+            rowClassName="user-table-row"
+          />
+        </ConfigProvider>
+      ) : (
+        /* MOBILE VIEW: Cards */
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {filteredData.map((user) => (
+            <Card
+              key={user.id}
+              style={{
+                borderRadius: "12px",
+                border: "none",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+              }}
+            >
+              <Row
+                justify="space-between"
+                align="top"
+                style={{ marginBottom: "8px" }}
+              >
+                <Col>
+                  <Text strong style={{ fontSize: "16px", display: "block" }}>
+                    {user.name}
+                  </Text>
+                  <Text type="secondary" style={{ fontSize: "12px" }}>
+                    {user.email}
+                  </Text>
+                </Col>
+                <Col>
+                  <Button
+                    icon={<EyeOutlined />}
+                    shape="circle"
+                    onClick={() => onView(user)}
+                    style={{ backgroundColor: "#f0f0f0", border: "none" }}
+                  />
+                </Col>
+              </Row>
+
+              <div style={{ margin: "12px 0", fontSize: "13px" }}>
+                <Text type="secondary">Phone: </Text> <Text>{user.phone}</Text>
+              </div>
+
+              <Row
+                justify="space-between"
+                align="middle"
+                style={{ marginTop: "16px" }}
+              >
+                <Col>
+                  <Tag
+                    style={{
+                      backgroundColor:
+                        user.status === "Active" ? "#2ecc71" : "#000000",
+                      color: "#ffffff",
+                      borderRadius: "6px",
+                      border: "none",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {user.status}
+                  </Tag>
+                </Col>
+                <Col>
+                  <Space>
+                    <Text type="secondary">Status</Text>
+                    <Switch
+                      size="small"
+                      checked={user.status === "Active"}
+                      onChange={(checked) => handleToggleStatus(checked, user)}
+                      style={{
+                        backgroundColor:
+                          user.status === "Active" ? "#2ecc71" : undefined,
+                      }}
+                    />
+                  </Space>
+                </Col>
+              </Row>
+            </Card>
+          ))}
+          {/* Mobile pagination summary */}
+          <div style={{ textAlign: "center", color: "#666", marginTop: "8px" }}>
+            Total {filteredData.length} users
+          </div>
+        </div>
+      )}
+
       <style jsx global>{`
         .user-table-row td {
           padding: 20px 16px !important;
