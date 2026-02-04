@@ -141,15 +141,20 @@ export const authService = {
   /**
    * Get current access token (for debugging)
    */
-  getAccessToken: (): string | undefined => {
-    return secureCookieManager.getToken("accessToken");
+  /**
+   * Get current access token
+   * UPDATED: Now needs to be async
+   */
+  getAccessToken: async (): Promise<string | undefined> => {
+    return await secureCookieManager.getToken("accessToken"); // Add await here
   },
 
   /**
    * Check if user is authenticated
+   * UPDATED: Now needs to be async
    */
-  isAuthenticated: (): boolean => {
-    const token = secureCookieManager.getToken("accessToken");
+  isAuthenticated: async (): Promise<boolean> => {
+    const token = await secureCookieManager.getToken("accessToken"); // Add await here
     return !!token;
   },
 

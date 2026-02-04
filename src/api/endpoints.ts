@@ -17,6 +17,9 @@ export const API_ENDPOINTS = {
   EDIT_CATEGORY: "/admin/categories/edit/",
   DELETE_CATEGORY: "/admin/categories/delete/",
 
+  AUCTIONS: "/admin/auctions/",
+  // AUCTION_DETAIL: "/admin/auctions/detail/",
+
   PRODUCTS: "/products",
   PRODUCT_DETAILS: (id: string) => `/products/${id}`,
 } as const;

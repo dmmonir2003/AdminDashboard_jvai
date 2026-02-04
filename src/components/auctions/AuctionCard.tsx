@@ -317,7 +317,7 @@ export default function AuctionCard({ item, onEdit, onView }: Props) {
               justifyContent: isMobile ? "center" : "flex-end",
             }}
           >
-            {(item.status === "live" || item.status === "upcoming") && (
+            {item.status === "upcoming" && (
               <Button
                 onClick={() => onEdit(item)}
                 icon={<EditOutlined />}

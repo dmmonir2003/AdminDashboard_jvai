@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // "use client";
 
 // import React, { useState, useMemo } from "react";
@@ -416,13 +417,33 @@
 //   );
 // }
 
+// import DashboardLayout from "@/src/components/layout/DashboardLayout";
+// import AuctionManager from "@/src/components/auctions/AuctionManager";
+
+// export default function AuctionsPage() {
+//   return (
+//     <DashboardLayout>
+//       <AuctionManager />
+//     </DashboardLayout>
+//   );
+// }
+
 import DashboardLayout from "@/src/components/layout/DashboardLayout";
 import AuctionManager from "@/src/components/auctions/AuctionManager";
+import { auctionService } from "@/src/services/auctionService";
 
-export default function AuctionsPage() {
+export default async function AuctionsPage() {
+  // Initial fetch on the server
+  let initialData: any[] = [];
+  try {
+    initialData = await auctionService.getAllAuctions("publish");
+  } catch (err) {
+    console.error("Failed to load auctions on server", err);
+  }
+
   return (
     <DashboardLayout>
-      <AuctionManager />
+      <AuctionManager initialAuctions={initialData} />
     </DashboardLayout>
   );
 }
