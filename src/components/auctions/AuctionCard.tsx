@@ -155,7 +155,7 @@
 
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Space, Tag, Button, Grid } from "antd";
 import {
   ClockCircleOutlined,
@@ -169,26 +169,106 @@ interface Props {
   item: any;
   onEdit: (item: any) => void;
   onView: (item: any) => void;
+  activeTab?: string;
+  onCountdownComplete?: (status: string) => void;
 }
 
 const { useBreakpoint } = Grid;
 
-export default function AuctionCard({ item, onEdit, onView }: Props) {
+export default function AuctionCard({
+  item,
+  onEdit,
+  onView,
+  activeTab = "publish",
+  onCountdownComplete,
+}: Props) {
   const screens = useBreakpoint();
-  // md is true for desktop (>= 768px)
   const isMobile = screens.md === false;
+  const [countdown, setCountdown] = useState<string>("");
+  const [apiCalled, setApiCalled] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
-      case "live":
+      case "publish":
+        return "red";
       case "invalid":
         return "#DC2626";
-      case "upcoming":
+      case "schedule":
         return "#000000";
       default:
         return "#bfbfbf";
     }
   };
+
+  // Calculate countdown based on active tab and auction status
+  useEffect(() => {
+    // Reset API flag when item or tab changes
+    setApiCalled(false);
+
+    const calculateCountdown = () => {
+      const now = new Date().getTime();
+      let targetTime = 0;
+      let totalDuration = 0;
+
+      // Parse duration
+      if (item.auction_duration) {
+        const { hours = 0, minutes = 0 } = item.auction_duration;
+        totalDuration = hours * 3600000 + minutes * 60000;
+      }
+
+      // Live tab (status: publish)
+      if (activeTab === "publish" && item.status === "publish") {
+        if (item.scheduled_time) {
+          // Countdown from scheduled_time to scheduled_time + duration
+          const scheduledTime = new Date(item.scheduled_time).getTime();
+          targetTime = scheduledTime + totalDuration;
+        } else if (item.created_at) {
+          // Countdown from created_at to created_at + duration
+          const createdTime = new Date(item.created_at).getTime();
+          targetTime = createdTime + totalDuration;
+        }
+      }
+      // Upcoming tab (status: schedule)
+      else if (activeTab === "upcoming" && item.status === "schedule") {
+        // Countdown from current time to scheduled_time
+        if (item.scheduled_time) {
+          targetTime = new Date(item.scheduled_time).getTime();
+        }
+      }
+
+      const timeRemaining = targetTime - now;
+
+      if (timeRemaining <= 0) {
+        setCountdown("00:00:00");
+        // Call API only ONCE when countdown completes
+        if (!apiCalled && onCountdownComplete) {
+          console.log(
+            `[v0] Countdown complete for auction ${item.auction_id}, calling API with status:`,
+            activeTab === "publish" ? "ended" : "publish",
+          );
+          setApiCalled(true);
+          if (activeTab === "publish") {
+            onCountdownComplete("ended");
+          } else if (activeTab === "upcoming") {
+            onCountdownComplete("publish");
+          }
+        }
+        return;
+      }
+
+      const hours = Math.floor(timeRemaining / 3600000);
+      const minutes = Math.floor((timeRemaining % 3600000) / 60000);
+      const seconds = Math.floor((timeRemaining % 60000) / 1000);
+
+      setCountdown(
+        `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`,
+      );
+    };
+
+    calculateCountdown();
+    const interval = setInterval(calculateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [item.auction_id, activeTab]);
 
   return (
     <Card
@@ -210,10 +290,10 @@ export default function AuctionCard({ item, onEdit, onView }: Props) {
             }}
           >
             <Image
-              src={item.image}
+              src={item.product_image_url || item.image || "/placeholder.jpg"}
               fill
               style={{ objectFit: "cover", borderRadius: "8px" }}
-              alt={item.title}
+              alt={item.product_name || item.title}
             />
           </div>
         </Col>
@@ -227,16 +307,17 @@ export default function AuctionCard({ item, onEdit, onView }: Props) {
               fontWeight: "bold",
             }}
           >
-            {item.title}
+            {item.product_name || item.title}
           </h3>
           <Space
             style={{ color: "#8c8c8c", fontSize: "12px", marginTop: "4px" }}
           >
             <span>
-              <ClockCircleOutlined /> {item.time}
+              <ClockCircleOutlined /> {countdown || "calculating..."}
             </span>
             <span>
-              <TeamOutlined /> {item.participants}
+              <TeamOutlined />{" "}
+              {item.participant_count || item.participants || 0} participants
             </span>
           </Space>
 
@@ -267,10 +348,10 @@ export default function AuctionCard({ item, onEdit, onView }: Props) {
                   }}
                 >
                   {idx === 0
-                    ? item.marketPrice
+                    ? `$${item.market_price || item.marketPrice || "0"}`
                     : idx === 1
-                      ? item.auctionPrice
-                      : item.category}
+                      ? `$${item.auction_price || item.auctionPrice || "0"}`
+                      : item.category_name || item.category || "N/A"}
                 </div>
               </Col>
             ))}
@@ -285,7 +366,6 @@ export default function AuctionCard({ item, onEdit, onView }: Props) {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            // Center everything on mobile, align items to the right on desktop
             alignItems: isMobile ? "center" : "flex-end",
             gap: "12px",
             borderTop: isMobile ? "1px solid #f0f0f0" : "none",
@@ -308,7 +388,7 @@ export default function AuctionCard({ item, onEdit, onView }: Props) {
             {item.status}
           </Tag>
 
-          {/* Action Buttons: Force horizontal (one row) on both mobile and desktop */}
+          {/* Action Buttons */}
           <Space
             size="small"
             direction="horizontal"
@@ -317,7 +397,7 @@ export default function AuctionCard({ item, onEdit, onView }: Props) {
               justifyContent: isMobile ? "center" : "flex-end",
             }}
           >
-            {item.status === "upcoming" && (
+            {item.status === "schedule" && (
               <Button
                 onClick={() => onEdit(item)}
                 icon={<EditOutlined />}

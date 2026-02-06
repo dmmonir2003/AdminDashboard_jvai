@@ -436,7 +436,7 @@ export default async function AuctionsPage() {
   // Initial fetch on the server
   let initialData: any[] = [];
   try {
-    initialData = await auctionService.getAllAuctions("publish");
+    initialData = await auctionService.getAllAuctions();
   } catch (err) {
     console.error("Failed to load auctions on server", err);
   }

@@ -17,7 +17,12 @@ export const API_ENDPOINTS = {
   EDIT_CATEGORY: "/admin/categories/edit/",
   DELETE_CATEGORY: "/admin/categories/delete/",
 
+  // auctions
   AUCTIONS: "/admin/auctions/",
+  DELETE_AUCTION: "/admin/auctions/delete/",
+  END_AUCTION: "/admin/auctions/end/",
+  // Add this line for the specific update path
+  UPDATE_AUCTION: (id: number) => `/admin/auctions/${id}/update/`,
   // AUCTION_DETAIL: "/admin/auctions/detail/",
 
   PRODUCTS: "/products",

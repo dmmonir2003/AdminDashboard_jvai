@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // "use client";
 
 // import React from "react";
@@ -707,7 +708,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   Tag,
@@ -720,15 +721,20 @@ import {
   Typography,
   ConfigProvider,
   Grid,
-  Pagination, // Added for mobile card list
+  Pagination,
+  message,
+  Popconfirm,
 } from "antd";
 import {
-  ClockCircleOutlined,
   TeamOutlined,
   TrophyFilled,
   ArrowLeftOutlined,
+  DeleteOutlined,
+  PoweroffOutlined,
 } from "@ant-design/icons";
 import Image from "next/image";
+import { auctionService } from "@/src/services/auctionService";
+// Adjust path to your service file
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -756,6 +762,34 @@ export default function AuctionDetailView({
 }: AuctionDetailProps) {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
+  const [loading, setLoading] = useState(false);
+
+  // --- API Handlers ---
+  const handleEndAuction = async () => {
+    setLoading(true);
+    try {
+      await auctionService.endAuction(auction.auction_id);
+      message.success("Auction has been ended.");
+      onBack();
+    } catch (error) {
+      message.error("Failed to end auction.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAuction = async () => {
+    setLoading(true);
+    try {
+      await auctionService.deleteAuction(auction.auction_id);
+      message.success("Auction deleted successfully.");
+      onBack();
+    } catch (error) {
+      message.error("Failed to delete auction.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Desktop Table Columns
   const columns = [
@@ -851,6 +885,21 @@ export default function AuctionDetailView({
     },
   ];
 
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "publish":
+      case "live":
+        return "#DC2626";
+      case "invalid":
+        return "#DC2626";
+      case "upcoming":
+      case "schedule":
+        return "#000000";
+      default:
+        return "#bfbfbf";
+    }
+  };
+
   return (
     <div style={{ padding: isMobile ? "12px" : "24px", background: "#f8f9fa" }}>
       <Button
@@ -865,109 +914,117 @@ export default function AuctionDetailView({
         Back to Auctions
       </Button>
 
-      {/* Top Details Card */}
       <Card
         style={{
-          marginBottom: "32px",
+          marginBottom: "16px",
           borderRadius: "12px",
-          border: "none",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
         }}
-        styles={{ body: { padding: isMobile ? "16px" : "24px" } }}
+        styles={{ body: { padding: isMobile ? "12px" : "16px" } }}
       >
-        <Row gutter={[16, 16]} align="middle">
-          <Col xs={24} md={4} style={{ textAlign: "center" }}>
-            <Image
-              src={auction.image}
-              width={isMobile ? 120 : 100}
-              height={isMobile ? 120 : 100}
-              alt="Product"
-              style={{ objectFit: "contain" }}
-            />
+        <Row gutter={[16, 16]} align="stretch">
+          <Col xs={24} md={4}>
+            <div
+              style={{
+                position: "relative",
+                width: "100%",
+                height: isMobile ? "160px" : "120px",
+              }}
+            >
+              <Image
+                src={
+                  auction.product_image_url ||
+                  auction.image ||
+                  "/placeholder.jpg"
+                }
+                fill
+                style={{ objectFit: "cover", borderRadius: "8px" }}
+                alt={auction.product_name || auction.title}
+              />
+            </div>
           </Col>
 
-          <Col
-            xs={24}
-            md={6}
-            style={{ textAlign: isMobile ? "center" : "left" }}
-          >
-            <Title level={isMobile ? 3 : 4} style={{ margin: 0 }}>
-              {auction.title}
-            </Title>
-            <Space style={{ color: "#8c8c8c", marginTop: "8px" }}>
+          <Col xs={24} md={16}>
+            <h3
+              style={{
+                margin: 0,
+                fontSize: isMobile ? "16px" : "18px",
+                fontWeight: "bold",
+              }}
+            >
+              {auction.product_name || auction.title}
+            </h3>
+            <Space
+              style={{ color: "#8c8c8c", fontSize: "12px", marginTop: "4px" }}
+            >
               <span>
-                <ClockCircleOutlined /> {auction.time}
-              </span>
-              <span>
-                <TeamOutlined /> {auction.participants}
+                <TeamOutlined />{" "}
+                {auction.participant_count || auction.participants || 0}{" "}
+                participants
               </span>
             </Space>
-          </Col>
 
-          <Col
-            xs={12}
-            md={5}
-            style={{
-              borderLeft: isMobile ? "none" : "1px solid #f0f0f0",
-              textAlign: "center",
-            }}
-          >
-            <Text
-              type="secondary"
-              style={{ fontSize: isMobile ? "12px" : "14px" }}
-            >
-              Market Price
-            </Text>
-            <div
-              style={{
-                fontSize: isMobile ? "16px" : "18px",
-                fontWeight: "bold",
-              }}
-            >
-              {auction.marketPrice || auction.currentPrice}
-            </div>
-          </Col>
-
-          <Col
-            xs={12}
-            md={5}
-            style={{ borderLeft: "1px solid #f0f0f0", textAlign: "center" }}
-          >
-            <Text
-              type="secondary"
-              style={{ fontSize: isMobile ? "12px" : "14px" }}
-            >
-              Auction Price
-            </Text>
-            <div
-              style={{
-                fontSize: isMobile ? "16px" : "18px",
-                fontWeight: "bold",
-              }}
-            >
-              {auction.auctionPrice}
-            </div>
+            <Row gutter={8} style={{ marginTop: "16px" }}>
+              {["Market Price", "Auction Price", "Category"].map(
+                (label, idx) => (
+                  <Col
+                    span={8}
+                    key={label}
+                    style={{
+                      borderLeft: idx > 0 ? "1px solid #f0f0f0" : "none",
+                      paddingLeft: idx > 0 ? "8px" : "0",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: "#8c8c8c",
+                        fontWeight: 500,
+                      }}
+                    >
+                      {label}
+                    </div>
+                    <div
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: isMobile ? "13px" : "15px",
+                        color: "#000",
+                      }}
+                    >
+                      {idx === 0
+                        ? `$${auction.market_price || auction.marketPrice || "0"}`
+                        : idx === 1
+                          ? `$${auction.auction_price || auction.auctionPrice || "0"}`
+                          : auction.category_name || auction.category || "N/A"}
+                    </div>
+                  </Col>
+                ),
+              )}
+            </Row>
           </Col>
 
           <Col
             xs={24}
             md={4}
-            style={{ textAlign: isMobile ? "center" : "right" }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: isMobile ? "center" : "flex-end",
+              gap: "12px",
+              borderTop: isMobile ? "1px solid #f0f0f0" : "none",
+              paddingTop: isMobile ? "12px" : "0",
+            }}
           >
             <Tag
               style={{
-                backgroundColor:
-                  auction.status === "live" || auction.status === "invalid"
-                    ? "#DC2626"
-                    : auction.status === "upcoming"
-                      ? "#000000"
-                      : "#d9d9d9",
-                color: "#ffffff",
-                border: "none",
-                padding: "6px 20px",
-                borderRadius: "8px",
-                fontWeight: "bold",
+                backgroundColor: getStatusColor(auction.status),
+                color: "#fff",
+                borderRadius: "6px",
+                padding: "4px 16px",
+                fontWeight: "600",
                 textTransform: "capitalize",
+                border: "none",
                 margin: 0,
               }}
             >
@@ -981,7 +1038,6 @@ export default function AuctionDetailView({
         All Participants
       </Title>
 
-      {/* CONDITIONAL RENDERING: TABLE VS CARDS */}
       {!isMobile ? (
         <ConfigProvider
           theme={{
@@ -1007,7 +1063,6 @@ export default function AuctionDetailView({
           />
         </ConfigProvider>
       ) : (
-        /* MOBILE VIEW: Participants as Cards */
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {participantsData.slice(0, 5).map((record) => (
             <Card
@@ -1020,7 +1075,6 @@ export default function AuctionDetailView({
               styles={{ body: { padding: "16px" } }}
             >
               <Row gutter={[12, 12]} align="middle">
-                {/* User Info */}
                 <Col span={24}>
                   <Space size="middle">
                     <Avatar src={record.avatar} size={40} />
@@ -1104,7 +1158,7 @@ export default function AuctionDetailView({
         </div>
       )}
 
-      {/* Footer Button */}
+      {/* Footer Button - Applied logic here without changing design */}
       <div
         style={{
           display: "flex",
@@ -1112,22 +1166,74 @@ export default function AuctionDetailView({
           marginTop: "24px",
         }}
       >
-        <Button
-          danger={auction.status !== "ended"}
-          disabled={auction.status === "ended"}
-          type={auction.status === "ended" ? "default" : "primary"}
-          size="large"
-          block={isMobile}
-          style={{
-            height: "45px",
-            fontWeight: "bold",
-            borderRadius: "8px",
-            backgroundColor: auction.status === "ended" ? "#e0e0e0" : "#DC2626",
-            border: "none",
-          }}
-        >
-          End Auction
-        </Button>
+        {auction.status === "schedule" ? (
+          <Popconfirm
+            title="Delete Auction"
+            description="Are you sure you want to delete this upcoming auction?"
+            onConfirm={handleDeleteAuction}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button
+              danger
+              type="primary"
+              size="large"
+              block={isMobile}
+              loading={loading}
+              icon={<DeleteOutlined />}
+              style={{
+                height: "45px",
+                fontWeight: "bold",
+                borderRadius: "8px",
+                backgroundColor: "#DC2626",
+                border: "none",
+              }}
+            >
+              Delete Auction
+            </Button>
+          </Popconfirm>
+        ) : auction.status === "publish" ? (
+          <Popconfirm
+            title="End Auction"
+            description="Are you sure you want to end this live auction?"
+            onConfirm={handleEndAuction}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button
+              danger
+              type="primary"
+              size="large"
+              block={isMobile}
+              loading={loading}
+              icon={<PoweroffOutlined />}
+              style={{
+                height: "45px",
+                fontWeight: "bold",
+                borderRadius: "8px",
+                backgroundColor: "#DC2626",
+                border: "none",
+              }}
+            >
+              End Auction
+            </Button>
+          </Popconfirm>
+        ) : (
+          <Button
+            disabled
+            size="large"
+            block={isMobile}
+            style={{
+              height: "45px",
+              fontWeight: "bold",
+              borderRadius: "8px",
+              backgroundColor: "#e0e0e0",
+              border: "none",
+            }}
+          >
+            Auction Ended
+          </Button>
+        )}
       </div>
 
       <style jsx global>{`

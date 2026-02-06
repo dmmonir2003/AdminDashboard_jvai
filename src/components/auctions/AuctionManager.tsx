@@ -842,13 +842,21 @@ import { auctionService } from "@/src/services/auctionService";
 
 const { useBreakpoint } = Grid;
 
+// Map UI tab names to API status values
+const TAB_TO_STATUS = {
+  publish: "publish",
+  upcoming: "schedule", // "upcoming" UI tab = "schedule" API status
+  invalid: "invalid",
+  ended: "ended",
+};
+
 export default function AuctionManager({
   initialAuctions = [], // Default to empty array to prevent crashes
 }: {
   initialAuctions: any[];
 }) {
   const [searchText, setSearchText] = useState("");
-  const [activeTab, setActiveTab] = useState("live");
+  const [activeTab, setActiveTab] = useState("publish");
   const [auctions, setAuctions] = useState(initialAuctions);
 
   // Initialize with initialAuctions so you don't start at (0)
@@ -861,6 +869,38 @@ export default function AuctionManager({
 
   const screens = useBreakpoint();
   const isMobile = !screens.md;
+
+  // Convert UI tab to API status
+  const getStatusFromTab = (tab: string): string => {
+    return TAB_TO_STATUS[tab as keyof typeof TAB_TO_STATUS] || tab;
+  };
+
+  // Handle countdown completion - call specific API only once
+  const handleCountdownComplete = async (newStatus: string) => {
+    try {
+      console.log(
+        `Countdown reached 0, calling getAllAuctions("${newStatus}")`,
+      );
+
+      // Call the specific API for the new status
+      const updatedData = await auctionService.getAllAuctions(newStatus);
+
+      // Update counts with all auctions
+      const allData = await auctionService.getAllAuctions("");
+      setAllAuctionsForCount(allData);
+
+      // If currently viewing this tab, update the list
+      const currentStatus = getStatusFromTab(activeTab);
+      if (currentStatus === newStatus) {
+        setAuctions(updatedData);
+      }
+    } catch (error) {
+      console.error(
+        `[v0] Failed to refresh auctions for status ${newStatus}:`,
+        error,
+      );
+    }
+  };
 
   // 1. Fetch ALL auctions once to calculate the total counts for tab labels
   // Note: Ensure your backend actually returns all records when status is empty
@@ -883,7 +923,11 @@ export default function AuctionManager({
   useEffect(() => {
     const fetchFilteredData = async () => {
       try {
-        const data = await auctionService.getAllAuctions(activeTab);
+        const status = getStatusFromTab(activeTab);
+        console.log(
+          ` Fetching auctions for tab "${activeTab}" with status "${status}"`,
+        );
+        const data = await auctionService.getAllAuctions(status);
         setAuctions(data);
       } catch (err) {
         console.error("Failed to fetch filtered auctions:", err);
@@ -894,24 +938,64 @@ export default function AuctionManager({
 
   const handleFormFinish = async (values: any) => {
     const formData = new FormData();
-    // ... your existing formData.append logic ...
+
+    console.log(values.category, "dfsaaaaaaaaaaaaaaaaaaaaaaasd");
+    // 1. Append Text Fields (matching your Postman screenshots)
     formData.append("product_name", values.product_name);
+    formData.append("category", values.category); // This will be the ID from Select
+    formData.append("description", values.description || "");
+    formData.append("market_price", values.market_price);
+    formData.append("auction_price", values.auction_price);
+    formData.append("entry_fee_coins", values.entry_fee_coins);
     formData.append("status", values.status);
+
+    // 2. Format Dates/Times
+    if (values.scheduled_time) {
+      formData.append(
+        "scheduled_time",
+        values.scheduled_time.format("YYYY-MM-DD HH:mm:ss"),
+      );
+    }
+
+    if (values.auction_duration) {
+      // Format to HH:mm:ss for backend time fields
+      formData.append("auction_duration", values.auction_duration);
+    }
+
+    console.log(values.winning_claim_window, "dsds");
+
+    formData.append(
+      "winning_claim_window",
+      values.winning_claim_window || "02:00:00",
+    );
+
+    // 3. Handle Image File
+    // Ant Design Dragger returns an object with a 'fileList' or 'file'
+    if (values.product_image && values.product_image.file) {
+      formData.append("product_image", values.product_image.file);
+    } else if (values.product_image?.fileList?.length > 0) {
+      formData.append(
+        "product_image",
+        values.product_image.fileList[0].originFileObj,
+      );
+    }
 
     try {
       if (editingAuction) {
+        // Use auction_id for PATCH request
         await auctionService.updateAuction(editingAuction.auction_id, formData);
       } else {
+        console.log("call api");
         await auctionService.createAuction(formData);
       }
 
-      // Refresh both the current list and the total counts after an update/create
+      // Refresh UI
       const updatedList = await auctionService.getAllAuctions(activeTab);
       const updatedAll = await auctionService.getAllAuctions("");
-
       setAuctions(updatedList);
       setAllAuctionsForCount(updatedAll);
       setIsModalOpen(false);
+      setEditingAuction(null);
     } catch (error) {
       console.error("Save failed:", error);
     }
@@ -1017,8 +1101,24 @@ export default function AuctionManager({
             <AuctionCard
               key={item.auction_id}
               item={item}
+              activeTab={activeTab}
+              onCountdownComplete={handleCountdownComplete}
               onEdit={(auction: any) => {
-                setEditingAuction(auction);
+                // --- FIX STARTS HERE ---
+                const duration = auction.auction_duration;
+
+                // Convert the object {hours: X, minutes: Y} into "HH:mm:ss" string
+                const formattedDuration =
+                  duration && typeof duration === "object"
+                    ? `${String(duration.hours || 0).padStart(2, "0")}:${String(duration.minutes || 0).padStart(2, "0")}:00`
+                    : duration;
+
+                setEditingAuction({
+                  ...auction,
+                  auction_duration: formattedDuration, // Pass the string version to the form
+                });
+                // --- FIX ENDS HERE ---
+
                 setIsModalOpen(true);
               }}
               onView={(auction: any) => setSelectedAuction(auction)}

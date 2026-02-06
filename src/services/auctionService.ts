@@ -187,18 +187,47 @@ export const auctionService = {
   /**
    * Update Auction
    */
-  updateAuction: async (id: number, formData: FormData): Promise<Auction> => {
+  updateAuction: async (id: number, formData: FormData): Promise<any> => {
     try {
-      return await apiClient.put<any, Auction>(
-        API_ENDPOINTS.AUCTIONS,
-        formData,
-        {
-          params: { auction_id: id },
-          headers: { "Content-Type": "multipart/form-data" },
+      // Use the function from API_ENDPOINTS to generate the correct URL
+      const url = API_ENDPOINTS.UPDATE_AUCTION(id);
+
+      return await apiClient.patch(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
         },
-      );
+      });
     } catch (error) {
       console.error("[Auction Service] Update failed:", error);
+      throw error;
+    }
+  },
+
+  endAuction: async (auctionId: number): Promise<any> => {
+    try {
+      // POST usually used for actions/status changes
+      // Sending data directly as the second argument (the body)
+      return await apiClient.post(API_ENDPOINTS.END_AUCTION, {
+        auction_id: auctionId,
+      });
+    } catch (error) {
+      console.error("[Auction Service] End auction failed:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Delete an auction
+   * Sends { auction_id: number } in the request body
+   */
+  deleteAuction: async (auctionId: number): Promise<any> => {
+    try {
+      // For DELETE requests with a body, Axios requires the 'data' property in the config object
+      return await apiClient.post(API_ENDPOINTS.DELETE_AUCTION, {
+        auction_id: auctionId,
+      });
+    } catch (error) {
+      console.error("[Auction Service] Delete auction failed:", error);
       throw error;
     }
   },
