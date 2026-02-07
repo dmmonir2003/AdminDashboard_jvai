@@ -13,8 +13,9 @@ export const API_ENDPOINTS = {
 
   // categories
   GET_CATEGORIES: "/admin/categories/",
-  CREATE_CATEGORY: "/admin/categories",
+  CREATE_CATEGORY: "/admin/categories/",
   EDIT_CATEGORY: "/admin/categories/edit/",
+  TOGGLE_CATEGORY: "/admin/categories/toggle-active/",
   DELETE_CATEGORY: "/admin/categories/delete/",
 
   // auctions

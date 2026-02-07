@@ -115,6 +115,11 @@ export interface EditCategoryRequest {
   category_for?: CategoryType;
   is_active?: boolean;
 }
+export interface ToggleCategoryRequest {
+  category_id: number;
+
+  is_active?: boolean;
+}
 
 // --- Service Logic ---
 
@@ -162,7 +167,19 @@ export const categoryService = {
    */
   editCategory: async (data: EditCategoryRequest): Promise<Category> => {
     try {
-      const response = await apiClient.put(API_ENDPOINTS.EDIT_CATEGORY, data);
+      const response = await apiClient.patch(API_ENDPOINTS.EDIT_CATEGORY, data);
+      return response as any as Category;
+    } catch (error) {
+      console.error("[Category Error] Edit failed:", error);
+      throw error;
+    }
+  },
+  toggleCategory: async (data: ToggleCategoryRequest): Promise<Category> => {
+    try {
+      const response = await apiClient.post(
+        API_ENDPOINTS.TOGGLE_CATEGORY,
+        data,
+      );
       return response as any as Category;
     } catch (error) {
       console.error("[Category Error] Edit failed:", error);
