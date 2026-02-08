@@ -754,22 +754,24 @@ const participantsData = Array.from({ length: 24 }).map((_, i) => ({
 interface AuctionDetailProps {
   auction: any;
   onBack: () => void;
+  onActionSuccess?: () => void;
 }
 
 export default function AuctionDetailView({
   auction,
   onBack,
+  onActionSuccess,
 }: AuctionDetailProps) {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
   const [loading, setLoading] = useState(false);
 
-  // --- API Handlers ---
   const handleEndAuction = async () => {
     setLoading(true);
     try {
       await auctionService.endAuction(auction.auction_id);
       message.success("Auction has been ended.");
+      if (onActionSuccess) onActionSuccess(); // 2. Signal Refresh
       onBack();
     } catch (error) {
       message.error("Failed to end auction.");
@@ -783,6 +785,7 @@ export default function AuctionDetailView({
     try {
       await auctionService.deleteAuction(auction.auction_id);
       message.success("Auction deleted successfully.");
+      if (onActionSuccess) onActionSuccess(); // 3. Signal Refresh
       onBack();
     } catch (error) {
       message.error("Failed to delete auction.");

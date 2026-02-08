@@ -155,7 +155,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, Row, Col, Space, Tag, Button, Grid } from "antd";
 import {
   ClockCircleOutlined,
@@ -185,7 +185,7 @@ export default function AuctionCard({
   const screens = useBreakpoint();
   const isMobile = screens.md === false;
   const [countdown, setCountdown] = useState<string>("");
-  const [apiCalled, setApiCalled] = useState(false);
+  const hasTriggered = useRef(false);
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -200,75 +200,96 @@ export default function AuctionCard({
     }
   };
 
-  // Calculate countdown based on active tab and auction status
   useEffect(() => {
-    // Reset API flag when item or tab changes
-    setApiCalled(false);
+    hasTriggered.current = false;
 
-    const calculateCountdown = () => {
-      const now = new Date().getTime();
-      let targetTime = 0;
-      let totalDuration = 0;
+    const calculateInitialSeconds = () => {
+      if (activeTab === "publish") {
+        // 1. Parse remaining_time string (e.g., "0h 0m")
+        const hMatch = item.remaining_time?.match(/(\d+)h/);
+        const mMatch = item.remaining_time?.match(/(\d+)m/);
+        const sMatch = item.remaining_time?.match(/(\d+)s/);
 
-      // Parse duration
-      if (item.auction_duration) {
-        const { hours = 0, minutes = 0 } = item.auction_duration;
-        totalDuration = hours * 3600000 + minutes * 60000;
-      }
+        const hours = hMatch ? parseInt(hMatch[1]) : 0;
+        const minutes = mMatch ? parseInt(mMatch[1]) : 0;
+        const seconds = sMatch ? parseInt(sMatch[1]) : 0;
 
-      // Live tab (status: publish)
-      if (activeTab === "publish" && item.status === "publish") {
-        if (item.scheduled_time) {
-          // Countdown from scheduled_time to scheduled_time + duration
-          const scheduledTime = new Date(item.scheduled_time).getTime();
-          targetTime = scheduledTime + totalDuration;
-        } else if (item.created_at) {
-          // Countdown from created_at to created_at + duration
+        let totalSeconds = hours * 3600 + minutes * 60 + seconds;
+
+        // 2. Fallback Logic: If backend says 0h 0m but it's a live auction,
+        // calculate based on created_at + auction_duration
+        if (totalSeconds <= 0 && item.created_at && item.auction_duration) {
           const createdTime = new Date(item.created_at).getTime();
-          targetTime = createdTime + totalDuration;
-        }
-      }
-      // Upcoming tab (status: schedule)
-      else if (activeTab === "upcoming" && item.status === "schedule") {
-        // Countdown from current time to scheduled_time
-        if (item.scheduled_time) {
-          targetTime = new Date(item.scheduled_time).getTime();
-        }
-      }
+          const durationSeconds =
+            (item.auction_duration.hours || 0) * 3600 +
+            (item.auction_duration.minutes || 0) * 60;
 
-      const timeRemaining = targetTime - now;
+          const endTime = createdTime + durationSeconds * 1000;
+          const now = new Date().getTime();
+          totalSeconds = Math.max(0, Math.floor((endTime - now) / 1000));
+        }
 
-      if (timeRemaining <= 0) {
+        return totalSeconds;
+      } else if (activeTab === "upcoming" && item.scheduled_time) {
+        const target = new Date(item.scheduled_time).getTime();
+        const now = new Date().getTime();
+        return Math.max(0, Math.floor((target - now) / 1000));
+      }
+      return 0;
+    };
+
+    let secondsLeft = calculateInitialSeconds();
+
+    const updateDisplay = (totalSecs: number) => {
+      if (totalSecs <= 0) {
         setCountdown("00:00:00");
-        // Call API only ONCE when countdown completes
-        if (!apiCalled && onCountdownComplete) {
-          console.log(
-            `[v0] Countdown complete for auction ${item.auction_id}, calling API with status:`,
-            activeTab === "publish" ? "ended" : "publish",
-          );
-          setApiCalled(true);
-          if (activeTab === "publish") {
-            onCountdownComplete("ended");
-          } else if (activeTab === "upcoming") {
-            onCountdownComplete("publish");
+        return;
+      }
+      const d = Math.floor(totalSecs / (3600 * 24));
+      const h = Math.floor((totalSecs % (3600 * 24)) / 3600);
+      const m = Math.floor((totalSecs % 3600) / 60);
+      const s = Math.floor(totalSecs % 60);
+
+      const dDisplay = d > 0 ? `${d}d ` : "";
+      setCountdown(
+        `${dDisplay}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`,
+      );
+    };
+
+    updateDisplay(secondsLeft);
+
+    const timer = setInterval(() => {
+      if (secondsLeft <= 0) {
+        clearInterval(timer);
+        updateDisplay(0);
+
+        // Check ref to ensure we only call this ONCE per auction component mount
+        if (!hasTriggered.current && onCountdownComplete) {
+          hasTriggered.current = true;
+
+          // Only trigger if the auction is in a state that actually needs refreshing
+          if (activeTab === "publish" || activeTab === "upcoming") {
+            const nextStatus = activeTab === "upcoming" ? "publish" : "ended";
+            onCountdownComplete(nextStatus);
           }
         }
         return;
       }
 
-      const hours = Math.floor(timeRemaining / 3600000);
-      const minutes = Math.floor((timeRemaining % 3600000) / 60000);
-      const seconds = Math.floor((timeRemaining % 60000) / 1000);
+      secondsLeft -= 1;
+      updateDisplay(secondsLeft);
+    }, 1000);
 
-      setCountdown(
-        `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`,
-      );
-    };
-
-    calculateCountdown();
-    const interval = setInterval(calculateCountdown, 1000);
-    return () => clearInterval(interval);
-  }, [item.auction_id, activeTab]);
+    return () => clearInterval(timer);
+  }, [
+    item.auction_id,
+    activeTab,
+    item.remaining_time,
+    item.scheduled_time,
+    item.created_at,
+    item.auction_duration,
+    onCountdownComplete,
+  ]);
 
   return (
     <Card
@@ -280,7 +301,6 @@ export default function AuctionCard({
       styles={{ body: { padding: isMobile ? "12px" : "16px" } }}
     >
       <Row gutter={[16, 16]} align="stretch">
-        {/* --- IMAGE SECTION --- */}
         <Col xs={24} md={4}>
           <div
             style={{
@@ -290,15 +310,14 @@ export default function AuctionCard({
             }}
           >
             <Image
-              src={item.product_image_url || item.image || "/placeholder.jpg"}
+              src={item.product_image_url || "/placeholder.jpg"}
               fill
               style={{ objectFit: "cover", borderRadius: "8px" }}
-              alt={item.product_name || item.title}
+              alt={item.product_name}
             />
           </div>
         </Col>
 
-        {/* --- CONTENT SECTION --- */}
         <Col xs={24} md={16}>
           <h3
             style={{
@@ -307,25 +326,28 @@ export default function AuctionCard({
               fontWeight: "bold",
             }}
           >
-            {item.product_name || item.title}
+            {item.product_name}
           </h3>
           <Space
             style={{ color: "#8c8c8c", fontSize: "12px", marginTop: "4px" }}
           >
             <span>
-              <ClockCircleOutlined /> {countdown || "calculating..."}
+              <ClockCircleOutlined /> {countdown || "00:00:00"}
             </span>
             <span>
-              <TeamOutlined />{" "}
-              {item.participant_count || item.participants || 0} participants
+              <TeamOutlined /> {item.participant_count || 0} participants
             </span>
           </Space>
 
           <Row gutter={8} style={{ marginTop: "16px" }}>
-            {["Market Price", "Auction Price", "Category"].map((label, idx) => (
+            {[
+              { label: "Market Price", value: `$${item.market_price}` },
+              { label: "Auction Price", value: `$${item.auction_price}` },
+              { label: "Category", value: item.category_name },
+            ].map((col, idx) => (
               <Col
                 span={8}
-                key={label}
+                key={col.label}
                 style={{
                   borderLeft: idx > 0 ? "1px solid #f0f0f0" : "none",
                   paddingLeft: idx > 0 ? "8px" : "0",
@@ -338,7 +360,7 @@ export default function AuctionCard({
                     fontWeight: 500,
                   }}
                 >
-                  {label}
+                  {col.label}
                 </div>
                 <div
                   style={{
@@ -347,18 +369,13 @@ export default function AuctionCard({
                     color: "#000",
                   }}
                 >
-                  {idx === 0
-                    ? `$${item.market_price || item.marketPrice || "0"}`
-                    : idx === 1
-                      ? `$${item.auction_price || item.auctionPrice || "0"}`
-                      : item.category_name || item.category || "N/A"}
+                  {col.value}
                 </div>
               </Col>
             ))}
           </Row>
         </Col>
 
-        {/* --- ACTIONS SECTION --- */}
         <Col
           xs={24}
           md={4}
@@ -368,11 +385,8 @@ export default function AuctionCard({
             justifyContent: "center",
             alignItems: isMobile ? "center" : "flex-end",
             gap: "12px",
-            borderTop: isMobile ? "1px solid #f0f0f0" : "none",
-            paddingTop: isMobile ? "12px" : "0",
           }}
         >
-          {/* Status Tag */}
           <Tag
             style={{
               backgroundColor: getStatusColor(item.status),
@@ -387,11 +401,8 @@ export default function AuctionCard({
           >
             {item.status}
           </Tag>
-
-          {/* Action Buttons */}
           <Space
             size="small"
-            direction="horizontal"
             style={{
               width: "100%",
               justifyContent: isMobile ? "center" : "flex-end",

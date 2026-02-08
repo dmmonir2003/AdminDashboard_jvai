@@ -832,7 +832,7 @@
 
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Row,
   Col,
@@ -885,19 +885,26 @@ export default function AuctionManager({
     return TAB_TO_STATUS[tab as keyof typeof TAB_TO_STATUS] || tab;
   };
 
-  const handleCountdownComplete = async (newStatus: string) => {
-    try {
-      const updatedData = await auctionService.getAllAuctions(newStatus);
-      const allData = await auctionService.getAllAuctions("");
-      setAllAuctionsForCount(allData);
-      const currentStatus = getStatusFromTab(activeTab);
-      if (currentStatus === newStatus) {
+  // Inside AuctionManager component
+  const handleCountdownComplete = useCallback(
+    async (newStatus: string) => {
+      try {
+        const currentStatus = getStatusFromTab(activeTab);
+        const updatedData = await auctionService.getAllAuctions(currentStatus);
         setAuctions(updatedData);
+
+        const allData = await auctionService.getAllAuctions("");
+        if (allData && Array.isArray(allData)) {
+          setAllAuctionsForCount(allData);
+        }
+
+        message.info(`Auction status updated to ${newStatus}`);
+      } catch (error) {
+        console.error(`Failed to refresh auctions:`, error);
       }
-    } catch (error) {
-      console.error(`Failed to refresh auctions:`, error);
-    }
-  };
+    },
+    [activeTab],
+  ); // Add activeTab as a dependency if it's used inside
 
   useEffect(() => {
     const fetchAllForCounts = async () => {
@@ -914,16 +921,24 @@ export default function AuctionManager({
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchFilteredData = async () => {
       try {
         const status = getStatusFromTab(activeTab);
         const data = await auctionService.getAllAuctions(status);
-        setAuctions(data);
+        if (isMounted) {
+          setAuctions(data);
+        }
       } catch (err) {
         console.error("Failed to fetch filtered auctions:", err);
       }
     };
+
     fetchFilteredData();
+    return () => {
+      isMounted = false;
+    };
   }, [activeTab]);
 
   const handleFormFinish = async (values: any) => {
@@ -952,15 +967,17 @@ export default function AuctionManager({
       values.winning_claim_window || "02:00:00",
     );
 
-    if (values.product_image && values.product_image.file) {
-      formData.append("product_image", values.product_image.file);
-    } else if (values.product_image?.fileList?.length > 0) {
-      formData.append(
-        "product_image",
-        values.product_image.fileList[0].originFileObj,
-      );
+    if (values.product_image?.fileList) {
+      values.product_image.fileList.forEach((fileItem: any) => {
+        // originFileObj contains the actual File object
+        if (fileItem.originFileObj) {
+          formData.append("product_images", fileItem.originFileObj);
+        }
+      });
+    } else if (values.product_image?.file) {
+      // Fallback for single file upload scenarios
+      formData.append("product_images", values.product_image.file);
     }
-
     try {
       if (editingAuction) {
         await auctionService.updateAuction(editingAuction.auction_id, formData);
@@ -1014,11 +1031,29 @@ export default function AuctionManager({
     item.product_name?.toLowerCase().includes(searchText.toLowerCase()),
   );
 
+  // 1. Create the refresh function
+  const refreshAllData = async () => {
+    try {
+      const status = getStatusFromTab(activeTab);
+      const updatedList = await auctionService.getAllAuctions(status);
+      const updatedAll = await auctionService.getAllAuctions("");
+      setAuctions(updatedList);
+      setAllAuctionsForCount(updatedAll);
+    } catch (error) {
+      console.error("Refresh failed:", error);
+    }
+  };
+
+  // ... in the return block ...
   if (selectedAuction) {
     return (
       <AuctionDetailView
         auction={selectedAuction}
-        onBack={() => setSelectedAuction(null)}
+        onBack={() => {
+          setSelectedAuction(null);
+          refreshAllData(); // 2. Refresh when coming back
+        }}
+        onActionSuccess={refreshAllData} // 3. Refresh immediately on end/delete
       />
     );
   }
