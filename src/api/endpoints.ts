@@ -20,11 +20,18 @@ export const API_ENDPOINTS = {
 
   // auctions
   AUCTIONS: "/admin/auctions/",
+  AUCTIONS_DETAIL: "/admin/auctions/detail/",
   DELETE_AUCTION: "/admin/auctions/delete/",
   END_AUCTION: "/admin/auctions/end/",
   // Add this line for the specific update path
   UPDATE_AUCTION: (id: number) => `/admin/auctions/${id}/update/`,
   // AUCTION_DETAIL: "/admin/auctions/detail/",
+
+  ADMIN_COIN_PACKAGES_LIST: "/admin/coin-packages/",
+  ADMIN_COIN_PACKAGES_CREATE: "/admin/coin-packages/",
+  ADMIN_COIN_PACKAGES_EDIT: "/admin/coin-packages/edit/",
+  ADMIN_COIN_PACKAGES_TOGGLE: "/admin/coin-packages/toggle/",
+  // ADMIN_COIN_PACKAGES_DELETE: "/admin/coin-packages/delete/", // if implemented
 
   PRODUCTS: "/products",
   PRODUCT_DETAILS: (id: string) => `/products/${id}`,

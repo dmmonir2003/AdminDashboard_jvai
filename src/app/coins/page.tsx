@@ -164,19 +164,43 @@
 //   );
 // }
 
-import React from "react";
-import DashboardLayout from "@/src/components/layout/DashboardLayout";
-import WalletStats from "@/src/components/coins/WalletStats";
-import CoinPricingManager from "@/src/components/coins/CoinPricingManager";
+// import React from "react";
+// import DashboardLayout from "@/src/components/layout/DashboardLayout";
+// import WalletStats from "@/src/components/coins/WalletStats";
+// import CoinPricingManager from "@/src/components/coins/CoinPricingManager";
 
-export default function CoinsPage() {
+// export default function CoinsPage() {
+//   return (
+//     <DashboardLayout>
+//       {/* WalletStats can remain a client or server component depending on its own code */}
+//       <WalletStats />
+
+//       {/* The interactive management logic */}
+//       <CoinPricingManager />
+//     </DashboardLayout>
+//   );
+// }
+
+import DashboardLayout from "@/src/components/layout/DashboardLayout";
+import CoinPricingManager from "@/src/components/coins/CoinPricingManager";
+import { CoinPackage, coinPackageService } from "@/src/services/coinService";
+import WalletStats from "@/src/components/coins/WalletStats";
+
+export default async function CoinsPage() {
+  let initialData: CoinPackage[] = [];
+
+  try {
+    const data = await coinPackageService.getAllCoinPackages();
+    initialData = data;
+    console.log(initialData);
+  } catch (error) {
+    console.error("Failed to load initial coin packages", error);
+  }
+
   return (
     <DashboardLayout>
-      {/* WalletStats can remain a client or server component depending on its own code */}
       <WalletStats />
-
-      {/* The interactive management logic */}
-      <CoinPricingManager />
+      <CoinPricingManager initialData={initialData} />
     </DashboardLayout>
   );
 }

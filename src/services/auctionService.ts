@@ -185,6 +185,26 @@ export const auctionService = {
   },
 
   /**
+   * Get a single auction by ID
+   * @param auctionId - The auction ID
+   * @returns Auction object with all details
+   */
+  getAuctionById: async (auctionId: string | number): Promise<Auction> => {
+    // Use the function from API_ENDPOINTS to generate the correct URL
+    const url = API_ENDPOINTS.AUCTIONS_DETAIL + `?auction_id=${auctionId}`;
+    try {
+      const response = await apiClient.get(url);
+      return response as unknown as Auction;
+    } catch (error) {
+      console.error(
+        `[Auction Service] Error fetching auction ${auctionId}:`,
+        error,
+      );
+      throw error;
+    }
+  },
+
+  /**
    * Update Auction
    */
   updateAuction: async (id: number, formData: FormData): Promise<any> => {

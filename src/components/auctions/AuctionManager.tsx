@@ -846,9 +846,10 @@ import {
 } from "antd";
 import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
 import { AuctionFormModal } from "@/src/components/auctions/AuctionFormModal";
-import AuctionDetailView from "@/src/components/auctions/AuctionView";
+// import AuctionDetailView from "@/src/components/auctions/AuctionView";
 import AuctionCard from "./AuctionCard";
 import { auctionService } from "@/src/services/auctionService";
+import { useRouter } from "next/navigation";
 
 const { useBreakpoint } = Grid;
 
@@ -873,7 +874,8 @@ export default function AuctionManager({
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAuction, setEditingAuction] = useState<any>(null);
-  const [selectedAuction, setSelectedAuction] = useState<any>(null);
+  // const [selectedAuction, setSelectedAuction] = useState<any>(null);
+  const router = useRouter();
 
   // Loader state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -885,6 +887,9 @@ export default function AuctionManager({
     return TAB_TO_STATUS[tab as keyof typeof TAB_TO_STATUS] || tab;
   };
 
+  const handleViewDetails = (auctionId: number) => {
+    router.push(`/auctions/${auctionId}`);
+  };
   // Inside AuctionManager component
   const handleCountdownComplete = useCallback(
     async (newStatus: string) => {
@@ -1045,18 +1050,18 @@ export default function AuctionManager({
   };
 
   // ... in the return block ...
-  if (selectedAuction) {
-    return (
-      <AuctionDetailView
-        auction={selectedAuction}
-        onBack={() => {
-          setSelectedAuction(null);
-          refreshAllData(); // 2. Refresh when coming back
-        }}
-        onActionSuccess={refreshAllData} // 3. Refresh immediately on end/delete
-      />
-    );
-  }
+  // if (selectedAuction) {
+  //   return (
+  //     <AuctionDetailView
+  //       auction={selectedAuction}
+  //       onBack={() => {
+  //         setSelectedAuction(null);
+  //         refreshAllData(); // 2. Refresh when coming back
+  //       }}
+  //       onActionSuccess={refreshAllData} // 3. Refresh immediately on end/delete
+  //     />
+  //   );
+  // }
 
   return (
     <div style={{ padding: isMobile ? "16px" : "24px" }}>
@@ -1135,7 +1140,8 @@ export default function AuctionManager({
                 });
                 setIsModalOpen(true);
               }}
-              onView={(auction: any) => setSelectedAuction(auction)}
+              onView={(auction: any) => handleViewDetails(auction.auction_id)}
+              // onView={(auction: any) => setSelectedAuction(auction)}
             />
           ))
         ) : (
