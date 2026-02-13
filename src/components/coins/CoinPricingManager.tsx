@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 //
 
 // /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -290,11 +290,12 @@ export default function CoinPricingManager({ initialData }: Props) {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
+  // ================= LOGIC (UNCHANGED) =================
   const refreshPackages = async () => {
     try {
       const data = await coinPackageService.getAllCoinPackages();
       setPackages(data || []);
-    } catch (err) {
+    } catch {
       message.error("Failed to refresh coin packages");
     }
   };
@@ -319,7 +320,7 @@ export default function CoinPricingManager({ initialData }: Props) {
         `Package ${pkg.coins} coins is now ${!pkg.is_active ? "active" : "inactive"}`,
       );
       refreshPackages();
-    } catch (err) {
+    } catch {
       message.error("Failed to update status");
     }
   };
@@ -330,7 +331,6 @@ export default function CoinPricingManager({ initialData }: Props) {
   }) => {
     try {
       if (selectedPackage) {
-        // Edit
         await coinPackageService.editCoinPackage({
           package_id: selectedPackage.package_id,
           coins: values.coins,
@@ -338,48 +338,60 @@ export default function CoinPricingManager({ initialData }: Props) {
         });
         message.success("Package updated");
       } else {
-        // Create
-        await coinPackageService.createCoinPackage({
-          coins: values.coins,
-          price_sar: values.price_sar,
-        });
+        await coinPackageService.createCoinPackage(values);
         message.success("Package created");
       }
       setIsModalOpen(false);
       refreshPackages();
-    } catch (err) {
+    } catch {
       message.error("Operation failed");
     }
   };
 
+  // ================= TABLE DESIGN =================
   const columns = [
     {
-      title: "Coins",
+      title: "Coin Packages",
       dataIndex: "coins",
-      key: "coins",
       render: (coins: number) => `${coins.toLocaleString()} Coins`,
     },
     {
-      title: "Price (SAR)",
+      title: "Price",
       dataIndex: "price_sar",
-      key: "price_sar",
       render: (price: string) => `SAR ${price}`,
     },
     {
       title: "Status",
       dataIndex: "is_active",
-      key: "is_active",
-      align: "center" as const,
-      render: (active: boolean, record: CoinPackage) => (
-        <Switch checked={active} onChange={() => handleToggle(record)} />
+      render: (active: boolean) => (
+        <div
+          style={{
+            background: active ? "#2ecc71" : "#000",
+            color: "#fff",
+            borderRadius: "6px",
+            padding: "4px 12px",
+            fontWeight: 600,
+            fontSize: 12,
+            display: "inline-block",
+            minWidth: 70,
+            textAlign: "center",
+          }}
+        >
+          {active ? "Active" : "Paused"}
+        </div>
       ),
     },
     {
       title: "Action",
-      key: "action",
-      align: "center" as const,
       render: (_: any, record: CoinPackage) => (
         <Space>
+          <Switch
+            checked={record.is_active}
+            onChange={() => handleToggle(record)}
+            style={{
+              backgroundColor: record.is_active ? "#2ecc71" : undefined,
+            }}
+          />
           <Button
             icon={<EditOutlined />}
             type="text"
@@ -391,82 +403,129 @@ export default function CoinPricingManager({ initialData }: Props) {
   ];
 
   return (
-    <div
-      style={{
-        padding: isMobile ? "0" : "24px",
-        background: isMobile ? "transparent" : "#fff",
-      }}
-    >
+    <div style={{ padding: isMobile ? "0" : "0px" }}>
+      {/* HEADER */}
       <Row
         gutter={[16, 16]}
         justify="space-between"
-        align="middle"
-        style={{ marginBottom: "24px" }}
+        align="bottom"
+        style={{ marginBottom: 20, marginTop: isMobile ? 16 : 32 }}
       >
-        <Col>
+        <Col xs={24} sm={16}>
           <Title level={isMobile ? 4 : 3} style={{ margin: 0 }}>
-            Coin Packages
+            Wallet & Coins
           </Title>
-          <Text type="secondary">Manage available coin purchase packages</Text>
+          <Text type="secondary">Manage wallet system and coin pricing</Text>
         </Col>
-        <Col>
+
+        <Col xs={24} sm={8} style={{ textAlign: isMobile ? "left" : "right" }}>
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={handleAdd}
             size="large"
-            style={{ borderRadius: "8px", height: "45px" }}
+            block={isMobile}
+            onClick={handleAdd}
+            style={{ borderRadius: 8, height: 45, fontWeight: "bold" }}
           >
-            Add Package
+            Coin Pricing
           </Button>
         </Col>
       </Row>
 
-      {isMobile ? (
-        <Row gutter={[12, 12]}>
-          {packages.map((pkg) => (
-            <Col xs={24} key={pkg.package_id}>
-              <Card
-                style={{ borderRadius: "12px" }}
-                actions={[
-                  <Button
-                    key="edit"
-                    icon={<EditOutlined />}
-                    type="text"
-                    onClick={() => handleEdit(pkg)}
-                  />,
-                ]}
-              >
-                <Row justify="space-between" align="middle">
-                  <Col>
-                    <div style={{ fontSize: 18, fontWeight: 600 }}>
-                      {pkg.coins.toLocaleString()} Coins
-                    </div>
-                    <div style={{ color: "#52c41a", fontWeight: 600 }}>
-                      SAR {pkg.price_sar}
-                    </div>
-                  </Col>
-                  <Col>
-                    <Switch
-                      checked={pkg.is_active}
-                      onChange={() => handleToggle(pkg)}
-                    />
-                  </Col>
-                </Row>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      ) : (
-        <ConfigProvider>
+      {/* DESKTOP TABLE */}
+      {!isMobile ? (
+        <ConfigProvider
+          theme={{ components: { Table: { headerBg: "#fafafa" } } }}
+        >
           <Table
             columns={columns}
             dataSource={packages}
             rowKey="package_id"
             pagination={{ pageSize: 10 }}
-            style={{ borderRadius: "12px", overflow: "hidden" }}
+            style={{
+              background: "#fff",
+              borderRadius: 12,
+              overflow: "hidden",
+              border: "1px solid #f0f0f0",
+            }}
           />
         </ConfigProvider>
+      ) : (
+        /* MOBILE CARDS */
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {packages.map((pkg) => (
+            <Card
+              key={pkg.package_id}
+              style={{
+                borderRadius: 12,
+                border: "none",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+              }}
+              styles={{ body: { padding: 16 } }}
+            >
+              <Row
+                justify="space-between"
+                align="middle"
+                style={{ marginBottom: 16 }}
+              >
+                <Col>
+                  <Text strong style={{ fontSize: 16, display: "block" }}>
+                    {pkg.coins.toLocaleString()} Coins
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: "#2ecc71",
+                    }}
+                  >
+                    SAR {pkg.price_sar}
+                  </Text>
+                </Col>
+                <Col>
+                  <Button
+                    icon={<EditOutlined />}
+                    onClick={() => handleEdit(pkg)}
+                    style={{ borderRadius: 8 }}
+                  />
+                </Col>
+              </Row>
+
+              <Row justify="space-between" align="middle">
+                <Col>
+                  <div
+                    style={{
+                      background: pkg.is_active ? "#2ecc71" : "#000",
+                      color: "#fff",
+                      borderRadius: 6,
+                      padding: "4px 12px",
+                      fontWeight: 600,
+                      fontSize: 12,
+                    }}
+                  >
+                    {pkg.is_active ? "Active" : "Paused"}
+                  </div>
+                </Col>
+
+                <Col>
+                  <Space>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      Status
+                    </Text>
+                    <Switch
+                      size="small"
+                      checked={pkg.is_active}
+                      onChange={() => handleToggle(pkg)}
+                      style={{
+                        backgroundColor: pkg.is_active ? "#2ecc71" : undefined,
+                      }}
+                    />
+                  </Space>
+                </Col>
+              </Row>
+            </Card>
+          ))}
+        </div>
       )}
 
       <CoinPricingModal
