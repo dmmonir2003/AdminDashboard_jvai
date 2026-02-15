@@ -14,11 +14,11 @@ interface BidData {
   timer_extended: boolean;
 }
 
-interface CountdownData {
-  auction_id: number;
-  remaining_seconds: number;
-  end_time: string;
-}
+// interface CountdownData {
+//   auction_id: number;
+//   remaining_seconds: number;
+//   end_time: string;
+// }
 
 interface AuctionEndedData {
   auction_id: number;
@@ -44,7 +44,7 @@ interface UseAuctionRealtimeOptions {
   token: string;
   isAdmin?: boolean; // If true, use monitor mode (no entry fee)
   onBidReceived?: (bid: BidData) => void;
-  onCountdownUpdate?: (countdown: CountdownData) => void;
+  // onCountdownUpdate?: (countdown: CountdownData) => void;
   onAuctionEnded?: (data: AuctionEndedData) => void;
 }
 
@@ -53,7 +53,7 @@ export function useAuctionRealtime({
   token,
   isAdmin = false,
   onBidReceived,
-  onCountdownUpdate,
+  // onCountdownUpdate,
   onAuctionEnded,
 }: UseAuctionRealtimeOptions) {
   const [participants, setParticipants] = useState<
@@ -128,17 +128,17 @@ export function useAuctionRealtime({
     [onBidReceived],
   );
 
-  // Handle countdown update
-  const handleCountdown = useCallback(
-    (data: CountdownData) => {
-      setRemainingSeconds(data.remaining_seconds);
+  // // Handle countdown update
+  // const handleCountdown = useCallback(
+  //   (data: CountdownData) => {
+  //     setRemainingSeconds(data.remaining_seconds);
 
-      if (onCountdownUpdate) {
-        onCountdownUpdate(data);
-      }
-    },
-    [onCountdownUpdate],
-  );
+  //     if (onCountdownUpdate) {
+  //       onCountdownUpdate(data);
+  //     }
+  //   },
+  //   [onCountdownUpdate],
+  // );
 
   // Handle auction ended
   const handleAuctionEnded = useCallback(
@@ -209,7 +209,7 @@ export function useAuctionRealtime({
 
     // Subscribe to events
     socketService.onNewBid(handleNewBid);
-    socketService.onCountdownUpdate(handleCountdown);
+    // socketService.onCountdownUpdate(handleCountdown);
     socketService.onAuctionEnded(handleAuctionEnded);
     socketService.onAuctionState(handleAuctionState);
     socketService.onError(handleError);
@@ -217,7 +217,7 @@ export function useAuctionRealtime({
     // Cleanup
     return () => {
       socketService.off("new_bid", handleNewBid);
-      socketService.off("countdown_update", handleCountdown);
+      // socketService.off("countdown_update", handleCountdown);
       socketService.off("auction_ended", handleAuctionEnded);
       socketService.off("auction_state", handleAuctionState);
       socketService.off("error", handleError);
@@ -227,7 +227,7 @@ export function useAuctionRealtime({
     token,
     isAdmin,
     handleNewBid,
-    handleCountdown,
+    // handleCountdown,
     handleAuctionEnded,
     handleAuctionState,
     handleError,
