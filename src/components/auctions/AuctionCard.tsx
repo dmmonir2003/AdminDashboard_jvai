@@ -164,6 +164,7 @@ import {
   EyeOutlined,
 } from "@ant-design/icons";
 import Image from "next/image";
+import { getFirstImageForAuction } from "@/src/utils/getFirstImageForAuction";
 
 interface Props {
   item: any;
@@ -310,10 +311,10 @@ export default function AuctionCard({
             }}
           >
             <Image
-              src={item.product_image_url || "/placeholder.jpg"}
+              src={getFirstImageForAuction(item.product_image_url)}
               fill
               style={{ objectFit: "cover", borderRadius: "8px" }}
-              alt={item.product_name}
+              alt={item.product_name || "Auction Product"}
             />
           </div>
         </Col>

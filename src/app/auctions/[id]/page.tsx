@@ -195,7 +195,7 @@ export default function AuctionDetailPage() {
             paddingTop: "100px",
           }}
         >
-          <Spin size="large" tip="Loading..." />
+          <Spin size="large" />
         </div>
       </DashboardLayout>
     );

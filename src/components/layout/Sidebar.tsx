@@ -262,7 +262,7 @@ export default function Sidebar({
         placement="left"
         onClose={() => setMobileVisible(false)}
         open={mobileVisible}
-        width={250}
+        size={250}
         styles={{ body: { padding: 0 } }}
         closable={false}
       >
