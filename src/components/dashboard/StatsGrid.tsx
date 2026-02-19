@@ -136,7 +136,7 @@ export default function StatsGrid({ stats }: StatsGridProps) {
 
   return (
     <Row gutter={[24, 24]} style={{ marginBottom: "32px" }}>
-      {statItems.map((stat, index) => (
+      {statItems?.map((stat, index) => (
         <Col xs={24} sm={12} lg={6} key={index}>
           <Card
             style={{

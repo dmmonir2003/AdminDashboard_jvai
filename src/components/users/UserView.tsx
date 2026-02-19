@@ -509,6 +509,12 @@ export default function UserView({
               </div>
               <div>
                 <Text type="secondary" style={labelStyle}>
+                  Phone
+                </Text>
+                <div style={valueStyle}>{user.phone}</div>
+              </div>
+              <div>
+                <Text type="secondary" style={labelStyle}>
                   Status
                 </Text>
                 <div style={{ marginTop: "4px" }}>

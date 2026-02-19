@@ -1003,6 +1003,15 @@ export default function AuctionDetailView({
 
   const token = Cookies.get("accessToken") || "";
 
+  const getInitials = (name: string) => {
+    if (!name) return "U";
+
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+
+    return parts[0][0].toUpperCase() + parts[1][0].toUpperCase();
+  };
+
   // Connect to socket and fetch live data
   useEffect(() => {
     if (!token || !auction?.auction_id) return;
@@ -1099,7 +1108,7 @@ export default function AuctionDetailView({
       name: p.user_name || "N/A",
       email: p.user_name || "N/A",
       avatar:
-        p.avatar ||
+        getInitials(p.user_name) ||
         `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.user_id}`,
       status: p.status || "N/A",
       coinBalance: p.coin_balance ?? 0,
@@ -1127,10 +1136,23 @@ export default function AuctionDetailView({
       render: (_: any, record: any) => (
         <Space size="middle">
           <Avatar
+            size={isMobile ? 30 : 40}
+            style={{
+              backgroundColor: "#00B2FF",
+              color: "#fff",
+              border: "2px solid #00B2FF",
+              cursor: "pointer",
+              flexShrink: 0,
+              fontWeight: 600,
+            }}
+          >
+            {getInitials(record.name)}
+          </Avatar>
+          {/* <Avatar
             src={record.avatar}
             size={48}
             style={{ border: "1px solid #f0f0f0" }}
-          />
+          /> */}
           <div style={{ display: "flex", flexDirection: "column" }}>
             <Space>
               <Text strong style={{ fontSize: "14px" }}>
@@ -1431,7 +1453,15 @@ export default function AuctionDetailView({
               rowClassName={() => "custom-table-row"}
             />
           </ConfigProvider>
-          <div style={{ marginTop: "16px", textAlign: "right" }}>
+          <div
+            style={{
+              marginTop: "16px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <div /> {/* empty spacer */}
             <Pagination
               current={currentPage}
               pageSize={pageSize}
@@ -1550,14 +1580,34 @@ export default function AuctionDetailView({
               </Card>
             ))}
           </div>
-          <Pagination
-            simple
-            current={currentPage}
-            total={formattedParticipants.length}
-            pageSize={pageSize}
-            onChange={(page) => setCurrentPage(page)}
-            style={{ textAlign: "center", marginTop: "16px" }}
-          />
+          <div
+            style={{
+              marginTop: "16px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "100%", // ✅ IMPORTANT
+            }}
+          >
+            {/* LEFT TEXT */}
+            <div style={{ fontSize: "13px", color: "#6b7280" }}>
+              Showing {(currentPage - 1) * pageSize + 1} to{" "}
+              {Math.min(currentPage * pageSize, formattedParticipants.length)}{" "}
+              of {formattedParticipants.length} results
+            </div>
+
+            {/* RIGHT PAGINATION */}
+            <div
+              style={{ display: "flex", justifyContent: "flex-end", flex: 1 }}
+            >
+              <Pagination
+                current={currentPage}
+                pageSize={pageSize}
+                total={formattedParticipants.length}
+                onChange={(page) => setCurrentPage(page)}
+              />
+            </div>
+          </div>
         </>
       )}
 

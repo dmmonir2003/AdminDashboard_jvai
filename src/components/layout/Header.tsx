@@ -108,6 +108,8 @@ import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/src/services/authService";
+import { profileService } from "@/src/services/profileService";
+import { useEffect, useState } from "react";
 
 const { Header } = Layout;
 const { useBreakpoint } = Grid;
@@ -121,6 +123,29 @@ export default function DashboardHeader({ collapsed, onToggle }: HeaderProps) {
   const router = useRouter();
   const screens = useBreakpoint();
   const { logout } = authService;
+  const [name, setName] = useState("");
+
+  const getInitials = (name: string) => {
+    if (!name) return "U";
+
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+
+    return parts[0][0].toUpperCase() + parts[1][0].toUpperCase();
+  };
+
+  // Fetch user profile on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await profileService.getMe();
+        setName(data.first_name + " " + data.last_name || data.email);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const isMobile = screens.md === false;
   const isVerySmall = screens.xs === true;
@@ -201,15 +226,19 @@ export default function DashboardHeader({ collapsed, onToggle }: HeaderProps) {
       >
         <Space size={isMobile ? 8 : 16}>
           <Avatar
-            src={"https://i.pravatar.cc/150"}
             size={isMobile ? 30 : 40}
             style={{
+              backgroundColor: "#00B2FF",
+              color: "#fff",
               border: "2px solid #00B2FF",
               cursor: "pointer",
               flexShrink: 0,
+              fontWeight: 600,
             }}
             onClick={() => router.push("/profile")}
-          />
+          >
+            {getInitials(name)}
+          </Avatar>
 
           <div
             onClick={handleLogout}
