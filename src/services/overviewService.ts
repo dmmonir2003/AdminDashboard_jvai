@@ -143,4 +143,33 @@ export const overviewService = {
       return []; // Return empty array so UI renders empty state instead of crashing
     }
   },
+
+  /**
+   * GET /api/admin/chart/user-participation-yearly/
+   * Returns monthly user participation data for the current year
+   */
+  getUserParticipationYearly:
+    async (): Promise<ParticipationYearlyResponse> => {
+      try {
+        const data = (await apiClient.get(
+          API_ENDPOINTS.CHART_USER_PARTICIPATION_YEARLY,
+        )) as unknown as ParticipationYearlyResponse;
+
+        if (data && Array.isArray(data.data)) {
+          return data;
+        }
+
+        console.warn(
+          "[Overview Service] getUserParticipationYearly: unexpected shape",
+          data,
+        );
+        return { year: new Date().getFullYear(), data: [] };
+      } catch (error) {
+        console.error(
+          "[Overview Service] getUserParticipationYearly failed:",
+          error,
+        );
+        return { year: new Date().getFullYear(), data: [] };
+      }
+    },
 };

@@ -61,6 +61,7 @@ export default function UsersPage() {
           </div>
         ) : (
           <UserTable
+            refreshUsers={fetchUsers}
             users={users}
             onView={(user) => router.push(`/users/${user.id}`)}
           />

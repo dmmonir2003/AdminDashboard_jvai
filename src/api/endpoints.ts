@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
   ADMIN_COIN_PACKAGES_CREATE: "/admin/coin-packages/",
   ADMIN_COIN_PACKAGES_EDIT: "/admin/coin-packages/edit/",
   ADMIN_COIN_PACKAGES_TOGGLE: "/admin/coin-packages/toggle/",
+  ADMIN_COIN_STATS: "/admin/coin-stats/",
   // ADMIN_COIN_PACKAGES_DELETE: "/admin/coin-packages/delete/", // if implemented
 
   // ─── Overview / Dashboard ────────────────────────────────────────────────────

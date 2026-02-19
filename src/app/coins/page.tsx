@@ -188,18 +188,19 @@ import WalletStats from "@/src/components/coins/WalletStats";
 
 export default async function CoinsPage() {
   let initialData: CoinPackage[] = [];
+  let stats = null;
 
   try {
-    const data = await coinPackageService.getAllCoinPackages();
-    initialData = data;
-    console.log(initialData);
+    initialData = await coinPackageService.getAllCoinPackages();
+    stats = await coinPackageService.getCoinStats();
+    // ✅ new
   } catch (error) {
-    console.error("Failed to load initial coin packages", error);
+    console.error("Failed to load data", error);
   }
 
   return (
     <DashboardLayout>
-      <WalletStats />
+      <WalletStats stats={stats} /> {/* ✅ pass */}
       <CoinPricingManager initialData={initialData} />
     </DashboardLayout>
   );

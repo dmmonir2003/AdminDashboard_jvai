@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // /* eslint-disable @typescript-eslint/no-explicit-any */
 // "use client";
 
@@ -162,6 +163,7 @@ import {
 import { App } from "antd";
 
 import { SearchOutlined, EyeOutlined } from "@ant-design/icons";
+import { userService } from "@/src/services/userService";
 
 const { useBreakpoint } = Grid;
 const { Text } = Typography;
@@ -169,11 +171,13 @@ const { Text } = Typography;
 interface UserTableProps {
   users: any[];
   onView: (user: any) => void;
+  refreshUsers: () => Promise<void>;
 }
 
 export default function UserTable({
   users: initialUsers,
   onView,
+  refreshUsers, // ✅ receive
 }: UserTableProps) {
   const [dataSource, setDataSource] = useState(initialUsers);
   const [searchText, setSearchText] = useState("");
@@ -185,13 +189,22 @@ export default function UserTable({
     setDataSource(initialUsers);
   }, [initialUsers]);
 
-  const handleToggleStatus = (checked: boolean, record: any) => {
+  const handleToggleStatus = async (checked: boolean, record: any) => {
     const newStatus = checked ? "Active" : "Blocked";
-    const updatedData = dataSource.map((user) =>
-      user.id === record.id ? { ...user, status: newStatus } : user,
-    );
-    setDataSource(updatedData);
-    message.success(`User ${record.name} is now ${newStatus}`);
+
+    try {
+      // ✅ Call API
+      await userService.toggleUserStatus(record.id);
+
+      message.success(`User ${record.name} updated`);
+
+      // ✅ re-fetch from backend (your requirement)
+      await refreshUsers();
+
+      message.success(`User ${record.name} is now ${newStatus}`);
+    } catch (error) {
+      message.error("Failed to update user status");
+    }
   };
 
   const filteredData = useMemo(() => {

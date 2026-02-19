@@ -634,10 +634,10 @@ import { overviewService } from "@/src/services/overviewService";
 export default async function DashboardPage() {
   const [stats, participationData, revenueData, topAuctions] =
     await Promise.all([
-      // overviewService.getStats(),
-      // overviewService.getUserParticipationYearly(),
-      // overviewService.getRevenueAuctionsYearly(),
-      // overviewService.getTopAuctions(),
+      overviewService.getStats(),
+      overviewService.getUserParticipationYearly(),
+      overviewService.getRevenueAuctionsYearly(),
+      overviewService.getTopAuctions(),
     ]);
 
   if (!stats || !participationData || !revenueData || !topAuctions) {

@@ -1,49 +1,36 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from "react";
 import { Card, Row, Col, Typography, Space } from "antd";
 
 const { Text } = Typography;
+interface Props {
+  stats: any; // or CoinStats | null
+}
 
-export default function WalletStats() {
-  const stats = [
-    { title: "Sold Coins", value: "1200,00", icon: "/icons/coin-gold.png" },
-    { title: "Unused coins", value: "22,025", icon: "/icons/coin-gold.png" },
-    {
-      title: "Refundable Coins",
-      value: "31,236",
-      icon: "/icons/coin-gold.png",
-    },
-    {
-      title: "Non Refundable Coins",
-      value: "51,523",
-      icon: "/icons/coin-gold.png",
-    },
-    {
-      title: "Saudi Rial Sold Coins",
-      value: "1200,00",
-      icon: "/icons/coin-gold.png",
-    },
-    {
-      title: "Saudi Rial Unused coins",
-      value: "22,025",
-      icon: "/icons/coin-gold.png",
-    },
+export default function WalletStats({ stats }: Props) {
+  console.log(stats);
+  const statsData = [
+    { title: "Sold Coins", value: stats?.solds_coins },
+    { title: "Unused Coins", value: stats?.unused_coins },
+    { title: "Refundable Coins", value: stats?.refundable_coins },
+    { title: "Non Refundable Coins", value: stats?.non_refundable_coins },
+    { title: "Saudi Rial Sold Coins", value: stats?.saudi_rial_sold_coins },
+    { title: "Saudi Rial Unused Coins", value: stats?.saudi_rial_unused_coins },
     {
       title: "Saudi Rial Refundable Coins",
-      value: "31,236",
-      icon: "/icons/coin-gold.png",
+      value: stats?.saudi_rial_refundable_coins,
     },
     {
       title: "Saudi Rial Non Refundable Coins",
-      value: "51,523",
-      icon: "/icons/coin-gold.png",
+      value: stats?.saudi_rial_non_refundable_coins,
     },
   ];
 
   return (
     <Row gutter={[16, 16]} style={{ marginBottom: "32px" }}>
-      {stats.map((item, index) => (
+      {statsData.map((item, index) => (
         <Col xs={24} sm={12} lg={6} key={index}>
           <Card
             variant="borderless"
@@ -53,12 +40,11 @@ export default function WalletStats() {
             }}
           >
             <Space
-              orientation="vertical"
+              direction="vertical"
               align="center"
               style={{ width: "100%" }}
             >
               <Space>
-                {/* Fallback to simple div if icon not found */}
                 <div
                   style={{
                     background: "#f9f1db",
@@ -75,6 +61,7 @@ export default function WalletStats() {
                   {item.title}
                 </Text>
               </Space>
+
               <div
                 style={{
                   fontSize: "20px",
@@ -82,7 +69,10 @@ export default function WalletStats() {
                   marginTop: "8px",
                 }}
               >
-                {item.value}
+                {item.value !== undefined && item.value !== null
+                  ? item.value
+                  : "0"}{" "}
+                {/* ✅ fallback */}
               </div>
             </Space>
           </Card>

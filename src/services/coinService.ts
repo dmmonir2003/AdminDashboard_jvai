@@ -35,6 +35,17 @@ export interface ToggleCoinPackageRequest {
   is_active: boolean;
 }
 
+export interface CoinStats {
+  solds_coins: number;
+  unused_coins: number;
+  refundable_coins: number;
+  non_refundable_coins: number;
+
+  saudi_rial_sold_coins: string;
+  saudi_rial_unused_coins: string;
+  saudi_rial_refundable_coins: string;
+  saudi_rial_non_refundable_coins: string;
+}
 // ── Service ──
 export const coinPackageService = {
   // getAllCoinPackages: async (): Promise<PaginatedResponse<CoinPackage>> => {
@@ -63,6 +74,19 @@ export const coinPackageService = {
     } catch (error) {
       console.error("[CoinPackage] Fetch failed:", error);
       return [];
+    }
+  },
+
+  getCoinStats: async (): Promise<CoinStats | null> => {
+    try {
+      const res = (await apiClient.get(
+        API_ENDPOINTS.ADMIN_COIN_STATS,
+      )) as CoinStats;
+
+      return res; // ✅ now correct
+    } catch (error) {
+      console.error("[CoinStats] Fetch failed:", error);
+      return null;
     }
   },
   // same pattern for other methods:
