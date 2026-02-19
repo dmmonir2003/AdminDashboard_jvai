@@ -1,24 +1,84 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Form,
   Input,
   Button,
-  Upload,
-  Avatar,
+  // Upload,
+  // Avatar,
   Typography,
   Row,
   Col,
   Card,
+  message,
 } from "antd";
-import { CameraOutlined } from "@ant-design/icons";
-
+// import { CameraOutlined } from "@ant-design/icons";
+import { profileService } from "@/src/services/profileService";
+import { authService } from "@/src/services/authService"; // for password change
 const { Title, Text } = Typography;
 
 export default function ProfileView() {
   const [profileForm] = Form.useForm();
   const [securityForm] = Form.useForm();
+
+  // Fetch user profile on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await profileService.getMe();
+        profileForm.setFieldsValue({
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+        });
+      } catch (error) {
+        console.error(error);
+        message.error("Failed to load profile");
+      }
+    };
+    fetchProfile();
+  }, [profileForm]);
+
+  // --- Handle profile update ---
+  const handleProfileSave = async (values: any) => {
+    try {
+      const payload = {
+        first_name: values.first_name,
+        last_name: values.last_name,
+        email: values.email,
+      };
+
+      await profileService.updateProfile(payload);
+      message.success("Profile updated successfully ✅");
+    } catch (error: any) {
+      console.error(error);
+      message.error(
+        error?.response?.data?.message || "Failed to update profile ❌",
+      );
+    }
+  };
+
+  // --- Handle password change ---
+  const handleChangePassword = async (values: any) => {
+    try {
+      const payload = {
+        old_password: values.currentPassword,
+        new_password: values.newPassword,
+        new_password_confirm: values.retypePassword,
+      };
+
+      await authService.changePassword(payload);
+      message.success("Password changed successfully ✅");
+      securityForm.resetFields();
+    } catch (error: any) {
+      console.error(error);
+      message.error(
+        error?.response?.data?.message || "Failed to change password ❌",
+      );
+    }
+  };
 
   return (
     <div>
@@ -30,7 +90,7 @@ export default function ProfileView() {
         }}
       >
         {/* --- Profile Photo Section --- */}
-        <div
+        {/* <div
           style={{
             display: "flex",
             alignItems: "center",
@@ -57,28 +117,40 @@ export default function ProfileView() {
               Upload a new photo or change your existing one
             </Text>
           </div>
-        </div>
+        </div> */}
 
-        {/* --- Profile Name & Email Section --- */}
-        <Form
-          form={profileForm}
-          layout="vertical"
-          initialValues={{ name: "Chefven", email: "chefven@example.com" }}
-        >
+        {/* --- Profile First Name / Last Name / Email Section --- */}
+        <Form form={profileForm} layout="vertical" onFinish={handleProfileSave}>
           <Row gutter={24}>
             <Col span={12}>
-              <Form.Item name="name" label={<strong>Profile name</strong>}>
+              <Form.Item
+                name="first_name"
+                label={<strong>First Name</strong>}
+                rules={[{ required: true, message: "First name is required" }]}
+              >
                 <Input style={inputStyle} />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="email" label={<strong>Email</strong>}>
+              <Form.Item name="last_name" label={<strong>Last Name</strong>}>
+                <Input style={inputStyle} />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item
+                name="email"
+                label={<strong>Email</strong>}
+                rules={[
+                  { required: true, message: "Email is required" },
+                  { type: "email", message: "Enter a valid email" },
+                ]}
+              >
                 <Input style={inputStyle} />
               </Form.Item>
             </Col>
           </Row>
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <Button type="primary" style={saveButtonStyle}>
+            <Button type="primary" style={saveButtonStyle} htmlType="submit">
               Save
             </Button>
           </div>
@@ -95,7 +167,11 @@ export default function ProfileView() {
         </div>
 
         {/* --- Security Section --- */}
-        <Form form={securityForm} layout="vertical">
+        <Form
+          form={securityForm}
+          layout="vertical"
+          onFinish={handleChangePassword}
+        >
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item
@@ -111,7 +187,7 @@ export default function ProfileView() {
             <Col span={12}>
               <Form.Item
                 name="newPassword"
-                label={<strong>New password</strong>}
+                label={<strong>New Password</strong>}
               >
                 <Input.Password
                   placeholder="Enter new password"
@@ -122,7 +198,21 @@ export default function ProfileView() {
             <Col span={12}>
               <Form.Item
                 name="retypePassword"
-                label={<strong>Current Password</strong>}
+                label={<strong>Retype Password</strong>}
+                dependencies={["newPassword"]}
+                rules={[
+                  { required: true, message: "Please confirm password" },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue("newPassword") === value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(
+                        new Error("Passwords do not match"),
+                      );
+                    },
+                  }),
+                ]}
               >
                 <Input.Password
                   placeholder="Retype new password"
@@ -132,7 +222,7 @@ export default function ProfileView() {
             </Col>
           </Row>
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <Button type="primary" style={saveButtonStyle}>
+            <Button type="primary" style={saveButtonStyle} htmlType="submit">
               Save
             </Button>
           </div>
@@ -158,16 +248,16 @@ const saveButtonStyle = {
   fontWeight: 600,
 };
 
-const cameraIconStyle: React.CSSProperties = {
-  position: "absolute",
-  bottom: 0,
-  right: 5,
-  background: "#fff",
-  borderRadius: "50%",
-  padding: "4px",
-  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: "14px",
-};
+// const cameraIconStyle: React.CSSProperties = {
+//   position: "absolute",
+//   bottom: 0,
+//   right: 5,
+//   background: "#fff",
+//   borderRadius: "50%",
+//   padding: "4px",
+//   boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+//   display: "flex",
+//   alignItems: "center",
+//   justifyContent: "center",
+//   fontSize: "14px",
+// };

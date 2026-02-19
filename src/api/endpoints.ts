@@ -5,11 +5,12 @@ export const API_ENDPOINTS = {
   REFRESH_TOKEN: "/token/refresh/",
   OTP_VERIFY: "/auth/verify-reset-otp/",
   PASSWORD_RESET: "/auth/reset-password/",
+  PASSWORD_CHANGE: "/admin/profile/change-password/",
   LOGOUT: "/auth/logout/",
   FORGOT_PASSWORD: "/auth/forgot-password/",
 
-  ME: "/users/me",
-  UPDATE_PROFILE: "/users/update",
+  ME: "/admin/profile/me/",
+  UPDATE_PROFILE: "/admin/profile/update/",
 
   // categories
   GET_CATEGORIES: "/admin/categories/",

@@ -431,6 +431,7 @@
 import DashboardLayout from "@/src/components/layout/DashboardLayout";
 import AuctionManager from "@/src/components/auctions/AuctionManager";
 import { auctionService } from "@/src/services/auctionService";
+import { Suspense } from "react";
 
 export default async function AuctionsPage() {
   // Initial fetch on the server
@@ -443,7 +444,9 @@ export default async function AuctionsPage() {
 
   return (
     <DashboardLayout>
-      <AuctionManager initialAuctions={initialData} />
+      <Suspense fallback={<div>Loading...</div>}>
+        <AuctionManager initialAuctions={initialData} />
+      </Suspense>
     </DashboardLayout>
   );
 }

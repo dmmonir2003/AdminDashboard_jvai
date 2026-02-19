@@ -185,6 +185,7 @@ import DashboardLayout from "@/src/components/layout/DashboardLayout";
 import CoinPricingManager from "@/src/components/coins/CoinPricingManager";
 import { CoinPackage, coinPackageService } from "@/src/services/coinService";
 import WalletStats from "@/src/components/coins/WalletStats";
+import { Suspense } from "react";
 
 export default async function CoinsPage() {
   let initialData: CoinPackage[] = [];
@@ -200,8 +201,10 @@ export default async function CoinsPage() {
 
   return (
     <DashboardLayout>
-      <WalletStats stats={stats} /> {/* ✅ pass */}
-      <CoinPricingManager initialData={initialData} />
+      <Suspense fallback={<div>Loading...</div>}>
+        <WalletStats stats={stats} /> {/* ✅ pass */}
+        <CoinPricingManager initialData={initialData} />
+      </Suspense>
     </DashboardLayout>
   );
 }

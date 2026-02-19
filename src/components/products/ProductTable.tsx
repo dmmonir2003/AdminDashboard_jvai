@@ -354,7 +354,7 @@ export default function ProductTable({
         align="middle"
         style={{ marginBottom: "24px" }}
       >
-        <Col xs={24} md={18}>
+        <Col xs={24} md={18} flex="auto">
           <Input
             placeholder="Search Products"
             prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
@@ -362,13 +362,17 @@ export default function ProductTable({
             onChange={(e) => setSearchText(e.target.value)}
           />
         </Col>
-        <Col xs={24} md={6}>
+        <Col
+          xs={24}
+          md={6}
+          style={{ textAlign: screens.md ? "right" : "left" }}
+        >
           <Button
             type="primary"
             icon={<PlusOutlined />}
             size="large"
-            block={!screens.md} // Full width button on mobile
-            style={{ borderRadius: "8px", height: "45px", fontWeight: "bold" }}
+            block={!screens.md}
+            style={{ borderRadius: "8px", height: "45px" }}
             onClick={handleOpenAddModal}
           >
             Add Product

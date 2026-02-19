@@ -74,52 +74,23 @@ export default function LoginPage() {
     if (savedEmail) setUserEmail(savedEmail);
   }, []);
 
-  // const handleLogin = async (values: any) => {
-  //   setLoading(true);
-  //   try {
-  //     const response = await authService.login(values);
-  //     if (response.access) {
-  //       message.success("Login successful!");
-  //       localStorage.removeItem("resetEmail"); // Cleanup
-  //       router.push("/dashboard");
-  //     }
-  //   } catch (error: any) {
-  //     message.error(error || "Invalid credentials");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleLogin = async (values: any) => {
     setLoading(true);
-
     try {
       const response = await authService.login(values);
-
       if (response.access) {
         message.success("Login successful!");
-        localStorage.removeItem("resetEmail");
+        localStorage.removeItem("resetEmail"); // Cleanup
         router.push("/dashboard");
       }
     } catch (error: any) {
-      // Check response status safely
-      const status = error?.response?.status;
-
-      if (status === 401) {
-        message.error(
-          "Unauthorized user. Please login with valid credentials.",
-        );
-      } else {
-        message.error(
-          error?.response?.data?.message ||
-            error?.message ||
-            "Invalid credentials",
-        );
-      }
+      console.log(error);
+      message.error("Invalid credentials");
     } finally {
       setLoading(false);
     }
   };
+
   const fields = [
     {
       name: "email",

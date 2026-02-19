@@ -648,6 +648,7 @@ export default async function DashboardPage() {
     <DashboardLayout>
       <div style={{ padding: "24px" }}>
         {/* Stats Row */}
+
         <StatsGrid stats={stats} />
 
         {/* Charts Row */}

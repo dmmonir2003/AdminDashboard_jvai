@@ -66,6 +66,10 @@ export const authService = {
         );
       }
 
+      if (data.user) {
+        localStorage.setItem("userId", JSON.stringify(data.user.id));
+      }
+
       return data;
     } catch (error) {
       console.error("[Auth Error] Login failed:", error);
@@ -123,11 +127,28 @@ export const authService = {
   },
 
   /**
+   * Change password (logged-in user)
+   */
+  changePassword: async (data: {
+    old_password: string;
+    new_password: string;
+    new_password_confirm: string;
+  }): Promise<any> => {
+    try {
+      return await apiClient.post(API_ENDPOINTS.PASSWORD_CHANGE, data);
+    } catch (error) {
+      console.error("[Auth Error] Change password failed:", error);
+      throw error;
+    }
+  },
+
+  /**
    * Logout user and clear all tokens
    */
   logout: async (): Promise<void> => {
     try {
       await apiClient.post(API_ENDPOINTS.LOGOUT);
+      localStorage.removeItem("userId");
     } catch (error) {
       console.warn("[Auth Warning] Logout API failed, clearing tokens anyway");
     } finally {

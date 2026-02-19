@@ -348,7 +348,11 @@ apiClient.interceptors.response.use(
     // ===============================
     // 401 TOKEN REFRESH LOGIC
     // ===============================
-    if (error.response?.status === 401 && !originalRequest?._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest?._retry &&
+      !originalRequest?.url?.includes("/auth/login/") // ← Add this line
+    ) {
       if (originalRequest?.url?.includes("/token/refresh/")) {
         secureCookieManager.clearAllTokens();
         if (typeof window !== "undefined") window.location.href = "/login";
