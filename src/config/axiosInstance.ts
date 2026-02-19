@@ -339,13 +339,17 @@ apiClient.interceptors.request.use(
 // Response Interceptor
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response.data as any,
+
   async (error: AxiosError<any>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      if (originalRequest.url?.includes("/token/refresh/")) {
+    // ===============================
+    // 401 TOKEN REFRESH LOGIC
+    // ===============================
+    if (error.response?.status === 401 && !originalRequest?._retry) {
+      if (originalRequest?.url?.includes("/token/refresh/")) {
         secureCookieManager.clearAllTokens();
         if (typeof window !== "undefined") window.location.href = "/login";
         return Promise.reject(error);
@@ -367,6 +371,7 @@ apiClient.interceptors.response.use(
 
       try {
         const refreshToken = await secureCookieManager.getToken("refreshToken");
+
         if (!refreshToken) throw new Error("No refresh token available");
 
         const response = await axios.post(
@@ -376,6 +381,7 @@ apiClient.interceptors.response.use(
         );
 
         const newAccessToken = response.data.access;
+
         secureCookieManager.setToken(
           "accessToken",
           newAccessToken,
@@ -395,9 +401,28 @@ apiClient.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
+
+    // ===============================
+    // 🔥 HANDLE 404
+    // ===============================
+    if (error.response?.status === 404) {
+      console.warn("🚨 API Not Found:", originalRequest?.url);
+      return Promise.reject("API endpoint not found (404)");
+    }
+
+    // ===============================
+    // 🔥 HANDLE NETWORK ERROR
+    // ===============================
+    if (!error.response) {
+      console.error("🚨 Server not reachable / Network error");
+      return Promise.reject("Server not reachable");
+    }
+
+    // ===============================
+    // OTHER ERRORS
+    // ===============================
     return Promise.reject(error.response?.data?.message || error.message);
   },
 );
-
 export default apiClient;
 export { SECURITY_CONFIG, secureCookieManager };

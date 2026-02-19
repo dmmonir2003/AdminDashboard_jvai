@@ -46,14 +46,14 @@ export default function WalletStats() {
       {stats.map((item, index) => (
         <Col xs={24} sm={12} lg={6} key={index}>
           <Card
-            bordered={false}
+            variant="borderless"
             style={{
               borderRadius: "12px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
             }}
           >
             <Space
-              direction="vertical"
+              orientation="vertical"
               align="center"
               style={{ width: "100%" }}
             >

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { AntdRegistry } from "@ant-design/nextjs-registry";
+import { App as AntdApp } from "antd";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard",
@@ -16,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning>
-        <AntdRegistry>{children}</AntdRegistry>
+        <AntdRegistry>
+          <AntdApp>{children}</AntdApp>
+        </AntdRegistry>
       </body>
     </html>
   );

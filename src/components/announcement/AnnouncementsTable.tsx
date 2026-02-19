@@ -178,25 +178,18 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Table,
-  Button,
-  Typography,
-  Space,
-  message,
-  Popconfirm,
-  Card,
-} from "antd";
+import { Table, Button, Typography, Space, Popconfirm, Card } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import AnnouncementFormModal from "./AnnouncementForm";
 import "./AnnouncementsTable.css"; // Import CSS file
+import { App } from "antd";
 
 const { Title, Text } = Typography;
 
 export default function AnnouncementsTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<any>(null);
-
+  const { message } = App.useApp();
   const [dataSource, setDataSource] = useState([
     {
       key: "1",
@@ -304,7 +297,11 @@ export default function AnnouncementsTable() {
             >
               {record.title}
             </Text>
-            <Space direction="vertical" size="small" style={{ width: "100%" }}>
+            <Space
+              orientation="vertical"
+              size="small"
+              style={{ width: "100%" }}
+            >
               <div>
                 <Text type="secondary" style={{ fontSize: "12px" }}>
                   Audience:{" "}

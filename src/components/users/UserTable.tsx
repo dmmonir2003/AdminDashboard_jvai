@@ -153,13 +153,14 @@ import {
   Button,
   Tag,
   ConfigProvider,
-  message,
   Grid,
   Card,
   Typography,
   Row,
   Col,
 } from "antd";
+import { App } from "antd";
+
 import { SearchOutlined, EyeOutlined } from "@ant-design/icons";
 
 const { useBreakpoint } = Grid;
@@ -176,7 +177,7 @@ export default function UserTable({
 }: UserTableProps) {
   const [dataSource, setDataSource] = useState(initialUsers);
   const [searchText, setSearchText] = useState("");
-
+  const { message } = App.useApp();
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
@@ -301,7 +302,7 @@ export default function UserTable({
             dataSource={filteredData}
             pagination={{
               pageSize: 5,
-              position: ["bottomRight"],
+              placement: ["bottom"] as any,
               showTotal: (total, range) => (
                 <span style={{ fontWeight: 500, color: "#666" }}>
                   Showing {range[0]} to {range[1]} of {total} results

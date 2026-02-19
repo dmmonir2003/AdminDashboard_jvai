@@ -830,9 +830,374 @@
 //   );
 // }
 
-"use client";
+//TODO: sdfdsfdsds
+// "use client";
 
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+// import React, { useState, useMemo, useEffect, useCallback } from "react";
+// import {
+//   Row,
+//   Col,
+//   Input,
+//   Button,
+//   Tabs,
+//   Empty,
+//   Grid,
+//   Select,
+//   message,
+// } from "antd";
+// import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
+// import { AuctionFormModal } from "@/src/components/auctions/AuctionFormModal";
+// // import AuctionDetailView from "@/src/components/auctions/AuctionView";
+// import AuctionCard from "./AuctionCard";
+// import { auctionService } from "@/src/services/auctionService";
+// import { useRouter } from "next/navigation";
+
+// const { useBreakpoint } = Grid;
+
+// const TAB_TO_STATUS = {
+//   publish: "publish",
+//   upcoming: "schedule",
+//   invalid: "invalid",
+//   ended: "ended",
+//   draft: "draft",
+// };
+
+// export default function AuctionManager({
+//   initialAuctions = [],
+// }: {
+//   initialAuctions: any[];
+// }) {
+//   const [searchText, setSearchText] = useState("");
+//   const [activeTab, setActiveTab] = useState("publish");
+//   const [auctions, setAuctions] = useState(initialAuctions);
+//   const [allAuctionsForCount, setAllAuctionsForCount] =
+//     useState<any[]>(initialAuctions);
+
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [editingAuction, setEditingAuction] = useState<any>(null);
+//   // const [selectedAuction, setSelectedAuction] = useState<any>(null);
+//   const router = useRouter();
+
+//   // Loader state
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+
+//   const screens = useBreakpoint();
+//   const isMobile = !screens.md;
+
+//   const getStatusFromTab = (tab: string): string => {
+//     return TAB_TO_STATUS[tab as keyof typeof TAB_TO_STATUS] || tab;
+//   };
+
+//   const handleViewDetails = (auctionId: number) => {
+//     router.push(`/auctions/${auctionId}`);
+//   };
+//   // Inside AuctionManager component
+//   const handleCountdownComplete = useCallback(
+//     async (newStatus: string) => {
+//       try {
+//         const currentStatus = getStatusFromTab(activeTab);
+//         const updatedData = await auctionService.getAllAuctions(currentStatus);
+//         setAuctions(updatedData);
+
+//         const allData = await auctionService.getAllAuctions("");
+//         if (allData && Array.isArray(allData)) {
+//           setAllAuctionsForCount(allData);
+//         }
+
+//         message.info(`Auction status updated to ${newStatus}`);
+//       } catch (error) {
+//         console.error(`Failed to refresh auctions:`, error);
+//       }
+//     },
+//     [activeTab],
+//   ); // Add activeTab as a dependency if it's used inside
+
+//   useEffect(() => {
+//     const fetchAllForCounts = async () => {
+//       try {
+//         const allData = await auctionService.getAllAuctions("");
+//         if (allData && Array.isArray(allData)) {
+//           setAllAuctionsForCount(allData);
+//         }
+//       } catch (err) {
+//         console.error("Failed to fetch counts:", err);
+//       }
+//     };
+//     fetchAllForCounts();
+//   }, []);
+
+//   useEffect(() => {
+//     let isMounted = true;
+
+//     const fetchFilteredData = async () => {
+//       try {
+//         const status = getStatusFromTab(activeTab);
+//         const data = await auctionService.getAllAuctions(status);
+//         if (isMounted) {
+//           setAuctions(data);
+//         }
+//       } catch (err) {
+//         console.error("Failed to fetch filtered auctions:", err);
+//       }
+//     };
+
+//     fetchFilteredData();
+//     return () => {
+//       isMounted = false;
+//     };
+//   }, [activeTab]);
+
+//   const handleFormFinish = async (values: any) => {
+//     setIsSubmitting(true); // START LOADER
+//     const formData = new FormData();
+
+//     formData.append("product_name", values.product_name);
+//     formData.append("category", values.category);
+//     formData.append("description", values.description || "");
+//     formData.append("market_price", values.market_price);
+//     formData.append("auction_price", values.auction_price);
+//     formData.append("entry_fee_coins", values.entry_fee_coins);
+//     formData.append("status", values.status);
+
+//     if (values.scheduled_time) {
+//       formData.append(
+//         "scheduled_time",
+//         values.scheduled_time.format("YYYY-MM-DD HH:mm:ss"),
+//       );
+//     }
+//     if (values.auction_duration) {
+//       formData.append("auction_duration", values.auction_duration);
+//     }
+//     formData.append(
+//       "winning_claim_window",
+//       values.winning_claim_window || "02:00:00",
+//     );
+
+//     if (values.product_image?.fileList) {
+//       values.product_image.fileList.forEach((fileItem: any) => {
+//         // originFileObj contains the actual File object
+//         if (fileItem.originFileObj) {
+//           formData.append("product_images", fileItem.originFileObj);
+//         }
+//       });
+//     } else if (values.product_image?.file) {
+//       // Fallback for single file upload scenarios
+//       formData.append("product_images", values.product_image.file);
+//     }
+//     try {
+//       if (editingAuction) {
+//         await auctionService.updateAuction(editingAuction.auction_id, formData);
+//         message.success("Auction updated successfully!");
+//       } else {
+//         await auctionService.createAuction(formData);
+//         message.success("Auction created successfully!");
+//       }
+
+//       // Refresh Data
+//       const updatedList = await auctionService.getAllAuctions(
+//         getStatusFromTab(activeTab),
+//       );
+//       const updatedAll = await auctionService.getAllAuctions("");
+//       setAuctions(updatedList);
+//       setAllAuctionsForCount(updatedAll);
+
+//       setIsModalOpen(false);
+//       setEditingAuction(null);
+//     } catch (error) {
+//       console.error("Save failed:", error);
+//       message.error("Failed to save auction. Please check your connection.");
+//     } finally {
+//       setIsSubmitting(false); // STOP LOADER
+//     }
+//   };
+
+//   const counts = useMemo(() => {
+//     const data = allAuctionsForCount || [];
+//     return {
+//       live: data.filter((item: any) => item.status === "publish").length,
+//       upcoming: data.filter((item: any) => item.status === "schedule").length,
+//       invalid: data.filter((item: any) => item.status === "invalid").length,
+//       ended: data.filter((item: any) => item.status === "ended").length,
+//       draft: data.filter((item: any) => item.status === "draft").length,
+//     };
+//   }, [allAuctionsForCount]);
+
+//   const tabItems = [
+//     { label: `Live (${counts.live})`, value: "publish", key: "publish" },
+//     {
+//       label: `Upcoming (${counts.upcoming})`,
+//       value: "upcoming",
+//       key: "upcoming",
+//     },
+//     { label: `Invalid (${counts.invalid})`, value: "invalid", key: "invalid" },
+//     { label: `Ended (${counts.ended})`, value: "ended", key: "ended" },
+//   ];
+
+//   const filteredData = (auctions || []).filter((item: any) =>
+//     item.product_name?.toLowerCase().includes(searchText.toLowerCase()),
+//   );
+
+//   // 1. Create the refresh function
+//   const refreshAllData = async () => {
+//     try {
+//       const status = getStatusFromTab(activeTab);
+//       const updatedList = await auctionService.getAllAuctions(status);
+//       const updatedAll = await auctionService.getAllAuctions("");
+//       setAuctions(updatedList);
+//       setAllAuctionsForCount(updatedAll);
+//     } catch (error) {
+//       console.error("Refresh failed:", error);
+//     }
+//   };
+
+//   // ... in the return block ...
+//   // if (selectedAuction) {
+//   //   return (
+//   //     <AuctionDetailView
+//   //       auction={selectedAuction}
+//   //       onBack={() => {
+//   //         setSelectedAuction(null);
+//   //         refreshAllData(); // 2. Refresh when coming back
+//   //       }}
+//   //       onActionSuccess={refreshAllData} // 3. Refresh immediately on end/delete
+//   //     />
+//   //   );
+//   // }
+
+//   return (
+//     <div style={{ padding: isMobile ? "16px" : "24px" }}>
+//       <Row
+//         gutter={[16, 16]}
+//         justify="space-between"
+//         align="middle"
+//         style={{ marginBottom: "24px" }}
+//       >
+//         <Col xs={24} md={18} flex="auto">
+//           <Input
+//             placeholder="Search Auctions"
+//             prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
+//             style={{ borderRadius: "8px", height: "45px", width: "100%" }}
+//             onChange={(e) => setSearchText(e.target.value)}
+//           />
+//         </Col>
+//         <Col xs={24} md={6} style={{ textAlign: isMobile ? "left" : "right" }}>
+//           <Button
+//             type="primary"
+//             block={isMobile}
+//             onClick={() => {
+//               setEditingAuction(null);
+//               setIsModalOpen(true);
+//             }}
+//             icon={<PlusOutlined />}
+//             size="large"
+//             style={{ borderRadius: "8px", height: "45px" }}
+//           >
+//             Add Auction
+//           </Button>
+//         </Col>
+//       </Row>
+
+//       {isMobile ? (
+//         <Select
+//           value={activeTab}
+//           onChange={setActiveTab}
+//           style={{ width: "100%", marginBottom: "16px" }}
+//           size="large"
+//           options={tabItems}
+//         />
+//       ) : (
+//         <Tabs
+//           activeKey={activeTab}
+//           onChange={setActiveTab}
+//           items={tabItems}
+//           style={{ marginBottom: "16px" }}
+//           className="custom-tabs"
+//         />
+//       )}
+
+//       <div
+//         style={{
+//           maxHeight: isMobile ? "calc(100vh - 320px)" : "calc(100vh - 250px)",
+//           overflowY: "auto",
+//         }}
+//       >
+//         {filteredData.length > 0 ? (
+//           filteredData.map((item) => (
+//             <AuctionCard
+//               key={item.auction_id}
+//               item={item}
+//               activeTab={activeTab}
+//               onCountdownComplete={handleCountdownComplete}
+//               onEdit={(auction: any) => {
+//                 const duration = auction.auction_duration;
+//                 const formattedDuration =
+//                   duration && typeof duration === "object"
+//                     ? `${String(duration.hours || 0).padStart(2, "0")}:${String(duration.minutes || 0).padStart(2, "0")}:00`
+//                     : duration;
+
+//                 setEditingAuction({
+//                   ...auction,
+//                   auction_duration: formattedDuration,
+//                 });
+//                 setIsModalOpen(true);
+//               }}
+//               onView={(auction: any) => handleViewDetails(auction.auction_id)}
+//               // onView={(auction: any) => setSelectedAuction(auction)}
+//             />
+//           ))
+//         ) : (
+//           <Empty
+//             description={`No ${activeTab} auctions found`}
+//             style={{ marginTop: "40px" }}
+//           />
+//         )}
+//       </div>
+
+//       <AuctionFormModal
+//         open={isModalOpen}
+//         initialValues={editingAuction}
+//         onCancel={() => setIsModalOpen(false)}
+//         onFinish={handleFormFinish}
+//         title={editingAuction ? "Edit Auction" : "Add Auction"}
+//         loading={isSubmitting} // Correctly passing the state here
+//       />
+
+//       <style jsx global>{`
+//         .custom-tabs .ant-tabs-nav::before {
+//           border-bottom: none !important;
+//         }
+//         .custom-tabs .ant-tabs-tab {
+//           background: #f0f2f5 !important;
+//           border-radius: 20px !important;
+//           padding: 6px 20px !important;
+//           margin-right: 8px !important;
+//           border: none !important;
+//           transition: all 0.3s;
+//         }
+//         .custom-tabs .ant-tabs-tab-active {
+//           background: #fff !important;
+//           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+//         }
+//         .custom-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+//           color: #1890ff !important;
+//           font-weight: 600 !important;
+//         }
+//         .custom-tabs .ant-tabs-ink-bar {
+//           display: none !important;
+//         }
+//       `}</style>
+//     </div>
+//   );
+// }
+
+"use client";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
 import {
   Row,
   Col,
@@ -846,10 +1211,10 @@ import {
 } from "antd";
 import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
 import { AuctionFormModal } from "@/src/components/auctions/AuctionFormModal";
-// import AuctionDetailView from "@/src/components/auctions/AuctionView";
 import AuctionCard from "./AuctionCard";
 import { auctionService } from "@/src/services/auctionService";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation"; // ← add useSearchParams
+import debounce from "lodash/debounce";
 
 const { useBreakpoint } = Grid;
 
@@ -866,56 +1231,76 @@ export default function AuctionManager({
 }: {
   initialAuctions: any[];
 }) {
+  const searchParams = useSearchParams(); // ← add this
+  const initialTab = searchParams.get("tab") || "publish"; // ← read ?tab= from URL
+
   const [searchText, setSearchText] = useState("");
-  const [activeTab, setActiveTab] = useState("publish");
+  const [activeTab, setActiveTab] = useState(initialTab); // ← use initialTab here
   const [auctions, setAuctions] = useState(initialAuctions);
   const [allAuctionsForCount, setAllAuctionsForCount] =
     useState<any[]>(initialAuctions);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAuction, setEditingAuction] = useState<any>(null);
-  // const [selectedAuction, setSelectedAuction] = useState<any>(null);
   const router = useRouter();
-
-  // Loader state
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const screens = useBreakpoint();
   const isMobile = !screens.md;
+  const isRefreshing = useRef(false);
 
   const getStatusFromTab = (tab: string): string => {
     return TAB_TO_STATUS[tab as keyof typeof TAB_TO_STATUS] || tab;
   };
 
+  // ← pass activeTab as ?from= so detail page knows where we came from
   const handleViewDetails = (auctionId: number) => {
-    router.push(`/auctions/${auctionId}`);
+    router.push(`/auctions/${auctionId}?from=${activeTab}`);
   };
-  // Inside AuctionManager component
-  const handleCountdownComplete = useCallback(
-    async (newStatus: string) => {
+
+  const refreshTabs = useCallback(
+    debounce(async (statusesToRefresh: string[]) => {
+      if (isRefreshing.current) return;
+      isRefreshing.current = true;
       try {
-        const currentStatus = getStatusFromTab(activeTab);
-        const updatedData = await auctionService.getAllAuctions(currentStatus);
-        setAuctions(updatedData);
-
+        const fetchPromises = statusesToRefresh.map((status) =>
+          auctionService.getAllAuctions(status),
+        );
+        const results = await Promise.all(fetchPromises);
         const allData = await auctionService.getAllAuctions("");
-        if (allData && Array.isArray(allData)) {
-          setAllAuctionsForCount(allData);
+        setAllAuctionsForCount(Array.isArray(allData) ? allData : []);
+        const currentStatus = getStatusFromTab(activeTab);
+        const activeIndex = statusesToRefresh.indexOf(currentStatus);
+        if (activeIndex !== -1) {
+          setAuctions(results[activeIndex]);
         }
-
-        message.info(`Auction status updated to ${newStatus}`);
       } catch (error) {
-        console.error(`Failed to refresh auctions:`, error);
+        console.error("Failed to refresh auctions:", error);
+      } finally {
+        isRefreshing.current = false;
       }
-    },
+    }, 500),
     [activeTab],
-  ); // Add activeTab as a dependency if it's used inside
+  );
+
+  const handleCountdownComplete = useCallback(
+    (newStatus: string) => {
+      let statusesToRefresh: string[];
+      if (newStatus === "publish") {
+        statusesToRefresh = ["schedule", "publish"];
+      } else if (newStatus === "ended") {
+        statusesToRefresh = ["publish", "ended"];
+      } else {
+        return;
+      }
+      refreshTabs(statusesToRefresh);
+    },
+    [refreshTabs],
+  );
 
   useEffect(() => {
     const fetchAllForCounts = async () => {
       try {
         const allData = await auctionService.getAllAuctions("");
-        if (allData && Array.isArray(allData)) {
+        if (Array.isArray(allData)) {
           setAllAuctionsForCount(allData);
         }
       } catch (err) {
@@ -927,7 +1312,6 @@ export default function AuctionManager({
 
   useEffect(() => {
     let isMounted = true;
-
     const fetchFilteredData = async () => {
       try {
         const status = getStatusFromTab(activeTab);
@@ -939,7 +1323,6 @@ export default function AuctionManager({
         console.error("Failed to fetch filtered auctions:", err);
       }
     };
-
     fetchFilteredData();
     return () => {
       isMounted = false;
@@ -947,9 +1330,8 @@ export default function AuctionManager({
   }, [activeTab]);
 
   const handleFormFinish = async (values: any) => {
-    setIsSubmitting(true); // START LOADER
+    setIsSubmitting(true);
     const formData = new FormData();
-
     formData.append("product_name", values.product_name);
     formData.append("category", values.category);
     formData.append("description", values.description || "");
@@ -957,7 +1339,6 @@ export default function AuctionManager({
     formData.append("auction_price", values.auction_price);
     formData.append("entry_fee_coins", values.entry_fee_coins);
     formData.append("status", values.status);
-
     if (values.scheduled_time) {
       formData.append(
         "scheduled_time",
@@ -971,16 +1352,13 @@ export default function AuctionManager({
       "winning_claim_window",
       values.winning_claim_window || "02:00:00",
     );
-
     if (values.product_image?.fileList) {
       values.product_image.fileList.forEach((fileItem: any) => {
-        // originFileObj contains the actual File object
         if (fileItem.originFileObj) {
           formData.append("product_images", fileItem.originFileObj);
         }
       });
     } else if (values.product_image?.file) {
-      // Fallback for single file upload scenarios
       formData.append("product_images", values.product_image.file);
     }
     try {
@@ -991,22 +1369,14 @@ export default function AuctionManager({
         await auctionService.createAuction(formData);
         message.success("Auction created successfully!");
       }
-
-      // Refresh Data
-      const updatedList = await auctionService.getAllAuctions(
-        getStatusFromTab(activeTab),
-      );
-      const updatedAll = await auctionService.getAllAuctions("");
-      setAuctions(updatedList);
-      setAllAuctionsForCount(updatedAll);
-
-      setIsModalOpen(false);
-      setEditingAuction(null);
+      refreshTabs([getStatusFromTab(activeTab)]);
     } catch (error) {
       console.error("Save failed:", error);
       message.error("Failed to save auction. Please check your connection.");
     } finally {
-      setIsSubmitting(false); // STOP LOADER
+      setIsSubmitting(false);
+      setIsModalOpen(false);
+      setEditingAuction(null);
     }
   };
 
@@ -1035,33 +1405,6 @@ export default function AuctionManager({
   const filteredData = (auctions || []).filter((item: any) =>
     item.product_name?.toLowerCase().includes(searchText.toLowerCase()),
   );
-
-  // 1. Create the refresh function
-  const refreshAllData = async () => {
-    try {
-      const status = getStatusFromTab(activeTab);
-      const updatedList = await auctionService.getAllAuctions(status);
-      const updatedAll = await auctionService.getAllAuctions("");
-      setAuctions(updatedList);
-      setAllAuctionsForCount(updatedAll);
-    } catch (error) {
-      console.error("Refresh failed:", error);
-    }
-  };
-
-  // ... in the return block ...
-  // if (selectedAuction) {
-  //   return (
-  //     <AuctionDetailView
-  //       auction={selectedAuction}
-  //       onBack={() => {
-  //         setSelectedAuction(null);
-  //         refreshAllData(); // 2. Refresh when coming back
-  //       }}
-  //       onActionSuccess={refreshAllData} // 3. Refresh immediately on end/delete
-  //     />
-  //   );
-  // }
 
   return (
     <div style={{ padding: isMobile ? "16px" : "24px" }}>
@@ -1095,7 +1438,6 @@ export default function AuctionManager({
           </Button>
         </Col>
       </Row>
-
       {isMobile ? (
         <Select
           value={activeTab}
@@ -1113,7 +1455,6 @@ export default function AuctionManager({
           className="custom-tabs"
         />
       )}
-
       <div
         style={{
           maxHeight: isMobile ? "calc(100vh - 320px)" : "calc(100vh - 250px)",
@@ -1133,7 +1474,6 @@ export default function AuctionManager({
                   duration && typeof duration === "object"
                     ? `${String(duration.hours || 0).padStart(2, "0")}:${String(duration.minutes || 0).padStart(2, "0")}:00`
                     : duration;
-
                 setEditingAuction({
                   ...auction,
                   auction_duration: formattedDuration,
@@ -1141,7 +1481,6 @@ export default function AuctionManager({
                 setIsModalOpen(true);
               }}
               onView={(auction: any) => handleViewDetails(auction.auction_id)}
-              // onView={(auction: any) => setSelectedAuction(auction)}
             />
           ))
         ) : (
@@ -1151,16 +1490,14 @@ export default function AuctionManager({
           />
         )}
       </div>
-
       <AuctionFormModal
         open={isModalOpen}
         initialValues={editingAuction}
         onCancel={() => setIsModalOpen(false)}
         onFinish={handleFormFinish}
         title={editingAuction ? "Edit Auction" : "Add Auction"}
-        loading={isSubmitting} // Correctly passing the state here
+        loading={isSubmitting}
       />
-
       <style jsx global>{`
         .custom-tabs .ant-tabs-nav::before {
           border-bottom: none !important;

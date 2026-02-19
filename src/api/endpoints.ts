@@ -33,6 +33,20 @@ export const API_ENDPOINTS = {
   ADMIN_COIN_PACKAGES_TOGGLE: "/admin/coin-packages/toggle/",
   // ADMIN_COIN_PACKAGES_DELETE: "/admin/coin-packages/delete/", // if implemented
 
+  // ─── Overview / Dashboard ────────────────────────────────────────────────────
+  STATS_OVERVIEW: "/admin/overview/",
+  CHART_USER_PARTICIPATION_YEARLY: "/admin/chart/user-participation-yearly/",
+  CHART_REVENUE_AUCTIONS_YEARLY: "/admin/chart/revenue-auctions-yearly/",
+  TOP_AUCTIONS: "/admin/top-auctions/",
+
+  //users
+  // users
+  ADMIN_USERS: "/admin/users/",
+  ADMIN_USER_DETAILS: "/admin/users/details/",
+  ADMIN_USER_HISTORY: "/admin/users/history/",
+  ADMIN_USER_TRANSACTIONS: "/admin/users/transactions/",
+  ADMIN_USER_TOGGLE_STATUS: "/admin/users/toggle-status/",
+
   PRODUCTS: "/products",
   PRODUCT_DETAILS: (id: string) => `/products/${id}`,
 } as const;

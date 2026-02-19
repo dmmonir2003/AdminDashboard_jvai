@@ -583,6 +583,45 @@
 //   );
 // }
 
+// import { Row, Col } from "antd";
+// import DashboardLayout from "@/src/components/layout/DashboardLayout";
+// import StatsGrid from "@/src/components/dashboard/StatsGrid";
+// import RevenueChart from "@/src/components/dashboard/RevenueChart";
+// import ParticipationChart from "@/src/components/dashboard/ParticipationChart";
+// import LiveAuctions from "@/src/components/dashboard/LiveAuctions";
+// import TopPerformance from "@/src/components/dashboard/TopPerformance";
+
+// export default function DashboardPage() {
+//   return (
+//     <DashboardLayout>
+//       <div style={{ padding: "24px" }}>
+//         {/* Stats Row */}
+//         <StatsGrid />
+
+//         {/* Charts Row */}
+//         <Row gutter={[24, 24]} style={{ marginBottom: "32px" }}>
+//           <Col xs={24} lg={12}>
+//             <RevenueChart />
+//           </Col>
+//           <Col xs={24} lg={12}>
+//             <ParticipationChart />
+//           </Col>
+//         </Row>
+
+//         {/* Auctions Data Row */}
+//         <Row gutter={[24, 24]}>
+//           <Col xs={24} lg={12}>
+//             <LiveAuctions />
+//           </Col>
+//           <Col xs={24} lg={12}>
+//             <TopPerformance />
+//           </Col>
+//         </Row>
+//       </div>
+//     </DashboardLayout>
+//   );
+// }
+
 import { Row, Col } from "antd";
 import DashboardLayout from "@/src/components/layout/DashboardLayout";
 import StatsGrid from "@/src/components/dashboard/StatsGrid";
@@ -590,21 +629,34 @@ import RevenueChart from "@/src/components/dashboard/RevenueChart";
 import ParticipationChart from "@/src/components/dashboard/ParticipationChart";
 import LiveAuctions from "@/src/components/dashboard/LiveAuctions";
 import TopPerformance from "@/src/components/dashboard/TopPerformance";
+import { overviewService } from "@/src/services/overviewService";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const [stats, participationData, revenueData, topAuctions] =
+    await Promise.all([
+      // overviewService.getStats(),
+      // overviewService.getUserParticipationYearly(),
+      // overviewService.getRevenueAuctionsYearly(),
+      // overviewService.getTopAuctions(),
+    ]);
+
+  if (!stats || !participationData || !revenueData || !topAuctions) {
+    return <div>Failed to load dashboard data</div>;
+  }
+
   return (
     <DashboardLayout>
       <div style={{ padding: "24px" }}>
         {/* Stats Row */}
-        <StatsGrid />
+        <StatsGrid stats={stats} />
 
         {/* Charts Row */}
         <Row gutter={[24, 24]} style={{ marginBottom: "32px" }}>
           <Col xs={24} lg={12}>
-            <RevenueChart />
+            <RevenueChart data={revenueData.data} />
           </Col>
           <Col xs={24} lg={12}>
-            <ParticipationChart />
+            <ParticipationChart data={participationData.data} />
           </Col>
         </Row>
 
@@ -614,7 +666,7 @@ export default function DashboardPage() {
             <LiveAuctions />
           </Col>
           <Col xs={24} lg={12}>
-            <TopPerformance />
+            <TopPerformance topAuctions={topAuctions} />
           </Col>
         </Row>
       </div>

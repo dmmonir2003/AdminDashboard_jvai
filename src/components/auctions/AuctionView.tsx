@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // "use client";
 
@@ -980,14 +979,16 @@ interface LiveBidUsersResponse {
 
 interface AuctionDetailProps {
   auctionData: any; // Changed from 'auction' to 'auctionData'
-  onBack: () => void;
+  onBack: (tab?: string) => void;
   onActionSuccess?: () => void;
+  activeTab?: string;
 }
 
 export default function AuctionDetailView({
   auctionData,
   onBack,
   onActionSuccess,
+  activeTab,
 }: AuctionDetailProps) {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
@@ -1270,7 +1271,7 @@ export default function AuctionDetailView({
     <div style={{ padding: isMobile ? "12px" : "24px", background: "#f8f9fa" }}>
       <Button
         icon={<ArrowLeftOutlined />}
-        onClick={onBack}
+        onClick={() => onBack(activeTab)}
         style={{
           marginBottom: "20px",
           borderRadius: "8px",
@@ -1326,10 +1327,10 @@ export default function AuctionDetailView({
                 {formattedParticipants.length || auction.participant_count || 0}{" "}
                 participants
               </span>
-              <Badge
+              {/* <Badge
                 status={isConnected ? "success" : "error"}
                 text={isConnected ? "Live" : "Offline"}
-              />
+              /> */}
             </Space>
 
             <Row gutter={8} style={{ marginTop: "16px" }}>
@@ -1396,7 +1397,7 @@ export default function AuctionDetailView({
                 margin: 0,
               }}
             >
-              {auction.status || "N/A"}
+              {auction.status === "publish" ? "Live" : auction.status || "N/A"}
             </Tag>
           </Col>
         </Row>

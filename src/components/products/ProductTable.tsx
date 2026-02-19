@@ -228,7 +228,6 @@ import {
   Col,
   Typography,
   ConfigProvider,
-  message,
   Card,
   Grid,
 } from "antd";
@@ -240,6 +239,7 @@ import {
 } from "@ant-design/icons";
 import Image from "next/image";
 import ProductFormModal from "./ProductFormModal";
+import { App } from "antd";
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -257,7 +257,7 @@ export default function ProductTable({
   const [categoryFilter, setCategoryFilter] = useState("Physical");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
-
+  const { message } = App.useApp();
   // --- Handlers ---
   const handleOpenAddModal = () => {
     setSelectedProduct(null);
@@ -401,7 +401,7 @@ export default function ProductTable({
             dataSource={filteredData}
             pagination={{
               pageSize: 5,
-              position: ["bottomRight"],
+              placement: ["bottom"] as any,
               showTotal: (total, range) =>
                 `Showing ${range[0]} to ${range[1]} of ${total} results`,
             }}

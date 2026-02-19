@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // /* eslint-disable @typescript-eslint/no-explicit-any */
 // "use client";
 
@@ -219,7 +220,6 @@ import {
   Space,
   Select,
   DatePicker,
-  List,
   Divider,
   Grid,
 } from "antd";
@@ -265,7 +265,7 @@ export default function OrderDetailView({ order, onBack }: any) {
         {/* Left Column: User Information */}
         <Col xs={24} lg={8}>
           <Card
-            bordered={false}
+            variant="borderless"
             style={{
               borderRadius: "12px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
@@ -273,7 +273,7 @@ export default function OrderDetailView({ order, onBack }: any) {
           >
             <Title level={4}>User Information</Title>
             <Space
-              direction="vertical"
+              orientation="vertical"
               size="middle"
               style={{ width: "100%", marginTop: "16px" }}
             >
@@ -302,7 +302,7 @@ export default function OrderDetailView({ order, onBack }: any) {
         {/* Right Column: Activity & Status Update */}
         <Col xs={24} lg={16}>
           <Card
-            bordered={false}
+            variant="borderless"
             style={{
               borderRadius: "12px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
@@ -315,7 +315,7 @@ export default function OrderDetailView({ order, onBack }: any) {
                 <Text strong style={{ display: "block", marginTop: "16px" }}>
                   Auction History
                 </Text>
-                <List
+                {/* <List
                   dataSource={auctionTransactions}
                   renderItem={(item) => (
                     <List.Item style={{ padding: "12px 0" }}>
@@ -335,7 +335,51 @@ export default function OrderDetailView({ order, onBack }: any) {
                       </Row>
                     </List.Item>
                   )}
-                />
+                /> */}
+                {/* @ts-ignore */}
+                {/* <List
+                  dataSource={auctionTransactions}
+                  renderItem={(item) => (
+                    <List.Item style={{ padding: "12px 0" }}>
+                      <Row justify="space-between" style={{ width: "100%" }}>
+                        <Col>
+                          <Text strong>Transaction {item.id}</Text>
+                          <br />
+                          <Text type="secondary" style={{ fontSize: "12px" }}>
+                            {item.date}
+                          </Text>
+                        </Col>
+                        <Col>
+                          <Text strong style={{ color: "#2ecc71" }}>
+                            {item.amount}
+                          </Text>
+                        </Col>
+                      </Row>
+                    </List.Item>
+                  )}
+                /> */}
+
+                <div>
+                  {auctionTransactions.map((item) => (
+                    <div key={item.id} style={{ padding: "12px 0" }}>
+                      <Row justify="space-between" style={{ width: "100%" }}>
+                        <Col>
+                          <Text strong>Transaction {item.id}</Text>
+                          <br />
+                          <Text type="secondary" style={{ fontSize: "12px" }}>
+                            {item.date}
+                          </Text>
+                        </Col>
+                        <Col>
+                          <Text strong style={{ color: "#2ecc71" }}>
+                            {item.amount}
+                          </Text>
+                        </Col>
+                      </Row>
+                    </div>
+                  ))}
+                </div>
+
                 <Divider />
               </>
             )}

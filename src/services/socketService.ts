@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { io, Socket } from "socket.io-client";
 
@@ -79,11 +80,28 @@ class SocketService {
    * Monitor auction (admin view only)
    */
   monitorAuction(auctionId: string | number) {
-    if (!this.socket?.connected) throw new Error("Socket not connected");
+    if (!this.socket) return;
 
-    console.log(`👁️ Monitoring auction ${auctionId}`);
-    this.socket.emit("monitor_auction", { auction_id: auctionId });
+    // if already connected → run immediately
+    if (this.socket.connected) {
+      console.log(`👁️ Monitoring auction ${auctionId}`);
+      this.socket.emit("monitor_auction", { auction_id: auctionId });
+      return;
+    }
+
+    // wait until connection is ready (fixes race condition)
+    this.socket.once("connect", () => {
+      console.log(`👁️ Monitoring auction ${auctionId}`);
+      this.socket?.emit("monitor_auction", { auction_id: auctionId });
+    });
   }
+
+  // monitorAuction(auctionId: string | number) {
+  //   if (!this.socket?.connected) throw new Error("Socket not connected");
+
+  //   console.log(`👁️ Monitoring auction ${auctionId}`);
+  //   this.socket.emit("monitor_auction", { auction_id: auctionId });
+  // }
   // liveBidUsers(callback: (data: any) => void) {
   //     this.socket?.on("live_bid_users_response", callback
   // }

@@ -263,7 +263,6 @@ import {
   Typography,
   ConfigProvider,
   Space,
-  message,
   Grid,
   Card,
   Row,
@@ -272,6 +271,7 @@ import {
 import { PlusOutlined, EditOutlined } from "@ant-design/icons";
 import CoinPricingModal from "./CoinPricingModal";
 import { CoinPackage, coinPackageService } from "@/src/services/coinService";
+import { App } from "antd";
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -286,7 +286,7 @@ export default function CoinPricingManager({ initialData }: Props) {
   const [selectedPackage, setSelectedPackage] = useState<CoinPackage | null>(
     null,
   );
-
+  const { message } = App.useApp();
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 

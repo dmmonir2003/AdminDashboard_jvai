@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 
@@ -150,11 +151,10 @@
 //     </DashboardLayout>
 //   );
 // }
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { message, Spin } from "antd";
 import DashboardLayout from "@/src/components/layout/DashboardLayout";
 import { auctionService } from "@/src/services/auctionService";
@@ -163,7 +163,9 @@ import AuctionDetailView from "@/src/components/auctions/AuctionView";
 export default function AuctionDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const auctionId = params.id as string;
+  const fromTab = searchParams.get("from") || "publish"; // reads ?from=upcoming etc.
 
   const [fullData, setFullData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -171,7 +173,6 @@ export default function AuctionDetailPage() {
   const fetchAuctionDetails = async () => {
     try {
       setLoading(true);
-      // This response contains { auction, participants, bid_leader }
       const response = await auctionService.getAuctionById(auctionId);
       setFullData(response);
     } catch (err: any) {
@@ -204,9 +205,9 @@ export default function AuctionDetailPage() {
     <DashboardLayout>
       {fullData && (
         <AuctionDetailView
-          // We pass the whole object so we have access to .auction and .participants
           auctionData={fullData}
-          onBack={() => router.push("/auctions")}
+          activeTab={fromTab}
+          onBack={() => router.push(`/auctions?tab=${fromTab}`)}
           onActionSuccess={fetchAuctionDetails}
         />
       )}

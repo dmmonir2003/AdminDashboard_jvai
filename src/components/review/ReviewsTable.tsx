@@ -8,7 +8,6 @@ import {
   Button,
   Typography,
   Space,
-  message,
   Popconfirm,
   Card,
   Input,
@@ -18,6 +17,7 @@ import {
 import { EyeOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons";
 import ReviewDetailsModal from "./ReviewDetailsModal";
 import "./ReviewsTable.css";
+import { App } from "antd";
 
 const { Title } = Typography;
 
@@ -27,7 +27,7 @@ export default function ReviewsTable() {
   const [searchText, setSearchText] = useState("");
   const [productFilter, setProductFilter] = useState("All Products");
   const [ratingFilter, setRatingFilter] = useState("All Ratings");
-
+  const { message } = App.useApp();
   const [dataSource] = useState([
     {
       key: "1",

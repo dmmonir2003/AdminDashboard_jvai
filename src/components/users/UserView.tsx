@@ -295,29 +295,19 @@ import { ArrowLeftOutlined } from "@ant-design/icons";
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
 
-// Mock Data
-const auctionHistoryData = [
-  { id: 1, title: "Participated in auction #100", date: "2 days ago", bids: 3 },
-  { id: 2, title: "Participated in auction #200", date: "4 days ago", bids: 3 },
-  { id: 3, title: "Participated in auction #300", date: "4 days ago", bids: 3 },
-];
-
-const walletTransactionData = [
-  {
-    id: 1,
-    title: "Added funds to wallet",
-    date: "1 week ago",
-    amount: "+ SAR 500.00",
-  },
-  { id: 2, title: "Withdrawal", date: "2 weeks ago", amount: "- SAR 100.00" },
-];
-
 interface UserViewProps {
   user: any;
+  historyData?: any[]; // ← make optional
+  transactionsData?: any[];
   onBack: () => void;
 }
 
-export default function UserView({ user, onBack }: UserViewProps) {
+export default function UserView({
+  user,
+  historyData = [], // ← default to empty array
+  transactionsData = [],
+  onBack,
+}: UserViewProps) {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
@@ -413,22 +403,50 @@ export default function UserView({ user, onBack }: UserViewProps) {
       key: "1",
       label: "Auction History",
       children: (
-        <List
-          dataSource={auctionHistoryData}
-          renderItem={renderAuctionItem}
-          split={false}
-        />
+        <div>
+          {historyData.length > 0 ? (
+            historyData.map((item, idx) => (
+              <React.Fragment key={idx}>
+                {renderAuctionItem({
+                  title: item.auction_title,
+                  date: `${item.days_ago} day${item.days_ago !== 1 ? "s" : ""} ago`,
+                  bids: item.total_bids,
+                })}
+              </React.Fragment>
+            ))
+          ) : (
+            <div
+              style={{ textAlign: "center", padding: "40px", color: "#999" }}
+            >
+              No auction history found
+            </div>
+          )}
+        </div>
       ),
     },
     {
       key: "2",
       label: "Wallet Transactions",
       children: (
-        <List
-          dataSource={walletTransactionData}
-          renderItem={renderWalletItem}
-          split={false}
-        />
+        <div>
+          {transactionsData.length > 0 ? (
+            transactionsData.map((item) => (
+              <React.Fragment key={item.id}>
+                {renderWalletItem({
+                  title: item.description,
+                  date: new Date(item.created_at).toLocaleDateString(),
+                  amount: `${item.transaction_type === "bid" || item.transaction_type === "entry_fee" ? "-" : "+"} ${item.amount} Coins`,
+                })}
+              </React.Fragment>
+            ))
+          ) : (
+            <div
+              style={{ textAlign: "center", padding: "40px", color: "#999" }}
+            >
+              No transactions found
+            </div>
+          )}
+        </div>
       ),
     },
   ];
@@ -461,7 +479,7 @@ export default function UserView({ user, onBack }: UserViewProps) {
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={8}>
           <Card
-            bordered={false}
+            variant="borderless"
             style={{
               borderRadius: "12px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
@@ -472,7 +490,11 @@ export default function UserView({ user, onBack }: UserViewProps) {
               User Information
             </Title>
 
-            <Space direction="vertical" size="large" style={{ width: "100%" }}>
+            <Space
+              orientation="vertical"
+              size="large"
+              style={{ width: "100%" }}
+            >
               <div>
                 <Text type="secondary" style={labelStyle}>
                   Name
@@ -526,7 +548,7 @@ export default function UserView({ user, onBack }: UserViewProps) {
 
         <Col xs={24} lg={16}>
           <Card
-            bordered={false}
+            variant="borderless"
             style={{
               borderRadius: "12px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
