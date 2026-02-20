@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // "use client";
 
@@ -924,7 +925,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Table,
   Tag,
@@ -949,6 +950,7 @@ import {
   DeleteOutlined,
   PoweroffOutlined,
   CrownOutlined,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 import Image from "next/image";
 import { auctionService } from "@/src/services/auctionService";
@@ -978,7 +980,7 @@ interface LiveBidUsersResponse {
 }
 
 interface AuctionDetailProps {
-  auctionData: any; // Changed from 'auction' to 'auctionData'
+  auctionData: any;
   onBack: (tab?: string) => void;
   onActionSuccess?: () => void;
   activeTab?: string;
@@ -996,6 +998,8 @@ export default function AuctionDetailView({
   const [liveParticipants, setLiveParticipants] = useState<Participant[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [countdown, setCountdown] = useState<string>("");
+  const hasTriggered = useRef(false);
   const pageSize = 5;
 
   // Extract auction object from auctionData
@@ -1005,33 +1009,161 @@ export default function AuctionDetailView({
 
   const getInitials = (name: string) => {
     if (!name) return "U";
-
     const parts = name.trim().split(" ");
     if (parts.length === 1) return parts[0][0].toUpperCase();
-
     return parts[0][0].toUpperCase() + parts[1][0].toUpperCase();
   };
+
+  // Countdown logic (mirrored from AuctionCard)
+  useEffect(() => {
+    if (!auction?.auction_id) return;
+
+    hasTriggered.current = false;
+
+    const calculateInitialSeconds = () => {
+      if (activeTab === "publish") {
+        const hMatch = auction.remaining_time?.match(/(\d+)h/);
+        const mMatch = auction.remaining_time?.match(/(\d+)m/);
+        const sMatch = auction.remaining_time?.match(/(\d+)s/);
+        const hours = hMatch ? parseInt(hMatch[1]) : 0;
+        const minutes = mMatch ? parseInt(mMatch[1]) : 0;
+        const seconds = sMatch ? parseInt(sMatch[1]) : 0;
+        let totalSeconds = hours * 3600 + minutes * 60 + seconds;
+        if (
+          totalSeconds <= 0 &&
+          auction.created_at &&
+          auction.auction_duration
+        ) {
+          const createdTime = new Date(auction.created_at).getTime();
+          const durationSeconds =
+            (auction.auction_duration.hours || 0) * 3600 +
+            (auction.auction_duration.minutes || 0) * 60;
+          const endTime = createdTime + durationSeconds * 1000;
+          const now = new Date().getTime();
+          totalSeconds = Math.max(0, Math.floor((endTime - now) / 1000));
+        }
+        return totalSeconds;
+      } else if (
+        activeTab === "upcoming" ||
+        activeTab === "schedule" ||
+        auction.status === "schedule"
+      ) {
+        // Log all auction fields to help identify the correct scheduled time field
+        console.log("🗓️ Schedule auction fields:", {
+          scheduled_time: auction.scheduled_time,
+          schedule_time: auction.schedule_time,
+          start_time: auction.start_time,
+          scheduled_at: auction.scheduled_at,
+          start_at: auction.start_at,
+          remaining_time: auction.remaining_time,
+          auction_start_time: auction.auction_start_time,
+          startTime: auction.startTime,
+          scheduleTime: auction.scheduleTime,
+          status: auction.status,
+          full_auction: auction,
+        });
+
+        // Try all possible field names for scheduled time
+        const scheduledTime =
+          auction.scheduled_time ||
+          auction.schedule_time ||
+          auction.start_time ||
+          auction.scheduled_at ||
+          auction.start_at ||
+          auction.auction_start_time ||
+          auction.startTime ||
+          auction.scheduleTime;
+
+        if (scheduledTime) {
+          const target = new Date(scheduledTime).getTime();
+          const now = new Date().getTime();
+          const diff = Math.max(0, Math.floor((target - now) / 1000));
+          console.log(
+            "⏱️ Scheduled time found:",
+            scheduledTime,
+            "→ seconds left:",
+            diff,
+          );
+          return diff;
+        }
+
+        // Fallback: try remaining_time string even for upcoming
+        if (auction.remaining_time) {
+          const hMatch = auction.remaining_time?.match(/(\d+)h/);
+          const mMatch = auction.remaining_time?.match(/(\d+)m/);
+          const sMatch = auction.remaining_time?.match(/(\d+)s/);
+          const hours = hMatch ? parseInt(hMatch[1]) : 0;
+          const minutes = mMatch ? parseInt(mMatch[1]) : 0;
+          const seconds = sMatch ? parseInt(sMatch[1]) : 0;
+          const total = hours * 3600 + minutes * 60 + seconds;
+          if (total > 0) return total;
+        }
+
+        console.warn("⚠️ No scheduled time field found for upcoming auction!");
+      }
+      return 0;
+    };
+
+    let secondsLeft = calculateInitialSeconds();
+
+    const updateDisplay = (totalSecs: number) => {
+      if (totalSecs <= 0) {
+        setCountdown("00:00:00");
+        return;
+      }
+      const d = Math.floor(totalSecs / (3600 * 24));
+      const h = Math.floor((totalSecs % (3600 * 24)) / 3600);
+      const m = Math.floor((totalSecs % 3600) / 60);
+      const s = Math.floor(totalSecs % 60);
+      const dDisplay = d > 0 ? `${d}d ` : "";
+      setCountdown(
+        `${dDisplay}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`,
+      );
+    };
+
+    updateDisplay(secondsLeft);
+
+    const timer = setInterval(() => {
+      if (secondsLeft <= 0) {
+        clearInterval(timer);
+        updateDisplay(0);
+        return;
+      }
+      secondsLeft -= 1;
+      updateDisplay(secondsLeft);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [
+    auction?.auction_id,
+    activeTab,
+    auction?.remaining_time,
+    auction?.scheduled_time,
+    auction?.schedule_time,
+    auction?.start_time,
+    auction?.scheduled_at,
+    auction?.start_at,
+    auction?.status,
+    auction?.created_at,
+    auction?.auction_duration,
+  ]);
 
   // Connect to socket and fetch live data
   useEffect(() => {
     if (!token || !auction?.auction_id) return;
 
-    // Connect socket
     socketService.connect(token, () => {
       console.log("✅ Socket connected for auction detail");
       setIsConnected(true);
 
-      // Monitor auction (admin view)
       socketService.monitorAuction(auction.auction_id);
 
-      // Request live bid users data
       const socket = socketService.getSocket();
       if (socket) {
         socket.emit("live_bid_users", { auction_id: auction.auction_id });
       }
     });
 
-    // Listen for live bid users response
     const socket = socketService.getSocket();
     if (socket) {
       socket.on("live_bid_users_response", (data: LiveBidUsersResponse) => {
@@ -1041,23 +1173,18 @@ export default function AuctionDetailView({
         }
       });
 
-      // Listen for new bids to update the table
       socket.on("new_bid", (bidData: any) => {
         console.log("💰 New bid received:", bidData);
-        // Request updated participant list
         socket.emit("live_bid_users", { auction_id: auction.auction_id });
       });
 
-      // Listen for auction ended
       socket.on("auction_ended", (endData: any) => {
         console.log("🏁 Auction ended:", endData);
-        // Request final participant list
         socket.emit("live_bid_users", { auction_id: auction.auction_id });
         message.success("Auction has ended!");
       });
     }
 
-    // Cleanup
     return () => {
       const socket = socketService.getSocket();
       if (socket) {
@@ -1148,11 +1275,6 @@ export default function AuctionDetailView({
           >
             {getInitials(record.name)}
           </Avatar>
-          {/* <Avatar
-            src={record.avatar}
-            size={48}
-            style={{ border: "1px solid #f0f0f0" }}
-          /> */}
           <div style={{ display: "flex", flexDirection: "column" }}>
             <Space>
               <Text strong style={{ fontSize: "14px" }}>
@@ -1341,18 +1463,19 @@ export default function AuctionDetailView({
             >
               {auction.product_name || auction.title || "N/A"}
             </h3>
+
+            {/* Countdown + Participants */}
             <Space
               style={{ color: "#8c8c8c", fontSize: "12px", marginTop: "4px" }}
             >
+              <span>
+                <ClockCircleOutlined /> {countdown || "00:00:00"}
+              </span>
               <span>
                 <TeamOutlined />{" "}
                 {formattedParticipants.length || auction.participant_count || 0}{" "}
                 participants
               </span>
-              {/* <Badge
-                status={isConnected ? "success" : "error"}
-                text={isConnected ? "Live" : "Offline"}
-              /> */}
             </Space>
 
             <Row gutter={8} style={{ marginTop: "16px" }}>
@@ -1457,11 +1580,10 @@ export default function AuctionDetailView({
             style={{
               marginTop: "16px",
               display: "flex",
-              justifyContent: "space-between",
+              justifyContent: "flex-end",
               alignItems: "center",
             }}
           >
-            <div /> {/* empty spacer */}
             <Pagination
               current={currentPage}
               pageSize={pageSize}
@@ -1586,7 +1708,7 @@ export default function AuctionDetailView({
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              width: "100%", // ✅ IMPORTANT
+              width: "100%",
             }}
           >
             {/* LEFT TEXT */}
