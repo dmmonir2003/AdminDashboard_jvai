@@ -1549,7 +1549,7 @@ export default function AuctionDetailView({
       </Card>
 
       <Title level={4} style={{ marginBottom: "20px" }}>
-        👥 Live Bid Users ({formattedParticipants.length})
+        👥 All Participants ({formattedParticipants.length})
       </Title>
 
       {formattedParticipants.length === 0 ? (
