@@ -96,6 +96,19 @@ class SocketService {
     });
   }
 
+  /**
+   * Countdown listener (real-time timer)
+   */
+  onCountdownUpdate(
+    callback: (data: {
+      auction_id: number;
+      remaining_seconds: number;
+      end_time: string;
+    }) => void,
+  ) {
+    this.socket?.on("countdown_update", callback);
+  }
+
   // monitorAuction(auctionId: string | number) {
   //   if (!this.socket?.connected) throw new Error("Socket not connected");
 

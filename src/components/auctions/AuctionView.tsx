@@ -922,6 +922,7 @@
 //     </div>
 //   );
 // }
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -974,6 +975,12 @@ interface Participant {
   total_bids: number;
 }
 
+interface CountdownData {
+  auction_id: number;
+  remaining_seconds: number;
+  end_time: string;
+}
+
 interface LiveBidUsersResponse {
   auction_id: string;
   participants: Participant[];
@@ -999,6 +1006,9 @@ export default function AuctionDetailView({
   const [isConnected, setIsConnected] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [countdown, setCountdown] = useState<string>("");
+  const [countdownsByAuction, setCountdownsByAuction] = useState<
+    Record<number, number>
+  >({});
   const hasTriggered = useRef(false);
   const pageSize = 5;
 
@@ -1014,139 +1024,18 @@ export default function AuctionDetailView({
     return parts[0][0].toUpperCase() + parts[1][0].toUpperCase();
   };
 
-  // Countdown logic (mirrored from AuctionCard)
-  useEffect(() => {
-    if (!auction?.auction_id) return;
-
-    hasTriggered.current = false;
-
-    const calculateInitialSeconds = () => {
-      if (activeTab === "publish") {
-        const hMatch = auction.remaining_time?.match(/(\d+)h/);
-        const mMatch = auction.remaining_time?.match(/(\d+)m/);
-        const sMatch = auction.remaining_time?.match(/(\d+)s/);
-        const hours = hMatch ? parseInt(hMatch[1]) : 0;
-        const minutes = mMatch ? parseInt(mMatch[1]) : 0;
-        const seconds = sMatch ? parseInt(sMatch[1]) : 0;
-        let totalSeconds = hours * 3600 + minutes * 60 + seconds;
-        if (
-          totalSeconds <= 0 &&
-          auction.created_at &&
-          auction.auction_duration
-        ) {
-          const createdTime = new Date(auction.created_at).getTime();
-          const durationSeconds =
-            (auction.auction_duration.hours || 0) * 3600 +
-            (auction.auction_duration.minutes || 0) * 60;
-          const endTime = createdTime + durationSeconds * 1000;
-          const now = new Date().getTime();
-          totalSeconds = Math.max(0, Math.floor((endTime - now) / 1000));
-        }
-        return totalSeconds;
-      } else if (
-        activeTab === "upcoming" ||
-        activeTab === "schedule" ||
-        auction.status === "schedule"
-      ) {
-        // Log all auction fields to help identify the correct scheduled time field
-        console.log("🗓️ Schedule auction fields:", {
-          scheduled_time: auction.scheduled_time,
-          schedule_time: auction.schedule_time,
-          start_time: auction.start_time,
-          scheduled_at: auction.scheduled_at,
-          start_at: auction.start_at,
-          remaining_time: auction.remaining_time,
-          auction_start_time: auction.auction_start_time,
-          startTime: auction.startTime,
-          scheduleTime: auction.scheduleTime,
-          status: auction.status,
-          full_auction: auction,
-        });
-
-        // Try all possible field names for scheduled time
-        const scheduledTime =
-          auction.scheduled_time ||
-          auction.schedule_time ||
-          auction.start_time ||
-          auction.scheduled_at ||
-          auction.start_at ||
-          auction.auction_start_time ||
-          auction.startTime ||
-          auction.scheduleTime;
-
-        if (scheduledTime) {
-          const target = new Date(scheduledTime).getTime();
-          const now = new Date().getTime();
-          const diff = Math.max(0, Math.floor((target - now) / 1000));
-          console.log(
-            "⏱️ Scheduled time found:",
-            scheduledTime,
-            "→ seconds left:",
-            diff,
-          );
-          return diff;
-        }
-
-        // Fallback: try remaining_time string even for upcoming
-        if (auction.remaining_time) {
-          const hMatch = auction.remaining_time?.match(/(\d+)h/);
-          const mMatch = auction.remaining_time?.match(/(\d+)m/);
-          const sMatch = auction.remaining_time?.match(/(\d+)s/);
-          const hours = hMatch ? parseInt(hMatch[1]) : 0;
-          const minutes = mMatch ? parseInt(mMatch[1]) : 0;
-          const seconds = sMatch ? parseInt(sMatch[1]) : 0;
-          const total = hours * 3600 + minutes * 60 + seconds;
-          if (total > 0) return total;
-        }
-
-        console.warn("⚠️ No scheduled time field found for upcoming auction!");
-      }
-      return 0;
-    };
-
-    let secondsLeft = calculateInitialSeconds();
-
-    const updateDisplay = (totalSecs: number) => {
-      if (totalSecs <= 0) {
-        setCountdown("00:00:00");
-        return;
-      }
-      const d = Math.floor(totalSecs / (3600 * 24));
-      const h = Math.floor((totalSecs % (3600 * 24)) / 3600);
-      const m = Math.floor((totalSecs % 3600) / 60);
-      const s = Math.floor(totalSecs % 60);
-      const dDisplay = d > 0 ? `${d}d ` : "";
-      setCountdown(
-        `${dDisplay}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`,
-      );
-    };
-
-    updateDisplay(secondsLeft);
-
-    const timer = setInterval(() => {
-      if (secondsLeft <= 0) {
-        clearInterval(timer);
-        updateDisplay(0);
-        return;
-      }
-      secondsLeft -= 1;
-      updateDisplay(secondsLeft);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [
-    auction?.auction_id,
-    activeTab,
-    auction?.remaining_time,
-    auction?.scheduled_time,
-    auction?.schedule_time,
-    auction?.start_time,
-    auction?.scheduled_at,
-    auction?.start_at,
-    auction?.status,
-    auction?.created_at,
-    auction?.auction_duration,
-  ]);
+  // Format countdown seconds to display format (HH:MM:SS or Xd HH:MM:SS)
+  const formatCountdown = (totalSecs: number): string => {
+    if (totalSecs <= 0) {
+      return "00:00:00";
+    }
+    const d = Math.floor(totalSecs / (3600 * 24));
+    const h = Math.floor((totalSecs % (3600 * 24)) / 3600);
+    const m = Math.floor((totalSecs % 3600) / 60);
+    const s = Math.floor(totalSecs % 60);
+    const dDisplay = d > 0 ? `${d}d ` : "";
+    return `${dDisplay}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
 
   // Connect to socket and fetch live data
   useEffect(() => {
@@ -1172,10 +1061,26 @@ export default function AuctionDetailView({
           setLiveParticipants(data.participants);
         }
       });
+      socket.on("countdown_update", (data: CountdownData) => {
+        console.log(
+          "countdown update received for auction",
+          data.auction_id,
+          ":",
+          data.remaining_seconds,
+        );
+        setCountdownsByAuction((prev) => ({
+          ...prev,
+          [data.auction_id]: data.remaining_seconds,
+        }));
+      });
 
       socket.on("new_bid", (bidData: any) => {
         console.log("💰 New bid received:", bidData);
         socket.emit("live_bid_users", { auction_id: auction.auction_id });
+      });
+      socket.on("auction_state", (bidData: any) => {
+        console.log("💰 Auction state :", bidData);
+        socket.emit("auction_state", { auction_id: auction.auction_id });
       });
 
       socket.on("auction_ended", (endData: any) => {
@@ -1189,7 +1094,8 @@ export default function AuctionDetailView({
       const socket = socketService.getSocket();
       if (socket) {
         socket.off("live_bid_users_response");
-        socket.off("new_bid");
+        socket.off("auction_state");
+        socket.off("countdown_update");
         socket.off("auction_ended");
       }
     };
@@ -1469,7 +1375,8 @@ export default function AuctionDetailView({
               style={{ color: "#8c8c8c", fontSize: "12px", marginTop: "4px" }}
             >
               <span>
-                <ClockCircleOutlined /> {countdown || "00:00:00"}
+                <ClockCircleOutlined />{" "}
+                {formatCountdown(countdownsByAuction[auction.auction_id] || 0)}
               </span>
               <span>
                 <TeamOutlined />{" "}

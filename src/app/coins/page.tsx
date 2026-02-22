@@ -194,6 +194,7 @@ export default async function CoinsPage() {
   try {
     initialData = await coinPackageService.getAllCoinPackages();
     stats = await coinPackageService.getCoinStats();
+
     // ✅ new
   } catch (error) {
     console.error("Failed to load data", error);
