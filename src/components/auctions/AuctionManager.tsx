@@ -1215,7 +1215,8 @@ import AuctionCard from "./AuctionCard";
 import { auctionService } from "@/src/services/auctionService";
 import { useRouter, useSearchParams } from "next/navigation"; // ← add useSearchParams
 import debounce from "lodash/debounce";
-
+import Cookies from "js-cookie";
+import { socketService } from "@/src/services/socketService";
 const { useBreakpoint } = Grid;
 
 const TAB_TO_STATUS = {
@@ -1246,7 +1247,8 @@ export default function AuctionManager({
   const screens = useBreakpoint();
   const isMobile = !screens.md;
   const isRefreshing = useRef(false);
-
+  const token = Cookies.get("accessToken") || "";
+  const [liveAuctions, setLiveAuctions] = useState<any[]>([]);
   const getStatusFromTab = (tab: string): string => {
     return TAB_TO_STATUS[tab as keyof typeof TAB_TO_STATUS] || tab;
   };
@@ -1255,6 +1257,46 @@ export default function AuctionManager({
   const handleViewDetails = (auctionId: number) => {
     router.push(`/auctions/${auctionId}?from=${activeTab}`);
   };
+
+  // Connect to socket and fetch live data
+  useEffect(() => {
+    if (!token) return;
+
+    socketService.connect(token, () => {
+      console.log("✅ Socket connected for auction live list");
+    });
+
+    const socket = socketService.getSocket();
+    if (socket) {
+      socket.on("all_countdowns", (data: any) => {
+        console.log(
+          "📊 All countdowns received:",
+          data.auctions[0].remaining_seconds,
+        );
+
+        if (data) {
+          // data is { auctions: [...], count: 2, timestamp: "..." }
+          const auctionsArray = Array.isArray(data)
+            ? data
+            : (data.auctions ?? []);
+          setLiveAuctions(auctionsArray);
+        }
+      });
+    }
+
+    console.log(liveAuctions, "sdfsdffasdafds");
+
+    return () => {
+      const socket = socketService.getSocket();
+      if (socket) {
+        socket.off("all_countdowns");
+        socket.off("live_bid_users_response");
+        socket.off("auction_state");
+        // socket.off("countdown_update");
+        socket.off("auction_ended");
+      }
+    };
+  }, [token]);
 
   const refreshTabs = useCallback(
     debounce(async (statusesToRefresh: string[]) => {
@@ -1462,27 +1504,38 @@ export default function AuctionManager({
         }}
       >
         {filteredData.length > 0 ? (
-          filteredData.map((item) => (
-            <AuctionCard
-              key={item.auction_id}
-              item={item}
-              activeTab={activeTab}
-              onCountdownComplete={handleCountdownComplete}
-              onEdit={(auction: any) => {
-                const duration = auction.auction_duration;
-                const formattedDuration =
-                  duration && typeof duration === "object"
-                    ? `${String(duration.hours || 0).padStart(2, "0")}:${String(duration.minutes || 0).padStart(2, "0")}:00`
-                    : duration;
-                setEditingAuction({
-                  ...auction,
-                  auction_duration: formattedDuration,
-                });
-                setIsModalOpen(true);
-              }}
-              onView={(auction: any) => handleViewDetails(auction.auction_id)}
-            />
-          ))
+          filteredData.map((item) => {
+            const liveData =
+              activeTab === "publish"
+                ? liveAuctions.find(
+                    (l: any) => l.auction_id === item.auction_id,
+                  )
+                : null;
+            const mergedItem = liveData
+              ? { ...item, remaining_seconds: liveData.remaining_seconds }
+              : item;
+            return (
+              <AuctionCard
+                key={item.auction_id}
+                item={mergedItem}
+                activeTab={activeTab}
+                onCountdownComplete={handleCountdownComplete}
+                onEdit={(auction: any) => {
+                  const duration = auction.auction_duration;
+                  const formattedDuration =
+                    duration && typeof duration === "object"
+                      ? `${String(duration.hours || 0).padStart(2, "0")}:${String(duration.minutes || 0).padStart(2, "0")}:00`
+                      : duration;
+                  setEditingAuction({
+                    ...auction,
+                    auction_duration: formattedDuration,
+                  });
+                  setIsModalOpen(true);
+                }}
+                onView={(auction: any) => handleViewDetails(auction.auction_id)}
+              />
+            );
+          })
         ) : (
           <Empty
             description={`No ${activeTab} auctions found`}

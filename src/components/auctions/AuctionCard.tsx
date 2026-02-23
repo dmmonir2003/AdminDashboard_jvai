@@ -487,7 +487,16 @@ export default function AuctionCard({
   useEffect(() => {
     hasTriggered.current = false;
     const calculateInitialSeconds = () => {
+      // AFTER
       if (activeTab === "publish") {
+        // ✅ Prefer socket-provided remaining_seconds (live data)
+        if (
+          typeof item.remaining_seconds === "number" &&
+          item.remaining_seconds > 0
+        ) {
+          return item.remaining_seconds;
+        }
+        // fallback: parse remaining_time string
         const hMatch = item.remaining_time?.match(/(\d+)h/);
         const mMatch = item.remaining_time?.match(/(\d+)m/);
         const sMatch = item.remaining_time?.match(/(\d+)s/);
@@ -557,6 +566,7 @@ export default function AuctionCard({
     item.scheduled_time,
     item.created_at,
     item.auction_duration,
+    item.remaining_seconds,
     onCountdownComplete,
   ]);
 

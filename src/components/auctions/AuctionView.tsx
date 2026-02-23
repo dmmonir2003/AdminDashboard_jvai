@@ -1024,6 +1024,15 @@ export default function AuctionDetailView({
     return parts[0][0].toUpperCase() + parts[1][0].toUpperCase();
   };
 
+  const parseTimeToSeconds = (timeStr: string) => {
+    if (!timeStr) return 0;
+
+    const hours = parseInt(timeStr.match(/(\d+)h/)?.[1] || "0");
+    const minutes = parseInt(timeStr.match(/(\d+)m/)?.[1] || "0");
+    const seconds = parseInt(timeStr.match(/(\d+)s/)?.[1] || "0");
+
+    return hours * 3600 + minutes * 60 + seconds;
+  };
   // Format countdown seconds to display format (HH:MM:SS or Xd HH:MM:SS)
   const formatCountdown = (totalSecs: number): string => {
     if (totalSecs <= 0) {
@@ -1037,69 +1046,164 @@ export default function AuctionDetailView({
     return `${dDisplay}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
 
-  // Connect to socket and fetch live data
   useEffect(() => {
-    if (!token || !auction?.auction_id) return;
+    let timer: NodeJS.Timeout;
 
-    socketService.connect(token, () => {
-      console.log("✅ Socket connected for auction detail");
-      setIsConnected(true);
+    const updateCountdown = (secs: number) => {
+      const d = Math.floor(secs / (3600 * 24));
+      const h = Math.floor((secs % (3600 * 24)) / 3600);
+      const m = Math.floor((secs % 3600) / 60);
+      const s = Math.floor(secs % 60);
+      const dDisplay = d > 0 ? `${d}d ` : "";
+      setCountdown(
+        `${dDisplay}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`,
+      );
+    };
 
-      socketService.monitorAuction(auction.auction_id);
+    // LIVE AUCTION: use socket.io
+    if (activeTab === "publish" && auction?.auction_id && token) {
+      socketService.connect(token, () => {
+        socketService.monitorAuction(auction.auction_id);
 
-      const socket = socketService.getSocket();
-      if (socket) {
-        socket.emit("live_bid_users", { auction_id: auction.auction_id });
-      }
-    });
+        const socket = socketService.getSocket();
+        if (socket) {
+          socket.emit("live_bid_users", { auction_id: auction.auction_id });
 
-    const socket = socketService.getSocket();
-    if (socket) {
-      socket.on("live_bid_users_response", (data: LiveBidUsersResponse) => {
-        console.log("📊 Live bid users received:", data);
-        if (data.participants) {
-          setLiveParticipants(data.participants);
+          socket.on("live_bid_users_response", (data: LiveBidUsersResponse) => {
+            if (data.participants) setLiveParticipants(data.participants);
+          });
+
+          socket.on("countdown_update", (data: CountdownData) => {
+            if (data.auction_id === auction.auction_id) {
+              setCountdownsByAuction((prev) => ({
+                ...prev,
+                [data.auction_id]: data.remaining_seconds,
+              }));
+              updateCountdown(data.remaining_seconds);
+            }
+          });
+
+          socket.on("new_bid", () => {
+            socket.emit("live_bid_users", { auction_id: auction.auction_id });
+          });
+
+          socket.on("auction_ended", () => {
+            message.success("Auction has ended!");
+          });
         }
       });
-      socket.on("countdown_update", (data: CountdownData) => {
-        console.log(
-          "countdown update received for auction",
-          data.auction_id,
-          ":",
-          data.remaining_seconds,
-        );
-        setCountdownsByAuction((prev) => ({
-          ...prev,
-          [data.auction_id]: data.remaining_seconds,
-        }));
-      });
 
-      socket.on("new_bid", (bidData: any) => {
-        console.log("💰 New bid received:", bidData);
-        socket.emit("live_bid_users", { auction_id: auction.auction_id });
-      });
-      socket.on("auction_state", (bidData: any) => {
-        console.log("💰 Auction state :", bidData);
-        socket.emit("auction_state", { auction_id: auction.auction_id });
-      });
-
-      socket.on("auction_ended", (endData: any) => {
-        console.log("🏁 Auction ended:", endData);
-        socket.emit("live_bid_users", { auction_id: auction.auction_id });
-        message.success("Auction has ended!");
-      });
+      return () => {
+        const socket = socketService.getSocket();
+        if (socket) {
+          socket.off("live_bid_users_response");
+          socket.off("countdown_update");
+          socket.off("new_bid");
+          socket.off("auction_ended");
+        }
+      };
     }
 
-    return () => {
-      const socket = socketService.getSocket();
-      if (socket) {
-        socket.off("live_bid_users_response");
-        socket.off("auction_state");
-        socket.off("countdown_update");
-        socket.off("auction_ended");
-      }
-    };
-  }, [auction?.auction_id, token]);
+    // UPCOMING OR OTHER AUCTIONS: use local timer
+    else if (activeTab === "upcoming") {
+      if (!auctionData?.auction?.remaining_time) return;
+
+      let secondsLeft = parseTimeToSeconds(auctionData.auction.remaining_time);
+
+      updateCountdown(secondsLeft);
+
+      timer = setInterval(() => {
+        secondsLeft -= 1;
+
+        updateCountdown(secondsLeft);
+
+        if (secondsLeft <= 0) {
+          clearInterval(timer);
+        }
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [
+    activeTab,
+    auction?.auction_id,
+    auctionData?.auction?.remaining_time,
+    token,
+  ]);
+
+  if (auctionData?.auction?.remaining_time) {
+    console.log("Scheduled time:", auctionData?.auction?.remaining_time);
+  }
+
+  // Connect to socket and fetch live data
+  // useEffect(() => {
+  //   if (!token || !auction?.auction_id) return;
+
+  //   socketService.connect(token, () => {
+  //     console.log("✅ Socket connected for auction detail");
+  //     setIsConnected(true);
+
+  //     socketService.monitorAuction(auction.auction_id);
+
+  //     const socket = socketService.getSocket();
+  //     if (socket) {
+  //       socket.emit("live_bid_users", { auction_id: auction.auction_id });
+  //     }
+  //   });
+
+  //   const socket = socketService.getSocket();
+  //   if (socket) {
+  //     // socket.on("bid_processor_worker", (data) => {
+  //     //   console.log("📊 Live bid users received:", data);
+  //     //   if (data.participants) {
+  //     //     setLiveParticipants(data.participants);
+  //     //   }
+  //     // });
+  //     socket.on("live_bid_users_response", (data: LiveBidUsersResponse) => {
+  //       console.log("📊 Live bid users received:", data);
+  //       if (data.participants) {
+  //         setLiveParticipants(data.participants);
+  //       }
+  //     });
+  //     socket.on("countdown_update", (data: CountdownData) => {
+  //       console.log(
+  //         "countdown update received for auction",
+  //         data.auction_id,
+  //         ":",
+  //         data.remaining_seconds,
+  //       );
+  //       setCountdownsByAuction((prev) => ({
+  //         ...prev,
+  //         [data.auction_id]: data.remaining_seconds,
+  //       }));
+  //     });
+
+  //     socket.on("new_bid", (bidData: any) => {
+  //       console.log("💰 New bid received:", bidData);
+  //       socket.emit("live_bid_users", { auction_id: auction.auction_id });
+  //     });
+  //     socket.on("auction_state", (bidData: any) => {
+  //       console.log("💰 Auction state :", bidData);
+  //       socket.emit("auction_state", { auction_id: auction.auction_id });
+  //     });
+
+  //     socket.on("auction_ended", (endData: any) => {
+  //       console.log("🏁 Auction ended:", endData);
+  //       socket.emit("live_bid_users", { auction_id: auction.auction_id });
+  //       message.success("Auction has ended!");
+  //     });
+  //   }
+
+  //   return () => {
+  //     const socket = socketService.getSocket();
+  //     if (socket) {
+  //       socket.off("live_bid_users_response");
+  //       socket.off("auction_state");
+  //       socket.off("countdown_update");
+  //       socket.off("auction_ended");
+  //     }
+  //   };
+  // }, [auction?.auction_id, token]);
 
   const handleEndAuction = async () => {
     if (!auction?.auction_id) return;
@@ -1376,7 +1480,12 @@ export default function AuctionDetailView({
             >
               <span>
                 <ClockCircleOutlined />{" "}
-                {formatCountdown(countdownsByAuction[auction.auction_id] || 0)}
+                {/* {formatCountdown(countdownsByAuction[auction.auction_id] || 0)} */}
+                {activeTab === "publish"
+                  ? formatCountdown(
+                      countdownsByAuction[auction.auction_id] || 0,
+                    )
+                  : countdown}
               </span>
               <span>
                 <TeamOutlined />{" "}
