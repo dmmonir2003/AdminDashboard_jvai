@@ -442,6 +442,11 @@ export default async function AuctionsPage() {
     console.error("Failed to load auctions on server", err);
   }
 
+  console.log(
+    initialData.filter((item: any) => item.status === "publish").length,
+    "server",
+  );
+
   return (
     <DashboardLayout>
       <Suspense fallback={<div>Loading...</div>}>

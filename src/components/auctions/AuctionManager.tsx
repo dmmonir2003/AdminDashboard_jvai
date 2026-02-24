@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // // "use client";
 
@@ -1432,6 +1433,8 @@ export default function AuctionManager({
       draft: data.filter((item: any) => item.status === "draft").length,
     };
   }, [allAuctionsForCount]);
+
+  console.log(counts.live);
 
   const tabItems = [
     { label: `Live (${counts.live})`, value: "publish", key: "publish" },

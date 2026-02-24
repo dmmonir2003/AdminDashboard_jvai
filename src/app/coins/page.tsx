@@ -181,21 +181,51 @@
 //   );
 // }
 
+// import DashboardLayout from "@/src/components/layout/DashboardLayout";
+// import CoinPricingManager from "@/src/components/coins/CoinPricingManager";
+// import { CoinPackage, coinPackageService } from "@/src/services/coinService";
+// import WalletStats from "@/src/components/coins/WalletStats";
+// import { Suspense } from "react";
+
+// export default async function CoinsPage() {
+//   let initialData: CoinPackage[] = [];
+//   let stats = null;
+
+//   try {
+//     initialData = await coinPackageService.getAllCoinPackages();
+//     stats = await coinPackageService.getCoinStats();
+
+//     // ✅ new
+//   } catch (error) {
+//     console.error("Failed to load data", error);
+//   }
+
+//   return (
+//     <DashboardLayout>
+//       <Suspense fallback={<div>Loading...</div>}>
+//         <WalletStats stats={stats} /> {/* ✅ pass */}
+//         <CoinPricingManager initialData={initialData} />
+//       </Suspense>
+//     </DashboardLayout>
+//   );
+// }
+
+// src/app/coins/page.tsx
+
 import DashboardLayout from "@/src/components/layout/DashboardLayout";
 import CoinPricingManager from "@/src/components/coins/CoinPricingManager";
 import { CoinPackage, coinPackageService } from "@/src/services/coinService";
 import WalletStats from "@/src/components/coins/WalletStats";
 import { Suspense } from "react";
 
+// CoinsPage — match exactly how AuctionsPage works
 export default async function CoinsPage() {
   let initialData: CoinPackage[] = [];
   let stats = null;
 
   try {
-    initialData = await coinPackageService.getAllCoinPackages();
-    stats = await coinPackageService.getCoinStats();
-
-    // ✅ new
+    initialData = await coinPackageService.getAllCoinPackages(); // no token
+    stats = await coinPackageService.getCoinStats(); // no token
   } catch (error) {
     console.error("Failed to load data", error);
   }
@@ -203,7 +233,7 @@ export default async function CoinsPage() {
   return (
     <DashboardLayout>
       <Suspense fallback={<div>Loading...</div>}>
-        <WalletStats stats={stats} /> {/* ✅ pass */}
+        <WalletStats stats={stats} />
         <CoinPricingManager initialData={initialData} />
       </Suspense>
     </DashboardLayout>

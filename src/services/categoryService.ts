@@ -139,12 +139,27 @@ export const categoryService = {
           category_for: categoryFor,
         },
       });
-      return response as any as PaginatedResponse<Category>;
+      return response as any;
     } catch (error) {
       console.error("[Category Error] Fetch failed:", error);
       throw error;
     }
   },
+
+  // getCategories: async (
+  //   page: number = 1,
+  //   categoryFor?: CategoryType,
+  //   search?: string,
+  // ): Promise<PaginatedResponse<Category>> => {
+  //   const params: any = { page };
+  //   if (categoryFor) params.category_for = categoryFor;
+  //   if (search) params.search = search; // ← or name__icontains, q, etc.
+
+  //   const response = await apiClient.get(API_ENDPOINTS.GET_CATEGORIES, {
+  //     params,
+  //   });
+  //   return response as any;
+  // },
 
   /**
    * Create a new category

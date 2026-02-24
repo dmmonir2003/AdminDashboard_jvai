@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, Row, Col, Typography, Space } from "antd";
+import { useRouter } from "next/navigation";
 
 const { Text } = Typography;
 interface Props {
@@ -10,7 +11,8 @@ interface Props {
 }
 
 export default function WalletStats({ stats }: Props) {
-  console.log(stats);
+  console.log(stats, "stats datas");
+  const router = useRouter();
   const statsData = [
     { title: "Sold Coins", value: stats?.solds_coins },
     { title: "Unused Coins", value: stats?.unused_coins },
@@ -27,6 +29,14 @@ export default function WalletStats({ stats }: Props) {
       value: stats?.saudi_rial_non_refundable_coins,
     },
   ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      router.refresh(); // re-runs StatsSection only on server
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [router]);
 
   return (
     <Row gutter={[16, 16]} style={{ marginBottom: "32px" }}>

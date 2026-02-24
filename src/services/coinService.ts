@@ -62,14 +62,41 @@ export const coinPackageService = {
   //   }
   // },
 
+  // getAllCoinPackages: async (): Promise<CoinPackage[]> => {
+  //   try {
+  //     const response = await apiClient.get(
+  //       API_ENDPOINTS.ADMIN_COIN_PACKAGES_LIST,
+  //     );
+
+  //     console.log("Coins API:", response);
+
+  //     return Array.isArray(response) ? response : [];
+  //   } catch (error) {
+  //     console.error("[CoinPackage] Fetch failed:", error);
+  //     return [];
+  //   }
+  // },
+
+  // getCoinStats: async (): Promise<CoinStats | null> => {
+  //   try {
+  //     const res = (await apiClient.get(
+  //       API_ENDPOINTS.ADMIN_COIN_STATS,
+  //     )) as CoinStats;
+
+  //     return res; // ✅ now correct
+  //   } catch (error) {
+  //     console.error("[CoinStats] Fetch failed:", error);
+  //     return null;
+  //   }
+  // },
+
+  // coinService.ts — revert to no token param, same pattern as auctionService
   getAllCoinPackages: async (): Promise<CoinPackage[]> => {
+    console.log("🪙 Hitting:", API_ENDPOINTS.ADMIN_COIN_PACKAGES_LIST); // add this
     try {
       const response = await apiClient.get(
         API_ENDPOINTS.ADMIN_COIN_PACKAGES_LIST,
       );
-
-      console.log("Coins API:", response);
-
       return Array.isArray(response) ? response : [];
     } catch (error) {
       console.error("[CoinPackage] Fetch failed:", error);
@@ -78,12 +105,12 @@ export const coinPackageService = {
   },
 
   getCoinStats: async (): Promise<CoinStats | null> => {
+    console.log("🪙 Hitting:", API_ENDPOINTS.ADMIN_COIN_STATS); // add this
     try {
       const res = (await apiClient.get(
         API_ENDPOINTS.ADMIN_COIN_STATS,
       )) as CoinStats;
-
-      return res; // ✅ now correct
+      return res;
     } catch (error) {
       console.error("[CoinStats] Fetch failed:", error);
       return null;
