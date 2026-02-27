@@ -50,6 +50,10 @@ export const API_ENDPOINTS = {
   ADMIN_USER_TRANSACTIONS: "/admin/users/transactions/",
   ADMIN_USER_TOGGLE_STATUS: "/admin/users/toggle-status/",
 
-  PRODUCTS: "/products",
-  PRODUCT_DETAILS: (id: string) => `/products/${id}`,
+  // Products (Admin side)
+  PRODUCTS_LIST: "/products/prod", // GET with ?product_type=physical|digital
+  PRODUCT_CREATE: "/products/prod", // POST (multipart/form-data)
+  PRODUCT_DETAIL: (id: number | string) => `/products/${id}`, // GET
+  PRODUCT_UPDATE: (id: number | string) => `/products/${id}/`, // PATCH (multipart/form-data)
+  PRODUCT_DELETE: (id: number | string) => `/products/${id}/`, // DELETE
 } as const;

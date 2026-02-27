@@ -1,97 +1,41 @@
-"use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// import React from "react";
+// import DashboardLayout from "@/src/components/layout/DashboardLayout";
+// import ProductTable from "@/src/components/products/ProductTable";
 
-import React from "react";
 import DashboardLayout from "@/src/components/layout/DashboardLayout";
 import ProductTable from "@/src/components/products/ProductTable";
+import { productService } from "@/src/services/productService";
 
-// Mock Data representing the products in your image
-const productsData = [
-  {
-    key: "1",
-    name: "Sunglass",
-    category: "Glass",
-    price: "SAR-25,410",
-    specification: "Black, White",
-    discount: "40%",
-    type: "Physical",
-    image: "https://cdn-icons-png.flaticon.com/512/655/655781.png",
-  },
-  {
-    key: "2",
-    name: "4k Camera",
-    category: "Accessories",
-    price: "SAR-15,482",
-    specification: "N/A",
-    discount: "SAR 150",
-    type: "Physical",
-    image: "https://cdn-icons-png.flaticon.com/512/685/685655.png",
-  },
-  {
-    key: "3",
-    name: "Casio Male Watch",
-    category: "Watch",
-    price: "SAR-12,6301",
-    specification: "Black, Blue",
-    discount: "25%",
-    type: "Physical",
-    image: "https://cdn-icons-png.flaticon.com/512/2951/2951125.png",
-  },
-  {
-    key: "4",
-    name: "Software License",
-    category: "Software",
-    price: "SAR-500",
-    specification: "Digital Key",
-    discount: "10%",
-    type: "Digital",
-    image: "https://cdn-icons-png.flaticon.com/512/4144/4144633.png",
-  },
-  {
-    key: "5",
-    name: "Sunglass",
-    category: "Glass",
-    price: "SAR-25,410",
-    specification: "Black, White",
-    discount: "40%",
-    type: "Physical",
-    image: "https://cdn-icons-png.flaticon.com/512/655/655781.png",
-  },
-  {
-    key: "6",
-    name: "4k Camera",
-    category: "Accessories",
-    price: "SAR-15,482",
-    specification: "N/A",
-    discount: "SAR 150",
-    type: "Physical",
-    image: "https://cdn-icons-png.flaticon.com/512/685/685655.png",
-  },
-  {
-    key: "7",
-    name: "Casio Male Watch",
-    category: "Watch",
-    price: "SAR-12,6301",
-    specification: "Black, Blue",
-    discount: "25%",
-    type: "Physical",
-    image: "https://cdn-icons-png.flaticon.com/512/2951/2951125.png",
-  },
-  {
-    key: "8",
-    name: "Software License",
-    category: "Software",
-    price: "SAR-500",
-    specification: "Digital Key",
-    discount: "10%",
-    type: "Digital",
-    image: "https://cdn-icons-png.flaticon.com/512/4144/4144633.png",
-  },
-];
+export default async function ProductsPage() {
+  let products: any[] = [];
 
-export default function ProductsPage() {
+  try {
+    const res = await productService.getProducts(1); // fetch first page initially
+
+    products = res.results.map((item: any) => ({
+      key: item.product_id.toString(),
+      name: item.name,
+      category: item.category_name,
+      price: `SAR-${item.price}`,
+      description: item.description,
+      specification: `${item.size || "N/A"}, ${item.color || "N/A"}`,
+      discount: item.discount_percentage
+        ? `${item.discount_percentage}%`
+        : "0%",
+      type: item.product_type === "physical" ? "Physical" : "Digital",
+      image: item.images?.[0]?.image_url || "",
+      size: item.size,
+      color: item.color,
+    }));
+  } catch (error) {
+    console.error("Server fetch error:", error);
+    products = [];
+  }
+
   return (
     <DashboardLayout>
-      <ProductTable products={productsData} />
+      <ProductTable initialProducts={products} />
     </DashboardLayout>
   );
 }
