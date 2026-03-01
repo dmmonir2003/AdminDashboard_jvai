@@ -11,8 +11,8 @@ export interface Product {
   description: string;
   price: string; // "45000.00"
   discount_percentage: number;
-  size?: string;
-  color?: string;
+  sizes?: Array<{ id: number; name: string }>; // ← New: Array of sizes
+  colors?: Array<{ id: number; name: string }>; // ← New: Array of colors
   region?: string;
   brand?: string;
   code_file_url?: string | null;
