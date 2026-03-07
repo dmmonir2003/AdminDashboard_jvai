@@ -56,4 +56,23 @@ export const API_ENDPOINTS = {
   PRODUCT_DETAIL: (id: number | string) => `/products/${id}`, // GET
   PRODUCT_UPDATE: (id: number | string) => `/products/${id}/`, // PATCH (multipart/form-data)
   PRODUCT_DELETE: (id: number | string) => `/products/${id}/`, // DELETE
+  // Shop Orders (Admin)
+  ADMIN_ORDERS: "/admin/orders/",
+  ADMIN_ORDER_DETAIL: (id: number | string) => `/admin/orders/${id}/`,
+  ADMIN_MARK_ORDER_DELIVERED: (id: number | string) =>
+    `/admin/orders/${id}/mark-delivered/`,
+
+  // Reviews
+  ADMIN_REVIEWS: "/admin/reviews/",
+  ADMIN_REVIEW_DETAIL: (id: number | string) => `/admin/reviews/${id}/`,
+  ADMIN_REVIEW_DELETE: (id: number | string) => `/admin/reviews/${id}/delete/`,
+
+  // Announcements
+  ADMIN_ANNOUNCEMENTS_LIST: "/admin/announcements/list/",
+  ADMIN_ANNOUNCEMENT_CREATE: "/admin/announcements/",
+  ADMIN_ANNOUNCEMENT_DELETE: (id: number | string) =>
+    `/admin/announcements/${id}/delete/`,
+
+  // User Search for Specific Announcements
+  ADMIN_USER_SEARCH: "/admin/users/search/",
 } as const;

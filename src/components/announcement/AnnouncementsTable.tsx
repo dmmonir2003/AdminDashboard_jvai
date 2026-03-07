@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // /* eslint-disable @typescript-eslint/no-explicit-any */
 // "use client";
 
@@ -174,56 +175,328 @@
 //   );
 // }
 
+// /* eslint-disable @typescript-eslint/no-explicit-any */
+// "use client";
+
+// import React, { useState } from "react";
+// import { Table, Button, Typography, Space, Popconfirm, Card } from "antd";
+// import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+// import AnnouncementFormModal from "./AnnouncementForm";
+// import "./AnnouncementsTable.css"; // Import CSS file
+// import { App } from "antd";
+
+// const { Title, Text } = Typography;
+
+// export default function AnnouncementsTable() {
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [selectedAnnouncement, setSelectedAnnouncement] = useState<any>(null);
+//   const { message } = App.useApp();
+//   const [dataSource, setDataSource] = useState([
+//     {
+//       key: "1",
+//       title: "System Maintenance Tonight",
+//       audience: "All Users",
+//       date: "Jan 24, 2026 · 5:30 PM",
+//       description: "Expect downtime between 12 AM and 4 AM.",
+//     },
+//     {
+//       key: "2",
+//       title: "New Premium Features",
+//       audience: "Zebu Uddin",
+//       date: "Jan 24, 2026 · 5:30 PM",
+//       description: "Check out the new dashboard analytics.",
+//     },
+//     {
+//       key: "3",
+//       title: "New Items Updated",
+//       audience: "All Users",
+//       date: "Jan 24, 2026 · 5:30 PM",
+//       description: "Inventory has been refreshed.",
+//     },
+//     {
+//       key: "4",
+//       title: "New Year Announcements",
+//       audience: "Rahim Ullha",
+//       date: "Jan 24, 2026 · 5:30 PM",
+//       description: "Happy 2026 to everyone!",
+//     },
+//   ]);
+
+//   const handleDelete = (key: string) => {
+//     setDataSource(dataSource.filter((item) => item.key !== key));
+//     message.success("Announcement deleted successfully");
+//   };
+
+//   const columns = [
+//     {
+//       title: "Title",
+//       dataIndex: "title",
+//       key: "title",
+//       render: (text: string) => <span style={{ fontWeight: 600 }}>{text}</span>,
+//     },
+//     { title: "Audience", dataIndex: "audience", key: "audience" },
+//     { title: "Date", dataIndex: "date", key: "date" },
+//     {
+//       title: "Action",
+//       key: "action",
+//       align: "right" as const,
+//       render: (_: any, record: any) => (
+//         <Space size="middle">
+//           <Button
+//             icon={<EditOutlined />}
+//             onClick={() => {
+//               setSelectedAnnouncement(record);
+//               setIsModalOpen(true);
+//             }}
+//             style={{ borderRadius: "6px" }}
+//           >
+//             Edit
+//           </Button>
+//           <Popconfirm
+//             title="Delete announcement?"
+//             onConfirm={() => handleDelete(record.key)}
+//             okText="Yes"
+//             cancelText="No"
+//           >
+//             <Button
+//               danger
+//               icon={<DeleteOutlined />}
+//               style={{
+//                 borderRadius: "6px",
+//                 borderColor: "#ffccc7",
+//                 color: "#ff4d4f",
+//               }}
+//             >
+//               Delete
+//             </Button>
+//           </Popconfirm>
+//         </Space>
+//       ),
+//     },
+//   ];
+
+//   // Mobile Card View - rendered inline, not as a component
+//   const renderMobileCards = () => (
+//     <div className="mobile-card-view">
+//       {dataSource.map((record) => (
+//         <Card
+//           key={record.key}
+//           style={{
+//             marginBottom: "16px",
+//             borderRadius: "12px",
+//             border: "1px solid #f0f0f0",
+//           }}
+//         >
+//           <div style={{ marginBottom: "12px" }}>
+//             <Text
+//               strong
+//               style={{
+//                 fontSize: "16px",
+//                 display: "block",
+//                 marginBottom: "8px",
+//               }}
+//             >
+//               {record.title}
+//             </Text>
+//             <Space
+//               orientation="vertical"
+//               size="small"
+//               style={{ width: "100%" }}
+//             >
+//               <div>
+//                 <Text type="secondary" style={{ fontSize: "12px" }}>
+//                   Audience:{" "}
+//                 </Text>
+//                 <Text style={{ fontSize: "14px" }}>{record.audience}</Text>
+//               </div>
+//               <div>
+//                 <Text type="secondary" style={{ fontSize: "12px" }}>
+//                   Date:{" "}
+//                 </Text>
+//                 <Text style={{ fontSize: "14px" }}>{record.date}</Text>
+//               </div>
+//             </Space>
+//           </div>
+//           <Space
+//             size="small"
+//             style={{ width: "100%", justifyContent: "flex-end" }}
+//           >
+//             <Button
+//               icon={<EditOutlined />}
+//               onClick={() => {
+//                 setSelectedAnnouncement(record);
+//                 setIsModalOpen(true);
+//               }}
+//               style={{ borderRadius: "6px" }}
+//             >
+//               Edit
+//             </Button>
+//             <Popconfirm
+//               title="Delete announcement?"
+//               onConfirm={() => handleDelete(record.key)}
+//               okText="Yes"
+//               cancelText="No"
+//             >
+//               <Button
+//                 danger
+//                 icon={<DeleteOutlined />}
+//                 style={{
+//                   borderRadius: "6px",
+//                   borderColor: "#ffccc7",
+//                   color: "#ff4d4f",
+//                 }}
+//               >
+//                 Delete
+//               </Button>
+//             </Popconfirm>
+//           </Space>
+//         </Card>
+//       ))}
+//     </div>
+//   );
+
+//   return (
+//     <div
+//       style={{
+//         padding: "40px",
+//         backgroundColor: "#f9fafb",
+//         minHeight: "100vh",
+//       }}
+//       className="announcements-container"
+//     >
+//       <div
+//         className="header-content"
+//         style={{
+//           display: "flex",
+//           justifyContent: "space-between",
+//           marginBottom: "24px",
+//         }}
+//       >
+//         <div>
+//           <Title level={2} style={{ margin: 0 }}>
+//             Announcements
+//           </Title>
+//           <Text type="secondary">
+//             Create and manage announcements sent to your users as notifications.
+//           </Text>
+//         </div>
+//         <Button
+//           type="primary"
+//           icon={<PlusOutlined />}
+//           size="large"
+//           onClick={() => {
+//             setSelectedAnnouncement(null);
+//             setIsModalOpen(true);
+//           }}
+//           style={{
+//             height: "45px",
+//             borderRadius: "8px",
+//             fontWeight: "bold",
+//             background: "#1677ff",
+//           }}
+//         >
+//           New Announcement
+//         </Button>
+//       </div>
+
+//       {/* Desktop Table View */}
+//       <div className="desktop-table-view">
+//         <Table
+//           columns={columns}
+//           dataSource={dataSource}
+//           pagination={{
+//             total: 24,
+//             showSizeChanger: false,
+//             itemRender: (page, type, originalElement) => {
+//               if (type === "prev") return <a>Previous</a>;
+//               if (type === "next") return <a>Next</a>;
+//               return originalElement;
+//             },
+//           }}
+//           style={{
+//             background: "#fff",
+//             borderRadius: "12px",
+//             border: "1px solid #f0f0f0",
+//             overflow: "hidden",
+//           }}
+//         />
+//       </div>
+
+//       {/* Mobile Card View */}
+//       {renderMobileCards()}
+
+//       <AnnouncementFormModal
+//         open={isModalOpen}
+//         initialValues={selectedAnnouncement}
+//         onCancel={() => setIsModalOpen(false)}
+//         onFinish={(values) => {
+//           console.log("Form Values:", values);
+//           setIsModalOpen(false);
+//           message.success(
+//             selectedAnnouncement ? "Updated successfully" : "Sent successfully",
+//           );
+//         }}
+//       />
+//     </div>
+//   );
+// }
+
+// TODO: review
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from "react";
-import { Table, Button, Typography, Space, Popconfirm, Card } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import React, { useState, useEffect, useCallback } from "react";
+import { Table, Button, Typography, Space, Popconfirm, App } from "antd";
+import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import AnnouncementFormModal from "./AnnouncementForm";
-import "./AnnouncementsTable.css"; // Import CSS file
-import { App } from "antd";
+import { announcementService } from "@/src/services/announcementService";
+import dayjs from "dayjs";
+import "./AnnouncementsTable.css";
 
 const { Title, Text } = Typography;
 
 export default function AnnouncementsTable() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState<any>(null);
   const { message } = App.useApp();
-  const [dataSource, setDataSource] = useState([
-    {
-      key: "1",
-      title: "System Maintenance Tonight",
-      audience: "All Users",
-      date: "Jan 24, 2026 · 5:30 PM",
-      description: "Expect downtime between 12 AM and 4 AM.",
-    },
-    {
-      key: "2",
-      title: "New Premium Features",
-      audience: "Zebu Uddin",
-      date: "Jan 24, 2026 · 5:30 PM",
-      description: "Check out the new dashboard analytics.",
-    },
-    {
-      key: "3",
-      title: "New Items Updated",
-      audience: "All Users",
-      date: "Jan 24, 2026 · 5:30 PM",
-      description: "Inventory has been refreshed.",
-    },
-    {
-      key: "4",
-      title: "New Year Announcements",
-      audience: "Rahim Ullha",
-      date: "Jan 24, 2026 · 5:30 PM",
-      description: "Happy 2026 to everyone!",
-    },
-  ]);
+  const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dataSource, setDataSource] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const handleDelete = (key: string) => {
-    setDataSource(dataSource.filter((item) => item.key !== key));
-    message.success("Announcement deleted successfully");
+  const fetchAnnouncements = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await announcementService.getAnnouncements({
+        page: currentPage,
+      });
+
+      console.log(res, "MMMMMMMM");
+      // Map data from the 'results' key in your JSON
+      setDataSource(res.results || []);
+      setTotal(res.count || 0);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      message.error("Failed to load announcements");
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, message]);
+
+  useEffect(() => {
+    fetchAnnouncements();
+  }, [fetchAnnouncements]);
+
+  console.log(dataSource, "sdfsdfsdfkjjkjkfsdaksdj");
+
+  const handleDelete = async (id: number) => {
+    try {
+      await announcementService.deleteAnnouncement(id);
+      message.success("Announcement deleted successfully");
+      fetchAnnouncements();
+    } catch (err) {
+      message.error("Delete failed");
+    }
   };
 
   const columns = [
@@ -233,135 +506,57 @@ export default function AnnouncementsTable() {
       key: "title",
       render: (text: string) => <span style={{ fontWeight: 600 }}>{text}</span>,
     },
-    { title: "Audience", dataIndex: "audience", key: "audience" },
-    { title: "Date", dataIndex: "date", key: "date" },
+    {
+      title: "Audience",
+      dataIndex: "send_to",
+      key: "send_to",
+      render: (val: string) => (
+        <Text>{val === "all" ? "All Users" : "Specific Users"}</Text>
+      ),
+    },
+    {
+      title: "Recipients",
+      dataIndex: "recipients_count",
+      key: "recipients_count",
+      align: "center" as const,
+    },
+    {
+      title: "Date Created",
+      dataIndex: "created_at",
+      key: "date",
+      render: (date: string) => dayjs(date).format("MMM DD, YYYY · h:mm A"),
+    },
     {
       title: "Action",
       key: "action",
       align: "right" as const,
       render: (_: any, record: any) => (
-        <Space size="middle">
+        <Popconfirm
+          title="Delete this announcement?"
+          onConfirm={() => handleDelete(record.id)}
+          okText="Yes"
+          cancelText="No"
+        >
           <Button
-            icon={<EditOutlined />}
-            onClick={() => {
-              setSelectedAnnouncement(record);
-              setIsModalOpen(true);
-            }}
+            danger
+            icon={<DeleteOutlined />}
             style={{ borderRadius: "6px" }}
           >
-            Edit
+            Delete
           </Button>
-          <Popconfirm
-            title="Delete announcement?"
-            onConfirm={() => handleDelete(record.key)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button
-              danger
-              icon={<DeleteOutlined />}
-              style={{
-                borderRadius: "6px",
-                borderColor: "#ffccc7",
-                color: "#ff4d4f",
-              }}
-            >
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
+        </Popconfirm>
       ),
     },
   ];
 
-  // Mobile Card View - rendered inline, not as a component
-  const renderMobileCards = () => (
-    <div className="mobile-card-view">
-      {dataSource.map((record) => (
-        <Card
-          key={record.key}
-          style={{
-            marginBottom: "16px",
-            borderRadius: "12px",
-            border: "1px solid #f0f0f0",
-          }}
-        >
-          <div style={{ marginBottom: "12px" }}>
-            <Text
-              strong
-              style={{
-                fontSize: "16px",
-                display: "block",
-                marginBottom: "8px",
-              }}
-            >
-              {record.title}
-            </Text>
-            <Space
-              orientation="vertical"
-              size="small"
-              style={{ width: "100%" }}
-            >
-              <div>
-                <Text type="secondary" style={{ fontSize: "12px" }}>
-                  Audience:{" "}
-                </Text>
-                <Text style={{ fontSize: "14px" }}>{record.audience}</Text>
-              </div>
-              <div>
-                <Text type="secondary" style={{ fontSize: "12px" }}>
-                  Date:{" "}
-                </Text>
-                <Text style={{ fontSize: "14px" }}>{record.date}</Text>
-              </div>
-            </Space>
-          </div>
-          <Space
-            size="small"
-            style={{ width: "100%", justifyContent: "flex-end" }}
-          >
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => {
-                setSelectedAnnouncement(record);
-                setIsModalOpen(true);
-              }}
-              style={{ borderRadius: "6px" }}
-            >
-              Edit
-            </Button>
-            <Popconfirm
-              title="Delete announcement?"
-              onConfirm={() => handleDelete(record.key)}
-              okText="Yes"
-              cancelText="No"
-            >
-              <Button
-                danger
-                icon={<DeleteOutlined />}
-                style={{
-                  borderRadius: "6px",
-                  borderColor: "#ffccc7",
-                  color: "#ff4d4f",
-                }}
-              >
-                Delete
-              </Button>
-            </Popconfirm>
-          </Space>
-        </Card>
-      ))}
-    </div>
-  );
-
   return (
     <div
+      className="announcements-container"
       style={{
         padding: "40px",
         backgroundColor: "#f9fafb",
         minHeight: "100vh",
       }}
-      className="announcements-container"
     >
       <div
         className="header-content"
@@ -375,65 +570,47 @@ export default function AnnouncementsTable() {
           <Title level={2} style={{ margin: 0 }}>
             Announcements
           </Title>
-          <Text type="secondary">
-            Create and manage announcements sent to your users as notifications.
-          </Text>
+          <Text type="secondary">Manage notifications sent to your users.</Text>
         </div>
         <Button
           type="primary"
           icon={<PlusOutlined />}
           size="large"
-          onClick={() => {
-            setSelectedAnnouncement(null);
-            setIsModalOpen(true);
-          }}
-          style={{
-            height: "45px",
-            borderRadius: "8px",
-            fontWeight: "bold",
-            background: "#1677ff",
-          }}
+          onClick={() => setIsModalOpen(true)}
+          style={{ height: "45px", borderRadius: "8px", fontWeight: "bold" }}
         >
           New Announcement
         </Button>
       </div>
 
-      {/* Desktop Table View */}
-      <div className="desktop-table-view">
-        <Table
-          columns={columns}
-          dataSource={dataSource}
-          pagination={{
-            total: 24,
-            showSizeChanger: false,
-            itemRender: (page, type, originalElement) => {
-              if (type === "prev") return <a>Previous</a>;
-              if (type === "next") return <a>Next</a>;
-              return originalElement;
-            },
-          }}
-          style={{
-            background: "#fff",
-            borderRadius: "12px",
-            border: "1px solid #f0f0f0",
-            overflow: "hidden",
-          }}
-        />
-      </div>
-
-      {/* Mobile Card View */}
-      {renderMobileCards()}
+      <Table
+        columns={columns}
+        dataSource={dataSource}
+        rowKey="id"
+        loading={loading}
+        pagination={{
+          current: currentPage,
+          total: total,
+          pageSize: 5,
+          onChange: (page) => setCurrentPage(page),
+          showSizeChanger: false,
+          position: ["bottomRight"],
+        }}
+        style={{
+          background: "#fff",
+          borderRadius: "12px",
+          border: "1px solid #f0f0f0",
+          overflow: "hidden",
+        }}
+      />
 
       <AnnouncementFormModal
         open={isModalOpen}
-        initialValues={selectedAnnouncement}
         onCancel={() => setIsModalOpen(false)}
-        onFinish={(values) => {
-          console.log("Form Values:", values);
+        onSuccess={() => {
           setIsModalOpen(false);
-          message.success(
-            selectedAnnouncement ? "Updated successfully" : "Sent successfully",
-          );
+          setCurrentPage(1);
+          fetchAnnouncements();
         }}
       />
     </div>
