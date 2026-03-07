@@ -510,9 +510,7 @@ export default function AnnouncementsTable() {
       title: "Audience",
       dataIndex: "send_to",
       key: "send_to",
-      render: (val: string) => (
-        <Text>{val === "all" ? "All Users" : "Specific Users"}</Text>
-      ),
+      render: (val: string) => <Text>{val}</Text>,
     },
     {
       title: "Recipients",

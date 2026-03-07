@@ -1,13 +1,24 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/services/announcementService.ts
 import apiClient from "../config/axiosInstance";
 import { API_ENDPOINTS } from "../api/endpoints";
 
 export const announcementService = {
-  getAnnouncements: async (params: { page?: number }) => {
-    // response is already the data object because of your interceptor
-    return await apiClient.get(API_ENDPOINTS.ADMIN_ANNOUNCEMENTS_LIST, {
-      params,
-    });
+  getAnnouncements: async (params: { page?: number }): Promise<any> => {
+    try {
+      // Cast the result to 'any' so TS knows we are returning the transformed data
+      const response = await apiClient.get(
+        API_ENDPOINTS.ADMIN_ANNOUNCEMENTS_LIST,
+        { params },
+      );
+      return response;
+    } catch (error) {
+      console.error(
+        "[Announcement Service] Failed to fetch announcements:",
+        error,
+      );
+      throw error;
+    }
   },
 
   searchUsers: async (query: string) => {

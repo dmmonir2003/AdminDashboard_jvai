@@ -338,7 +338,7 @@ apiClient.interceptors.request.use(
 
 // Response Interceptor
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => response.data as any,
+  (response: AxiosResponse<any>) => response.data as any,
 
   async (error: AxiosError<any>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & {
