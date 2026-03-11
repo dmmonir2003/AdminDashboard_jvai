@@ -668,9 +668,286 @@
 //   );
 // }
 
+//TODO:
+// "use client";
+
+// import React, { useState, useEffect, useMemo } from "react";
+// import {
+//   Table,
+//   Button,
+//   Input,
+//   Switch,
+//   Space,
+//   Row,
+//   Col,
+//   Grid,
+//   Popconfirm,
+//   Card,
+//   Typography,
+//   Pagination, // Added for mobile view
+//   App,
+// } from "antd";
+// import {
+//   SearchOutlined,
+//   PlusOutlined,
+//   EditOutlined,
+//   DeleteOutlined,
+// } from "@ant-design/icons";
+// import { categoryService, Category } from "@/src/services/categoryService";
+
+// const { Text } = Typography;
+// const { useBreakpoint } = Grid;
+
+// export default function CategoryTable({
+//   onEdit,
+//   onAdd,
+//   onToggle,
+//   onDelete,
+// }: any) {
+//   const screens = useBreakpoint();
+//   const { message } = App.useApp();
+//   const isMobile = !screens.md && screens.xs;
+
+//   // --- State Management ---
+//   const [categories, setCategories] = useState<Category[]>([]);
+//   const [loading, setLoading] = useState(true);
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const [totalCount, setTotalCount] = useState(0);
+//   const [searchText, setSearchText] = useState("");
+
+//   // --- Fetch Logic ---
+//   const fetchCategories = async () => {
+//     try {
+//       setLoading(true);
+//       const res = await categoryService.getCategories({ page: currentPage });
+//       setCategories(res.results);
+//       setTotalCount(res.count);
+//     } catch (error) {
+//       console.error("Failed to fetch categories:", error);
+//       message.error("Failed to load categories");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchCategories();
+//   }, [currentPage]);
+
+//   // Client-side search within the current page results
+//   const filteredData = useMemo(() => {
+//     return categories.filter((item: Category) =>
+//       item.name.toLowerCase().includes(searchText.toLowerCase()),
+//     );
+//   }, [categories, searchText]);
+
+//   const columns = [
+//     {
+//       title: "Category Name",
+//       dataIndex: "name",
+//       key: "name",
+//       render: (text: string) => <span style={{ fontWeight: 500 }}>{text}</span>,
+//     },
+//     {
+//       title: "Category For",
+//       dataIndex: "category_for",
+//       key: "category_for",
+//       render: (text: string) => (
+//         <span style={{ textTransform: "capitalize" }}>{text}</span>
+//       ),
+//     },
+//     {
+//       title: "Status",
+//       dataIndex: "is_active",
+//       key: "status",
+//       align: "center" as const,
+//       render: (isActive: boolean, record: Category) => (
+//         <Switch
+//           checked={isActive}
+//           onChange={() => onToggle(record)}
+//           style={{ backgroundColor: isActive ? "#16A34A" : "#d9d9d9" }}
+//         />
+//       ),
+//     },
+//     {
+//       title: "Action",
+//       key: "action",
+//       align: "center" as const,
+//       render: (_: any, record: Category) => (
+//         <Space size="middle">
+//           <Button icon={<EditOutlined />} onClick={() => onEdit(record)}>
+//             Edit
+//           </Button>
+//           <Popconfirm
+//             title="Delete category?"
+//             onConfirm={async () => {
+//               await onDelete(record.category_id);
+//               fetchCategories(); // Refresh after delete
+//             }}
+//           >
+//             <Button icon={<DeleteOutlined />} danger>
+//               Delete
+//             </Button>
+//           </Popconfirm>
+//         </Space>
+//       ),
+//     },
+//   ];
+
+//   return (
+//     <div
+//       style={{
+//         background: isMobile ? "transparent" : "#fff",
+//         padding: isMobile ? "0" : "20px",
+//         borderRadius: "12px",
+//       }}
+//     >
+//       {/* Search and Add Header */}
+//       <Row gutter={[16, 16]} align="middle" style={{ marginBottom: "24px" }}>
+//         <Col xs={24} md={18}>
+//           <Input
+//             placeholder="Search Categories"
+//             prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
+//             style={{ borderRadius: "8px", height: "45px", width: "100%" }}
+//             onChange={(e) => setSearchText(e.target.value)}
+//           />
+//         </Col>
+//         <Col
+//           xs={24}
+//           md={6}
+//           style={{
+//             display: "flex",
+//             justifyContent: isMobile ? "start" : "flex-end",
+//           }}
+//         >
+//           <Button
+//             onClick={onAdd}
+//             type="primary"
+//             icon={<PlusOutlined />}
+//             size="large"
+//             block={isMobile}
+//             style={{
+//               borderRadius: "8px",
+//               height: "45px",
+//               fontWeight: "bold",
+//               minWidth: isMobile ? "100%" : "160px",
+//             }}
+//           >
+//             Add Category
+//           </Button>
+//         </Col>
+//       </Row>
+
+//       {/* Desktop Table */}
+//       {!isMobile ? (
+//         <Table
+//           columns={columns}
+//           dataSource={filteredData}
+//           rowKey="category_id"
+//           loading={loading}
+//           pagination={{
+//             current: currentPage,
+//             total: totalCount,
+//             pageSize: 5, // Adjust based on your API's default limit
+//             onChange: (page) => setCurrentPage(page),
+//             showTotal: (total, range) =>
+//               `Showing ${range[0]} to ${range[1]} of ${total} results`,
+//           }}
+//         />
+//       ) : (
+//         /* Mobile Card View */
+//         <Row gutter={[16, 16]}>
+//           {filteredData.map((item: Category) => (
+//             <Col xs={24} key={item.category_id}>
+//               <Card
+//                 style={{ borderRadius: "12px", border: "1px solid #f0f0f0" }}
+//                 loading={loading}
+//                 actions={[
+//                   <EditOutlined key="edit" onClick={() => onEdit(item)} />,
+//                   <Popconfirm
+//                     key="delete"
+//                     title="Delete category?"
+//                     onConfirm={async () => {
+//                       await onDelete(item.category_id);
+//                       fetchCategories();
+//                     }}
+//                   >
+//                     <DeleteOutlined style={{ color: "#ff4d4f" }} />
+//                   </Popconfirm>,
+//                 ]}
+//               >
+//                 <div
+//                   style={{ display: "flex", justifyContent: "space-between" }}
+//                 >
+//                   <div>
+//                     <Text type="secondary" style={{ fontSize: "12px" }}>
+//                       Category Name
+//                     </Text>
+//                     <div
+//                       style={{
+//                         fontSize: "16px",
+//                         fontWeight: 600,
+//                         marginBottom: "8px",
+//                       }}
+//                     >
+//                       {item.name}
+//                     </div>
+//                     <Text type="secondary" style={{ fontSize: "12px" }}>
+//                       Category For
+//                     </Text>
+//                     <div style={{ textTransform: "capitalize" }}>
+//                       {item.category_for}
+//                     </div>
+//                   </div>
+//                   <div style={{ textAlign: "right" }}>
+//                     <Text
+//                       type="secondary"
+//                       style={{
+//                         fontSize: "12px",
+//                         display: "block",
+//                         marginBottom: "4px",
+//                       }}
+//                     >
+//                       Status
+//                     </Text>
+//                     <Switch
+//                       checked={item.is_active}
+//                       onChange={() => onToggle(item)}
+//                       style={{
+//                         backgroundColor: item.is_active ? "#16A34A" : "#d9d9d9",
+//                       }}
+//                     />
+//                   </div>
+//                 </div>
+//               </Card>
+//             </Col>
+//           ))}
+//           {/* Mobile Pagination Control */}
+//           <Col
+//             span={24}
+//             style={{
+//               display: "flex",
+//               justifyContent: "center",
+//               marginTop: "16px",
+//             }}
+//           >
+//             <Pagination
+//               current={currentPage}
+//               total={totalCount}
+//               pageSize={10}
+//               onChange={(page) => setCurrentPage(page)}
+//               simple={isMobile}
+//             />
+//           </Col>
+//         </Row>
+//       )}
+//     </div>
+//   );
+// }
+
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Table,
   Button,
@@ -683,7 +960,7 @@ import {
   Popconfirm,
   Card,
   Typography,
-  Pagination, // Added for mobile view
+  Pagination,
   App,
 } from "antd";
 import {
@@ -712,13 +989,28 @@ export default function CategoryTable({
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [searchText, setSearchText] = useState("");
 
-  // --- Fetch Logic ---
-  const fetchCategories = async () => {
+  // Search States
+  const [searchText, setSearchText] = useState(""); // Immediate UI state
+  const [debouncedSearch, setDebouncedSearch] = useState(""); // API Trigger state
+
+  // --- 1. Debounce Logic ---
+  // Wait 500ms after the user stops typing before triggering the search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchText);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchText]);
+
+  // --- 2. Fetch Logic (Updated for Server-Side Search) ---
+  const fetchCategories = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await categoryService.getCategories({ page: currentPage });
+      const res = await categoryService.getCategories({
+        page: currentPage,
+        search: debouncedSearch, // Pass the debounced search to API
+      });
       setCategories(res.results);
       setTotalCount(res.count);
     } catch (error) {
@@ -727,19 +1019,20 @@ export default function CategoryTable({
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, debouncedSearch, message]);
 
+  // Fetch when page or debounced search changes
   useEffect(() => {
     fetchCategories();
-  }, [currentPage]);
+  }, [fetchCategories]);
 
-  // Client-side search within the current page results
-  const filteredData = useMemo(() => {
-    return categories.filter((item: Category) =>
-      item.name.toLowerCase().includes(searchText.toLowerCase()),
-    );
-  }, [categories, searchText]);
+  // Reset to page 1 when the user types
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchText(e.target.value);
+    setCurrentPage(1);
+  };
 
+  // --- Columns Definition ---
   const columns = [
     {
       title: "Category Name",
@@ -781,7 +1074,7 @@ export default function CategoryTable({
             title="Delete category?"
             onConfirm={async () => {
               await onDelete(record.category_id);
-              fetchCategories(); // Refresh after delete
+              fetchCategories();
             }}
           >
             <Button icon={<DeleteOutlined />} danger>
@@ -805,10 +1098,12 @@ export default function CategoryTable({
       <Row gutter={[16, 16]} align="middle" style={{ marginBottom: "24px" }}>
         <Col xs={24} md={18}>
           <Input
-            placeholder="Search Categories"
+            placeholder="Search Categories by name..."
             prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
             style={{ borderRadius: "8px", height: "45px", width: "100%" }}
-            onChange={(e) => setSearchText(e.target.value)}
+            value={searchText}
+            onChange={handleSearchChange}
+            allowClear
           />
         </Col>
         <Col
@@ -841,13 +1136,13 @@ export default function CategoryTable({
       {!isMobile ? (
         <Table
           columns={columns}
-          dataSource={filteredData}
+          dataSource={categories} // Use 'categories' directly from API
           rowKey="category_id"
           loading={loading}
           pagination={{
             current: currentPage,
             total: totalCount,
-            pageSize: 5, // Adjust based on your API's default limit
+            pageSize: 10,
             onChange: (page) => setCurrentPage(page),
             showTotal: (total, range) =>
               `Showing ${range[0]} to ${range[1]} of ${total} results`,
@@ -856,11 +1151,10 @@ export default function CategoryTable({
       ) : (
         /* Mobile Card View */
         <Row gutter={[16, 16]}>
-          {filteredData.map((item: Category) => (
+          {categories.map((item: Category) => (
             <Col xs={24} key={item.category_id}>
               <Card
                 style={{ borderRadius: "12px", border: "1px solid #f0f0f0" }}
-                loading={loading}
                 actions={[
                   <EditOutlined key="edit" onClick={() => onEdit(item)} />,
                   <Popconfirm
@@ -921,7 +1215,6 @@ export default function CategoryTable({
               </Card>
             </Col>
           ))}
-          {/* Mobile Pagination Control */}
           <Col
             span={24}
             style={{

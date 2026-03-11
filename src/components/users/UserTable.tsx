@@ -455,7 +455,7 @@ interface UserTableProps {
   currentPage: number;
   loading: boolean;
   onPageChange: (page: number) => void;
-  onSearch: (value: string) => void; // This is the prop we are using
+  onSearch: (value: string) => void;
   onView: (user: any) => void;
   refreshUsers: () => Promise<void>;
 }
@@ -474,18 +474,16 @@ export default function UserTable({
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
-  // 1. Create a local state to track what the user is typing
   const [searchValue, setSearchValue] = useState("");
 
-  // 2. Use a Debounce Effect: This waits for the user to stop typing
-  // before calling the 'onSearch' prop to trigger the API.
+  // Debounce logic to prevent API spamming
   useEffect(() => {
     const handler = setTimeout(() => {
       onSearch(searchValue);
-    }, 500); // 500ms delay
+    }, 500);
 
-    return () => clearTimeout(handler); // Cleanup if the user types again within 500ms
-  }, [searchValue, onSearch]);
+    return () => clearTimeout(handler);
+  }, [searchValue]); // Removed onSearch from deps to avoid infinite loops if not memoized
 
   const handleToggleStatus = async (checked: boolean, record: any) => {
     try {
@@ -553,14 +551,13 @@ export default function UserTable({
         borderRadius: "12px",
       }}
     >
-      {/* 3. Controlled Input linked to local state */}
       <Input
         placeholder="Search users by name or email..."
         prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
         style={{ borderRadius: "8px", height: "50px", marginBottom: "24px" }}
         value={searchValue}
         onChange={(e) => setSearchValue(e.target.value)}
-        allowClear // Allows the user to clear search quickly
+        allowClear
       />
 
       {!isMobile ? (
@@ -588,7 +585,6 @@ export default function UserTable({
           />
         </ConfigProvider>
       ) : (
-        /* Mobile View Cards */
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {users.map((user) => (
             <Card key={user.id} style={{ borderRadius: "12px" }}>

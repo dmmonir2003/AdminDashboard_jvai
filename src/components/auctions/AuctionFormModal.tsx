@@ -611,7 +611,9 @@ export const AuctionFormModal: React.FC<AuctionFormProps> = ({
       const fetchCategoriesData = async () => {
         setLoadingCategories(true);
         try {
-          const res = await categoryService.getCategories("auction");
+          const res = await categoryService.getCategories({
+            category_for: "auction",
+          });
           setCategories(res.results);
         } catch (err) {
           console.error("Failed to load category data", err);

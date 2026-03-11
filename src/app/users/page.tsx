@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/exhaustive-deps */
+
 // /* eslint-disable @typescript-eslint/no-unused-vars */
 // /* eslint-disable @typescript-eslint/no-explicit-any */
 // "use client";
@@ -74,11 +74,120 @@
 //   );
 // }
 
+//TODO:
+// "use client";
+
+// import React, { useState, useEffect, useCallback } from "react";
+// import DashboardLayout from "@/src/components/layout/DashboardLayout";
+// import { Typography, Spin, message } from "antd";
+// import UserTable from "@/src/components/users/UserTable";
+// import { useRouter } from "next/navigation";
+// import { userService } from "@/src/services/userService";
+
+// const { Title, Text } = Typography;
+
+// export default function UsersPage() {
+//   const router = useRouter();
+//   const [users, setUsers] = useState<any[]>([]);
+//   const [loading, setLoading] = useState(true);
+
+//   // New States for Server-side logic
+//   const [totalCount, setTotalCount] = useState(0);
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const [searchKeyword, setSearchKeyword] = useState("");
+
+//   console.log(searchKeyword, "dsfhsdiufhdishihf");
+
+//   // const fetchUsers = async () => {
+//   //   try {
+//   //     setLoading(true);
+//   //     console.log(searchKeyword, "under fatch fuctions ");
+//   //     const response = await userService.getAllUsers({
+//   //       page: currentPage,
+//   //       search: searchKeyword || undefined,
+//   //     });
+
+//   //     const normalized = (response?.results || []).map((user: any) => ({
+//   //       id: user.id,
+//   //       name: user.username,
+//   //       email: user.email,
+//   //       phone: user.phone_number || "N/A",
+//   //       status: user.status ? "Active" : "Blocked",
+//   //     }));
+
+//   //     setUsers(normalized);
+//   //     setTotalCount(response.count);
+//   //   } catch (err: any) {
+//   //     message.error("Failed to load users");
+//   //   } finally {
+//   //     setLoading(false);
+//   //   }
+//   // };
+
+//   const fetchUsers = useCallback(async () => {
+//     try {
+//       setLoading(true);
+//       console.log(searchKeyword, "under fatch fuctions "); // Now this will always be fresh
+//       const response = await userService.getAllUsers({
+//         page: currentPage,
+//         search: searchKeyword || undefined,
+//       });
+
+//       const normalized = (response?.results || []).map((user: any) => ({
+//         id: user.id,
+//         name: user.username,
+//         email: user.email,
+//         phone: user.phone_number || "N/A",
+//         status: user.status ? "Active" : "Blocked",
+//       }));
+
+//       setUsers(normalized);
+//       setTotalCount(response.count);
+//     } catch (err: any) {
+//       message.error("Failed to load users");
+//     } finally {
+//       setLoading(false);
+//     }
+//   }, [currentPage, searchKeyword]); // These are the dependencies
+
+//   // Re-fetch when page or search changes
+//   useEffect(() => {
+//     fetchUsers();
+//   }, [currentPage, searchKeyword]);
+
+//   return (
+//     <DashboardLayout>
+//       <div>
+//         <div style={{ marginBottom: "24px" }}>
+//           <Title level={2} style={{ margin: 0, fontWeight: "bold" }}>
+//             Users
+//           </Title>
+//           <Text type="secondary">Manage platform users</Text>
+//         </div>
+
+//         <UserTable
+//           loading={loading}
+//           users={users}
+//           total={totalCount}
+//           currentPage={currentPage}
+//           onPageChange={(page) => setCurrentPage(page)}
+//           onSearch={useCallback((val: string) => {
+//             setSearchKeyword(val);
+//             // setCurrentPage(1);
+//           }, [])}
+//           refreshUsers={fetchUsers}
+//           onView={(user) => router.push(`/users/${user.id}`)}
+//         />
+//       </div>
+//     </DashboardLayout>
+//   );
+// }
+
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "@/src/components/layout/DashboardLayout";
-import { Typography, Spin, message } from "antd";
+import { Typography, message } from "antd";
 import UserTable from "@/src/components/users/UserTable";
 import { useRouter } from "next/navigation";
 import { userService } from "@/src/services/userService";
@@ -90,43 +199,13 @@ export default function UsersPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // New States for Server-side logic
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchKeyword, setSearchKeyword] = useState("");
 
-  console.log(searchKeyword, "dsfhsdiufhdishihf");
-
-  // const fetchUsers = async () => {
-  //   try {
-  //     setLoading(true);
-  //     console.log(searchKeyword, "under fatch fuctions ");
-  //     const response = await userService.getAllUsers({
-  //       page: currentPage,
-  //       search: searchKeyword || undefined,
-  //     });
-
-  //     const normalized = (response?.results || []).map((user: any) => ({
-  //       id: user.id,
-  //       name: user.username,
-  //       email: user.email,
-  //       phone: user.phone_number || "N/A",
-  //       status: user.status ? "Active" : "Blocked",
-  //     }));
-
-  //     setUsers(normalized);
-  //     setTotalCount(response.count);
-  //   } catch (err: any) {
-  //     message.error("Failed to load users");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
-      console.log(searchKeyword, "under fatch fuctions "); // Now this will always be fresh
       const response = await userService.getAllUsers({
         page: currentPage,
         search: searchKeyword || undefined,
@@ -147,12 +226,11 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchKeyword]); // These are the dependencies
+  }, [currentPage, searchKeyword]);
 
-  // Re-fetch when page or search changes
   useEffect(() => {
     fetchUsers();
-  }, [currentPage, searchKeyword]);
+  }, [fetchUsers]);
 
   return (
     <DashboardLayout>
@@ -170,10 +248,10 @@ export default function UsersPage() {
           total={totalCount}
           currentPage={currentPage}
           onPageChange={(page) => setCurrentPage(page)}
-          onSearch={useCallback((val: string) => {
+          onSearch={(val: string) => {
             setSearchKeyword(val);
-            // setCurrentPage(1);
-          }, [])}
+            setCurrentPage(1); // RESET TO PAGE 1 ON SEARCH
+          }}
           refreshUsers={fetchUsers}
           onView={(user) => router.push(`/users/${user.id}`)}
         />

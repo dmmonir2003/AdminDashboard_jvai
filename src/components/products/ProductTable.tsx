@@ -868,9 +868,386 @@
 // }
 
 //TODO:
+// "use client";
+
+// import React, { useState, useEffect } from "react";
+// import {
+//   Table,
+//   Button,
+//   Input,
+//   Select,
+//   Space,
+//   Row,
+//   Col,
+//   Typography,
+//   ConfigProvider,
+//   Card,
+//   Grid,
+//   App,
+//   Modal,
+//   Popconfirm,
+// } from "antd";
+// import {
+//   SearchOutlined,
+//   PlusOutlined,
+//   EditOutlined,
+//   DeleteOutlined,
+// } from "@ant-design/icons";
+// import Image from "next/image";
+// import ProductFormModal from "./ProductFormModal";
+// import { productService } from "@/src/services/productService";
+
+// const { Text } = Typography;
+// const { useBreakpoint } = Grid;
+
+// interface ProductTableProps {
+//   initialProducts?: any[];
+// }
+
+// export default function ProductTable({
+//   initialProducts = [],
+// }: ProductTableProps) {
+//   const screens = useBreakpoint();
+//   const { message } = App.useApp();
+
+//   const [products, setProducts] = useState<any[]>(initialProducts);
+//   const [loading, setLoading] = useState(true);
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const [totalCount, setTotalCount] = useState(0);
+//   const [searchText, setSearchText] = useState("");
+//   const [productTypeFilter, setProductTypeFilter] = useState<
+//     "" | "Physical" | "Digital"
+//   >("");
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
+
+//   // Extract fetch into reusable function
+//   const fetchProducts = async () => {
+//     try {
+//       setLoading(true);
+//       const apiType =
+//         productTypeFilter === "Physical"
+//           ? "physical"
+//           : productTypeFilter === "Digital"
+//             ? "digital"
+//             : "";
+//       const res = await productService.getProducts(currentPage, apiType);
+
+//       const formatted = res.results.map((item: any) => ({
+//         key: item.product_id.toString(),
+//         name: item.name,
+//         category: item.category_name,
+//         price: `SAR-${item.price}`, // display only
+//         rawPrice: item.price, // ← for form
+//         description: item.description,
+//         // Display sizes and colors as comma-separated strings
+//         specification: [
+//           item.sizes?.map((s: any) => s.name).join(", ") || "N/A",
+//           item.colors?.map((c: any) => c.name).join(", ") || "N/A",
+//         ]
+//           .filter((s) => s !== "N/A")
+//           .join(" | "),
+//         discount: item.discount_percentage
+//           ? `${item.discount_percentage}%`
+//           : "0%",
+//         discount_percentage: item.discount_percentage, // ← for form
+//         type: item.product_type === "physical" ? "Physical" : "Digital",
+//         image: item.images?.[0]?.image_url || "https://via.placeholder.com/40",
+//         // Store original sizes and colors for editing
+//         sizes: item.sizes || [],
+//         colors: item.colors || [],
+//         categoryId: Number(item.category),
+//         // ← critical for edit
+//         region: item.region,
+//         brand: item.brand,
+//         card_expiry_date: item.card_expiry_date,
+//         code_file_url: item.code_file_url,
+//         images: item.images, // for prefill
+//       }));
+
+//       setProducts(formatted);
+//       setTotalCount(res.count);
+//     } catch (error) {
+//       console.error("Failed to fetch products:", error);
+//       message.error("Failed to load products");
+//       setProducts([]);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchProducts();
+//   }, [currentPage, productTypeFilter]);
+
+//   // Delete handler
+//   const handleDelete = async (id: string) => {
+//     try {
+//       await productService.deleteProduct(id);
+//       message.success("Product deleted successfully");
+//       fetchProducts(); // refresh the list
+//     } catch (err) {
+//       message.error("Failed to delete product");
+//     }
+//   };
+
+//   // Update edit handler (no change needed – now passes full record)
+//   const handleOpenEditModal = (record: any) => {
+//     setSelectedProduct(record);
+//     setIsModalOpen(true);
+//   };
+
+//   // --- Filtering (search by name client-side) ---
+//   const filteredData = products.filter((item) =>
+//     item.name.toLowerCase().includes(searchText.toLowerCase()),
+//   );
+
+//   const columns = [
+//     {
+//       title: "Name",
+//       dataIndex: "name",
+//       key: "name",
+//       render: (text: string, record: any) => (
+//         <Space>
+//           <Image
+//             src={record.image || "https://via.placeholder.com/30"}
+//             width={30}
+//             height={30}
+//             alt={"img"}
+//           />
+//           <Text strong>{text}</Text>
+//         </Space>
+//       ),
+//     },
+//     { title: "Category", dataIndex: "category", key: "category" },
+//     { title: "Price", dataIndex: "price", key: "price" },
+//     {
+//       title: "Size/Color",
+//       dataIndex: "specification",
+//       key: "specification",
+//       render: (_: any, record: any) => {
+//         // Build size/color display
+//         const sizeText = record.sizes?.length
+//           ? record.sizes.map((s: any) => s.name).join(", ")
+//           : "N/A";
+//         const colorText = record.colors?.length
+//           ? record.colors.map((c: any) => c.name).join(", ")
+//           : "N/A";
+
+//         return (
+//           <div>
+//             <div>
+//               <strong>Sizes:</strong> {sizeText}
+//             </div>
+//             <div>
+//               <strong>Colors:</strong> {colorText}
+//             </div>
+//           </div>
+//         );
+//       },
+//     },
+//     { title: "Discount", dataIndex: "discount", key: "discount" },
+//     {
+//       title: "Action",
+//       key: "action",
+//       align: "center" as const, // ← add "as const"
+//       render: (_: any, record: any) => (
+//         <Space size="middle">
+//           <Button
+//             icon={<EditOutlined />}
+//             size="small"
+//             onClick={() => handleOpenEditModal(record)}
+//           >
+//             Edit
+//           </Button>
+
+//           <Popconfirm
+//             title="Delete Product"
+//             description={
+//               <span>
+//                 Are you sure you want to delete <strong>{record.name}</strong>?
+//               </span>
+//             }
+//             onConfirm={() => handleDelete(record.key)}
+//             okText="Yes"
+//             cancelText="No"
+//             okButtonProps={{ danger: true }}
+//           >
+//             <Button
+//               danger
+//               type="primary"
+//               size="small"
+//               icon={<DeleteOutlined />}
+//               style={{
+//                 backgroundColor: "#DC2626",
+//                 border: "none",
+//               }}
+//             >
+//               Delete
+//             </Button>
+//           </Popconfirm>
+//         </Space>
+//       ),
+//     },
+//   ];
+
+//   return (
+//     <div
+//       style={{ background: "#f8f9fa", padding: "20px", borderRadius: "8px" }}
+//     >
+//       <Row
+//         gutter={[16, 16]}
+//         justify="space-between"
+//         align="middle"
+//         style={{ marginBottom: "24px" }}
+//       >
+//         <Col xs={24} md={18} flex="auto">
+//           <Input
+//             placeholder="Search Products"
+//             prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
+//             style={{ borderRadius: "8px", height: "45px" }}
+//             onChange={(e) => setSearchText(e.target.value)}
+//           />
+//         </Col>
+//         <Col
+//           xs={24}
+//           md={6}
+//           style={{ textAlign: screens.md ? "right" : "left" }}
+//         >
+//           <Button
+//             type="primary"
+//             icon={<PlusOutlined />}
+//             size="large"
+//             block={!screens.md}
+//             style={{ borderRadius: "8px", height: "45px" }}
+//             onClick={() => {
+//               setSelectedProduct(null); // ← important: null = add mode
+//               setIsModalOpen(true);
+//             }}
+//           >
+//             Add Product
+//           </Button>
+//         </Col>
+//       </Row>
+
+//       <div style={{ marginBottom: "16px" }}>
+//         <Select
+//           defaultValue=""
+//           style={{ width: 120, fontWeight: "bold", fontSize: "16px" }}
+//           onChange={(value) => {
+//             setProductTypeFilter(value as "" | "Physical" | "Digital");
+//             setCurrentPage(1);
+//           }}
+//           options={[
+//             { value: "", label: "All" },
+//             { value: "Physical", label: "Physical" },
+//             { value: "Digital", label: "Digital" },
+//           ]}
+//         />
+//       </div>
+
+//       {/* DESKTOP TABLE VIEW */}
+//       {screens.md ? (
+//         <ConfigProvider
+//           theme={{
+//             components: { Table: { headerBg: "#fff", headerColor: "#000" } },
+//           }}
+//         >
+//           <Table
+//             columns={columns}
+//             dataSource={filteredData}
+//             loading={loading}
+//             pagination={{
+//               current: currentPage,
+//               pageSize: 5,
+//               total: totalCount,
+//               onChange: (page) => setCurrentPage(page),
+//               showTotal: (total, range) =>
+//                 `Showing ${range[0]} to ${range[1]} of ${total} results`,
+//             }}
+//             locale={{ emptyText: "No products found." }}
+//             style={{
+//               background: "#fff",
+//               borderRadius: "12px",
+//               border: "1px solid #f0f0f0",
+//               overflow: "hidden",
+//             }}
+//           />
+//         </ConfigProvider>
+//       ) : (
+//         /* MOBILE CARD VIEW */
+//         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+//           {filteredData.map((item) => (
+//             <Card
+//               key={item.key}
+//               style={{ borderRadius: "12px", border: "1px solid #f0f0f0" }}
+//               actions={[
+//                 <EditOutlined
+//                   key="edit"
+//                   onClick={() => handleOpenEditModal(item)}
+//                 />,
+//                 <DeleteOutlined
+//                   key="delete"
+//                   style={{ color: "red" }}
+//                   onClick={() => handleDelete(item.key)}
+//                 />,
+//               ]}
+//             >
+//               <Card.Meta
+//                 avatar={
+//                   <Image
+//                     src={item?.image || "https://via.placeholder.com/40"}
+//                     width={40}
+//                     height={40}
+//                     alt={"Product Image"}
+//                     style={{ borderRadius: "4px" }}
+//                   />
+//                 }
+//                 title={item.name}
+//                 description={item.category}
+//               />
+//               <div style={{ marginTop: "16px" }}>
+//                 <p>
+//                   <strong>Price:</strong> {item.price}
+//                 </p>
+//                 <p>
+//                   <strong>Sizes:</strong>{" "}
+//                   {item.sizes?.length
+//                     ? item.sizes.map((s: any) => s.name).join(", ")
+//                     : "N/A"}
+//                 </p>
+//                 <p>
+//                   <strong>Colors:</strong>{" "}
+//                   {item.colors?.length
+//                     ? item.colors.map((c: any) => c.name).join(", ")
+//                     : "N/A"}
+//                 </p>
+//                 <p>
+//                   <strong>Discount:</strong> {item.discount}
+//                 </p>
+//               </div>
+//             </Card>
+//           ))}
+//           {filteredData.length === 0 && (
+//             <Text type="secondary">No products found.</Text>
+//           )}
+//         </div>
+//       )}
+
+//       <ProductFormModal
+//         open={isModalOpen}
+//         initialValues={selectedProduct}
+//         onCancel={() => setIsModalOpen(false)}
+//         onSuccess={fetchProducts} // ← real refetch after create/edit
+//         messageApi={message}
+//       />
+//     </div>
+//   );
+// }
+
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Table,
   Button,
@@ -884,8 +1261,8 @@ import {
   Card,
   Grid,
   App,
-  Modal,
   Popconfirm,
+  Pagination,
 } from "antd";
 import {
   SearchOutlined,
@@ -910,19 +1287,34 @@ export default function ProductTable({
   const screens = useBreakpoint();
   const { message } = App.useApp();
 
+  // Data State
   const [products, setProducts] = useState<any[]>(initialProducts);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [searchText, setSearchText] = useState("");
+
+  // Filter & Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchText, setSearchText] = useState(""); // UI State for input
+  const [debouncedSearch, setDebouncedSearch] = useState(""); // API Trigger State
   const [productTypeFilter, setProductTypeFilter] = useState<
     "" | "Physical" | "Digital"
   >("");
+
+  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
 
-  // Extract fetch into reusable function
-  const fetchProducts = async () => {
+  // 1. Debounce Logic: Wait 500ms after user stops typing to trigger API
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchText);
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [searchText]);
+
+  // 2. Fetch Products from Server
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const apiType =
@@ -931,16 +1323,21 @@ export default function ProductTable({
           : productTypeFilter === "Digital"
             ? "digital"
             : "";
-      const res = await productService.getProducts(currentPage, apiType);
+
+      // Call service with page, type, and search keyword
+      const res = await productService.getProducts(
+        currentPage,
+        apiType,
+        debouncedSearch,
+      );
 
       const formatted = res.results.map((item: any) => ({
         key: item.product_id.toString(),
         name: item.name,
         category: item.category_name,
-        price: `SAR-${item.price}`, // display only
-        rawPrice: item.price, // ← for form
+        price: `SAR-${item.price}`,
+        rawPrice: item.price,
         description: item.description,
-        // Display sizes and colors as comma-separated strings
         specification: [
           item.sizes?.map((s: any) => s.name).join(", ") || "N/A",
           item.colors?.map((c: any) => c.name).join(", ") || "N/A",
@@ -950,19 +1347,17 @@ export default function ProductTable({
         discount: item.discount_percentage
           ? `${item.discount_percentage}%`
           : "0%",
-        discount_percentage: item.discount_percentage, // ← for form
+        discount_percentage: item.discount_percentage,
         type: item.product_type === "physical" ? "Physical" : "Digital",
         image: item.images?.[0]?.image_url || "https://via.placeholder.com/40",
-        // Store original sizes and colors for editing
         sizes: item.sizes || [],
         colors: item.colors || [],
         categoryId: Number(item.category),
-        // ← critical for edit
         region: item.region,
         brand: item.brand,
         card_expiry_date: item.card_expiry_date,
         code_file_url: item.code_file_url,
-        images: item.images, // for prefill
+        images: item.images,
       }));
 
       setProducts(formatted);
@@ -974,33 +1369,28 @@ export default function ProductTable({
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, productTypeFilter, debouncedSearch, message]);
 
+  // 3. Trigger Re-fetch when dependencies change
   useEffect(() => {
     fetchProducts();
-  }, [currentPage, productTypeFilter]);
+  }, [fetchProducts]);
 
-  // Delete handler
+  // 4. Action Handlers
   const handleDelete = async (id: string) => {
     try {
       await productService.deleteProduct(id);
       message.success("Product deleted successfully");
-      fetchProducts(); // refresh the list
+      fetchProducts();
     } catch (err) {
       message.error("Failed to delete product");
     }
   };
 
-  // Update edit handler (no change needed – now passes full record)
   const handleOpenEditModal = (record: any) => {
     setSelectedProduct(record);
     setIsModalOpen(true);
   };
-
-  // --- Filtering (search by name client-side) ---
-  const filteredData = products.filter((item) =>
-    item.name.toLowerCase().includes(searchText.toLowerCase()),
-  );
 
   const columns = [
     {
@@ -1014,6 +1404,7 @@ export default function ProductTable({
             width={30}
             height={30}
             alt={"img"}
+            style={{ borderRadius: "4px", objectFit: "cover" }}
           />
           <Text strong>{text}</Text>
         </Space>
@@ -1025,32 +1416,28 @@ export default function ProductTable({
       title: "Size/Color",
       dataIndex: "specification",
       key: "specification",
-      render: (_: any, record: any) => {
-        // Build size/color display
-        const sizeText = record.sizes?.length
-          ? record.sizes.map((s: any) => s.name).join(", ")
-          : "N/A";
-        const colorText = record.colors?.length
-          ? record.colors.map((c: any) => c.name).join(", ")
-          : "N/A";
-
-        return (
+      render: (_: any, record: any) => (
+        <div style={{ fontSize: "12px" }}>
           <div>
-            <div>
-              <strong>Sizes:</strong> {sizeText}
-            </div>
-            <div>
-              <strong>Colors:</strong> {colorText}
-            </div>
+            <strong>Sizes:</strong>{" "}
+            {record.sizes?.length
+              ? record.sizes.map((s: any) => s.name).join(", ")
+              : "N/A"}
           </div>
-        );
-      },
+          <div>
+            <strong>Colors:</strong>{" "}
+            {record.colors?.length
+              ? record.colors.map((c: any) => c.name).join(", ")
+              : "N/A"}
+          </div>
+        </div>
+      ),
     },
     { title: "Discount", dataIndex: "discount", key: "discount" },
     {
       title: "Action",
       key: "action",
-      align: "center" as const, // ← add "as const"
+      align: "center" as const,
       render: (_: any, record: any) => (
         <Space size="middle">
           <Button
@@ -1060,12 +1447,11 @@ export default function ProductTable({
           >
             Edit
           </Button>
-
           <Popconfirm
             title="Delete Product"
             description={
               <span>
-                Are you sure you want to delete <strong>{record.name}</strong>?
+                Delete <strong>{record.name}</strong>?
               </span>
             }
             onConfirm={() => handleDelete(record.key)}
@@ -1078,10 +1464,7 @@ export default function ProductTable({
               type="primary"
               size="small"
               icon={<DeleteOutlined />}
-              style={{
-                backgroundColor: "#DC2626",
-                border: "none",
-              }}
+              style={{ backgroundColor: "#DC2626", border: "none" }}
             >
               Delete
             </Button>
@@ -1095,18 +1478,24 @@ export default function ProductTable({
     <div
       style={{ background: "#f8f9fa", padding: "20px", borderRadius: "8px" }}
     >
+      {/* Search and Add Section */}
       <Row
         gutter={[16, 16]}
         justify="space-between"
         align="middle"
         style={{ marginBottom: "24px" }}
       >
-        <Col xs={24} md={18} flex="auto">
+        <Col xs={24} md={18}>
           <Input
-            placeholder="Search Products"
+            placeholder="Search products by name..."
             prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
             style={{ borderRadius: "8px", height: "45px" }}
-            onChange={(e) => setSearchText(e.target.value)}
+            value={searchText}
+            allowClear
+            onChange={(e) => {
+              setSearchText(e.target.value);
+              setCurrentPage(1); // Reset to page 1 on search
+            }}
           />
         </Col>
         <Col
@@ -1121,7 +1510,7 @@ export default function ProductTable({
             block={!screens.md}
             style={{ borderRadius: "8px", height: "45px" }}
             onClick={() => {
-              setSelectedProduct(null); // ← important: null = add mode
+              setSelectedProduct(null);
               setIsModalOpen(true);
             }}
           >
@@ -1130,42 +1519,39 @@ export default function ProductTable({
         </Col>
       </Row>
 
+      {/* Filter Section */}
       <div style={{ marginBottom: "16px" }}>
         <Select
-          defaultValue=""
-          style={{ width: 120, fontWeight: "bold", fontSize: "16px" }}
+          value={productTypeFilter}
+          style={{ width: 140, fontWeight: "bold" }}
           onChange={(value) => {
-            setProductTypeFilter(value as "" | "Physical" | "Digital");
-            setCurrentPage(1);
+            setProductTypeFilter(value);
+            setCurrentPage(1); // Reset to page 1 on filter change
           }}
           options={[
-            { value: "", label: "All" },
+            { value: "", label: "All Types" },
             { value: "Physical", label: "Physical" },
             { value: "Digital", label: "Digital" },
           ]}
         />
       </div>
 
-      {/* DESKTOP TABLE VIEW */}
+      {/* Table / Card View */}
       {screens.md ? (
-        <ConfigProvider
-          theme={{
-            components: { Table: { headerBg: "#fff", headerColor: "#000" } },
-          }}
-        >
+        <ConfigProvider theme={{ components: { Table: { headerBg: "#fff" } } }}>
           <Table
             columns={columns}
-            dataSource={filteredData}
+            dataSource={products}
             loading={loading}
+            rowKey="key"
             pagination={{
               current: currentPage,
               pageSize: 5,
               total: totalCount,
               onChange: (page) => setCurrentPage(page),
               showTotal: (total, range) =>
-                `Showing ${range[0]} to ${range[1]} of ${total} results`,
+                `Showing ${range[0]}-${range[1]} of ${total}`,
             }}
-            locale={{ emptyText: "No products found." }}
             style={{
               background: "#fff",
               borderRadius: "12px",
@@ -1175,62 +1561,55 @@ export default function ProductTable({
           />
         </ConfigProvider>
       ) : (
-        /* MOBILE CARD VIEW */
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {filteredData.map((item) => (
+          {products.map((item) => (
             <Card
               key={item.key}
-              style={{ borderRadius: "12px", border: "1px solid #f0f0f0" }}
+              style={{ borderRadius: "12px" }}
               actions={[
                 <EditOutlined
                   key="edit"
                   onClick={() => handleOpenEditModal(item)}
                 />,
-                <DeleteOutlined
-                  key="delete"
-                  style={{ color: "red" }}
-                  onClick={() => handleDelete(item.key)}
-                />,
+                <Popconfirm
+                  key="del"
+                  title="Delete?"
+                  onConfirm={() => handleDelete(item.key)}
+                >
+                  <DeleteOutlined style={{ color: "red" }} />
+                </Popconfirm>,
               ]}
             >
               <Card.Meta
                 avatar={
                   <Image
-                    src={item?.image || "https://via.placeholder.com/40"}
+                    src={item.image}
                     width={40}
                     height={40}
-                    alt={"Product Image"}
+                    alt="img"
                     style={{ borderRadius: "4px" }}
                   />
                 }
                 title={item.name}
                 description={item.category}
               />
-              <div style={{ marginTop: "16px" }}>
-                <p>
-                  <strong>Price:</strong> {item.price}
-                </p>
-                <p>
-                  <strong>Sizes:</strong>{" "}
-                  {item.sizes?.length
-                    ? item.sizes.map((s: any) => s.name).join(", ")
-                    : "N/A"}
-                </p>
-                <p>
-                  <strong>Colors:</strong>{" "}
-                  {item.colors?.length
-                    ? item.colors.map((c: any) => c.name).join(", ")
-                    : "N/A"}
-                </p>
-                <p>
-                  <strong>Discount:</strong> {item.discount}
-                </p>
+              <div style={{ marginTop: "12px", fontSize: "13px" }}>
+                <Text type="secondary">Price: </Text>
+                <Text strong>{item.price}</Text>
+                <br />
+                <Text type="secondary">Type: </Text>
+                {item.type}
               </div>
             </Card>
           ))}
-          {filteredData.length === 0 && (
-            <Text type="secondary">No products found.</Text>
-          )}
+          <Pagination
+            current={currentPage}
+            total={totalCount}
+            pageSize={5}
+            onChange={(page) => setCurrentPage(page)}
+            style={{ textAlign: "center", marginTop: "16px" }}
+            simple
+          />
         </div>
       )}
 
@@ -1238,7 +1617,10 @@ export default function ProductTable({
         open={isModalOpen}
         initialValues={selectedProduct}
         onCancel={() => setIsModalOpen(false)}
-        onSuccess={fetchProducts} // ← real refetch after create/edit
+        onSuccess={() => {
+          setIsModalOpen(false);
+          fetchProducts();
+        }}
         messageApi={message}
       />
     </div>

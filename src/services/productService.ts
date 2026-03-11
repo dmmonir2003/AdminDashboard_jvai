@@ -38,15 +38,30 @@ export const productService = {
   getProducts: async (
     page: number = 1,
     product_type?: "physical" | "digital" | "",
+    search?: string, // Add search parameter
   ): Promise<PaginatedProducts> => {
     const params: any = { page };
     if (product_type) params.product_type = product_type;
+    if (search) params.search = search; // Pass search to API
 
     const data = await extractData<PaginatedProducts>(
       apiClient.get(API_ENDPOINTS.PRODUCTS_LIST, { params }),
     );
     return data;
   },
+
+  // getProducts: async (
+  //   page: number = 1,
+  //   product_type?: "physical" | "digital" | "",
+  // ): Promise<PaginatedProducts> => {
+  //   const params: any = { page };
+  //   if (product_type) params.product_type = product_type;
+
+  //   const data = await extractData<PaginatedProducts>(
+  //     apiClient.get(API_ENDPOINTS.PRODUCTS_LIST, { params }),
+  //   );
+  //   return data;
+  // },
   // Create product (multipart/form-data)
   createProduct: async (formData: FormData): Promise<Product> => {
     try {
