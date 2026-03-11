@@ -1159,7 +1159,7 @@ export default function ProductTable({
             loading={loading}
             pagination={{
               current: currentPage,
-              pageSize: 6,
+              pageSize: 5,
               total: totalCount,
               onChange: (page) => setCurrentPage(page),
               showTotal: (total, range) =>

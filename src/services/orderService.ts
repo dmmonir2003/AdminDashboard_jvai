@@ -15,8 +15,17 @@ export interface ShopOrder {
     user_id: number;
     name: string;
     email: string;
+    phone_number: string | null;
   };
   items_count: number;
+
+  // auction_history?: Array<{
+  //   transaction_number: string;
+  //   amount_sar: number;
+  //   coins_added: number;
+  //   date: string;
+  // }>;
+
   products: Array<{
     product_id: number;
     product_name: string;

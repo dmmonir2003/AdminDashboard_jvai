@@ -52,11 +52,25 @@ export const userService = {
   /**
    * Fetch all users (paginated)
    */
-  getAllUsers: async (page: number = 1): Promise<PaginatedResponse<User>> => {
+  // getAllUsers: async (page: number = 1): Promise<PaginatedResponse<User>> => {
+  //   try {
+  //     const response = (await apiClient.get(API_ENDPOINTS.ADMIN_USERS, {
+  //       params: { page },
+  //     })) as unknown as PaginatedResponse<User>;
+  //     return response || { count: 0, next: null, previous: null, results: [] };
+  //   } catch (error) {
+  //     console.error("[User Service] Failed to fetch users:", error);
+  //     throw error;
+  //   }
+  // },
+  getAllUsers: async (
+    params: { page?: number; search?: string } = {},
+  ): Promise<PaginatedResponse<User>> => {
     try {
       const response = (await apiClient.get(API_ENDPOINTS.ADMIN_USERS, {
-        params: { page },
+        params, // Axios handles removing undefined keys
       })) as unknown as PaginatedResponse<User>;
+
       return response || { count: 0, next: null, previous: null, results: [] };
     } catch (error) {
       console.error("[User Service] Failed to fetch users:", error);

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // /* eslint-disable @typescript-eslint/no-explicit-any */
 // "use client";
 
@@ -199,6 +199,7 @@ import { useRouter } from "next/navigation";
 import AuctionOrderTable from "@/src/components/orders/AuctionOrderTable";
 import ShopOrderTable from "@/src/components/orders/ShopOrderTable";
 import { orderService } from "@/src/services/orderService";
+import { auctionOrderService } from "@/src/services/auctionOrderService";
 
 const { useBreakpoint } = Grid;
 
@@ -229,6 +230,31 @@ export default function OrderManager() {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
+  const [auctionOrders, setAuctionOrders] = useState<any[]>([]);
+  const [auctionLoading, setAuctionLoading] = useState(false);
+  const [auctionTotal, setAuctionTotal] = useState(0);
+  const [auctionPage, setAuctionPage] = useState(1);
+
+  const fetchAuctionOrders = useCallback(
+    async (page: number, search?: string) => {
+      setAuctionLoading(true);
+      try {
+        const response: any = await auctionOrderService.getAuctionOrders(
+          page,
+          search,
+        );
+        console.log("auctions orders", response.results);
+        setAuctionOrders(response.results || []);
+        setAuctionTotal(response.count || 0);
+      } catch (error) {
+        message.error("Failed to load auction orders");
+      } finally {
+        setAuctionLoading(false);
+      }
+    },
+    [],
+  );
+
   const fetchShopOrders = useCallback(async (page: number, search?: string) => {
     setLoading(true);
     try {
@@ -243,6 +269,21 @@ export default function OrderManager() {
     }
   }, []);
 
+  useEffect(() => {
+    if (activeTab === "auction") {
+      fetchAuctionOrders(auctionPage, searchText);
+    } else {
+      fetchShopOrders(currentPage, searchText);
+    }
+  }, [
+    activeTab,
+    auctionPage,
+    currentPage,
+    searchText,
+    fetchAuctionOrders,
+    fetchShopOrders,
+  ]);
+
   // Re-fetch when tab, page, or search changes
   useEffect(() => {
     if (activeTab === "shop") {
@@ -253,6 +294,7 @@ export default function OrderManager() {
   const handleSearch = (val: string) => {
     setSearchText(val);
     setCurrentPage(1); // Reset to page 1 on new search
+    setAuctionPage(1);
   };
 
   return (
@@ -314,9 +356,25 @@ export default function OrderManager() {
 
       <div style={{ marginTop: "16px" }}>
         {activeTab === "auction" ? (
+          // <AuctionOrderTable
+          //   data={auctionOrders}
+          //   onView={(order: any) => router.push(`/orders/auction/${order.id}`)}
+          // />
+
           <AuctionOrderTable
             data={auctionOrders}
-            onView={(order: any) => router.push(`/orders/auction/${order.id}`)}
+            loading={auctionLoading}
+            pagination={{
+              current: auctionPage,
+              total: auctionTotal,
+              pageSize: 10,
+              onChange: (page: number) => setAuctionPage(page),
+              position: ["bottomRight"],
+            }}
+            // Passing claim_id for the URL as seen in your Postman images
+            onView={(order: any) =>
+              router.push(`/orders/${order.claim_id}?type=auction`)
+            }
           />
         ) : (
           <ShopOrderTable
@@ -330,7 +388,9 @@ export default function OrderManager() {
               showSizeChanger: false,
               position: ["bottomCenter"],
             }}
-            onView={(order: any) => router.push(`/orders/${order.order_id}`)}
+            onView={(order: any) =>
+              router.push(`/orders/${order.order_id}?type=shop`)
+            }
           />
         )}
       </div>

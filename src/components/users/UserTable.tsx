@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // /* eslint-disable @typescript-eslint/no-explicit-any */
 // "use client";
@@ -142,10 +143,290 @@
 //   );
 // }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+//TODO
+// /* eslint-disable @typescript-eslint/no-explicit-any */
+// "use client";
+
+// import React, { useState, useMemo, useEffect } from "react";
+// import {
+//   Table,
+//   Input,
+//   Switch,
+//   Space,
+//   Button,
+//   Tag,
+//   ConfigProvider,
+//   Grid,
+//   Card,
+//   Typography,
+//   Row,
+//   Col,
+// } from "antd";
+// import { App } from "antd";
+
+// import { SearchOutlined, EyeOutlined } from "@ant-design/icons";
+// import { userService } from "@/src/services/userService";
+
+// const { useBreakpoint } = Grid;
+// const { Text } = Typography;
+
+// interface UserTableProps {
+//   users: any[];
+//   onView: (user: any) => void;
+//   refreshUsers: () => Promise<void>;
+// }
+
+// export default function UserTable({
+//   users: initialUsers,
+//   onView,
+//   refreshUsers, // ✅ receive
+// }: UserTableProps) {
+//   const [dataSource, setDataSource] = useState(initialUsers);
+//   const [searchText, setSearchText] = useState("");
+//   const { message } = App.useApp();
+//   const screens = useBreakpoint();
+//   const isMobile = !screens.md;
+
+//   useEffect(() => {
+//     setDataSource(initialUsers);
+//   }, [initialUsers]);
+
+//   const handleToggleStatus = async (checked: boolean, record: any) => {
+//     const newStatus = checked ? "Active" : "Blocked";
+
+//     try {
+//       // ✅ Call API
+//       await userService.toggleUserStatus(record.id);
+
+//       message.success(`User ${record.name} updated`);
+
+//       // ✅ re-fetch from backend (your requirement)
+//       await refreshUsers();
+
+//       message.success(`User ${record.name} is now ${newStatus}`);
+//     } catch (error) {
+//       message.error("Failed to update user status");
+//     }
+//   };
+
+//   const filteredData = useMemo(() => {
+//     return dataSource.filter(
+//       (item) =>
+//         item.name.toLowerCase().includes(searchText.toLowerCase()) ||
+//         item.email.toLowerCase().includes(searchText.toLowerCase()),
+//     );
+//   }, [dataSource, searchText]);
+
+//   const columns = [
+//     {
+//       title: "User Name",
+//       dataIndex: "name",
+//       key: "name",
+//       render: (text: string) => <span style={{ fontWeight: 500 }}>{text}</span>,
+//     },
+//     {
+//       title: "Email",
+//       dataIndex: "email",
+//       key: "email",
+//     },
+//     {
+//       title: "Phone",
+//       dataIndex: "phone",
+//       key: "phone",
+//     },
+//     {
+//       title: "Status",
+//       dataIndex: "status",
+//       key: "status",
+//       render: (status: string) => (
+//         <Tag
+//           style={{
+//             backgroundColor: status === "Active" ? "#2ecc71" : "#000000",
+//             color: "#ffffff",
+//             borderRadius: "6px",
+//             padding: "2px 12px",
+//             fontWeight: 600,
+//             border: "none",
+//             width: "80px",
+//             textAlign: "center",
+//           }}
+//         >
+//           {status}
+//         </Tag>
+//       ),
+//     },
+//     {
+//       title: "Action",
+//       key: "action",
+//       render: (_: any, record: any) => (
+//         <Space size="middle">
+//           <Switch
+//             checked={record.status === "Active"}
+//             onChange={(checked) => handleToggleStatus(checked, record)}
+//             style={{
+//               backgroundColor:
+//                 record.status === "Active" ? "#2ecc71" : undefined,
+//             }}
+//           />
+//           <Button
+//             icon={<EyeOutlined />}
+//             shape="circle"
+//             onClick={() => onView(record)}
+//             style={{ border: "none", boxShadow: "none", color: "#666" }}
+//           />
+//         </Space>
+//       ),
+//     },
+//   ];
+
+//   return (
+//     <div
+//       style={{
+//         background: isMobile ? "transparent" : "#fff",
+//         padding: isMobile ? "0" : "24px",
+//         borderRadius: "12px",
+//         boxShadow: isMobile ? "none" : "0 2px 8px rgba(0,0,0,0.05)",
+//       }}
+//     >
+//       {/* Responsive Search Input */}
+//       <Input
+//         placeholder="Search users"
+//         prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
+//         style={{
+//           borderRadius: "8px",
+//           height: "50px",
+//           marginBottom: "24px",
+//           backgroundColor: "#f9f9f9",
+//           border: "1px solid #f0f0f0",
+//         }}
+//         onChange={(e) => setSearchText(e.target.value)}
+//       />
+
+//       {!isMobile ? (
+//         /* DESKTOP VIEW */
+//         <ConfigProvider
+//           theme={{
+//             components: {
+//               Table: { headerBg: "#fafafa", headerColor: "#000" },
+//               Switch: { colorPrimary: "#2ecc71" },
+//             },
+//           }}
+//         >
+//           <Table
+//             columns={columns}
+//             dataSource={filteredData}
+//             pagination={{
+//               pageSize: 5,
+//               placement: ["bottom"] as any,
+//               showTotal: (total, range) => (
+//                 <span style={{ fontWeight: 500, color: "#666" }}>
+//                   Showing {range[0]} to {range[1]} of {total} results
+//                 </span>
+//               ),
+//             }}
+//             rowKey="id"
+//             style={{
+//               border: "1px solid #f0f0f0",
+//               borderRadius: "12px",
+//               overflow: "hidden",
+//             }}
+//             rowClassName="user-table-row"
+//           />
+//         </ConfigProvider>
+//       ) : (
+//         /* MOBILE VIEW: Cards */
+//         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+//           {filteredData.map((user) => (
+//             <Card
+//               key={user.id}
+//               style={{
+//                 borderRadius: "12px",
+//                 border: "none",
+//                 boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+//               }}
+//             >
+//               <Row
+//                 justify="space-between"
+//                 align="top"
+//                 style={{ marginBottom: "8px" }}
+//               >
+//                 <Col>
+//                   <Text strong style={{ fontSize: "16px", display: "block" }}>
+//                     {user.name}
+//                   </Text>
+//                   <Text type="secondary" style={{ fontSize: "12px" }}>
+//                     {user.email}
+//                   </Text>
+//                 </Col>
+//                 <Col>
+//                   <Button
+//                     icon={<EyeOutlined />}
+//                     shape="circle"
+//                     onClick={() => onView(user)}
+//                     style={{ backgroundColor: "#f0f0f0", border: "none" }}
+//                   />
+//                 </Col>
+//               </Row>
+
+//               <div style={{ margin: "12px 0", fontSize: "13px" }}>
+//                 <Text type="secondary">Phone: </Text> <Text>{user.phone}</Text>
+//               </div>
+
+//               <Row
+//                 justify="space-between"
+//                 align="middle"
+//                 style={{ marginTop: "16px" }}
+//               >
+//                 <Col>
+//                   <Tag
+//                     style={{
+//                       backgroundColor:
+//                         user.status === "Active" ? "#2ecc71" : "#000000",
+//                       color: "#ffffff",
+//                       borderRadius: "6px",
+//                       border: "none",
+//                       fontWeight: 600,
+//                     }}
+//                   >
+//                     {user.status}
+//                   </Tag>
+//                 </Col>
+//                 <Col>
+//                   <Space>
+//                     <Text type="secondary">Status</Text>
+//                     <Switch
+//                       size="small"
+//                       checked={user.status === "Active"}
+//                       onChange={(checked) => handleToggleStatus(checked, user)}
+//                       style={{
+//                         backgroundColor:
+//                           user.status === "Active" ? "#2ecc71" : undefined,
+//                       }}
+//                     />
+//                   </Space>
+//                 </Col>
+//               </Row>
+//             </Card>
+//           ))}
+//           {/* Mobile pagination summary */}
+//           <div style={{ textAlign: "center", color: "#666", marginTop: "8px" }}>
+//             Total {filteredData.length} users
+//           </div>
+//         </div>
+//       )}
+
+//       <style jsx global>{`
+//         .user-table-row td {
+//           padding: 20px 16px !important;
+//         }
+//       `}</style>
+//     </div>
+//   );
+// }
+
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   Input,
@@ -159,9 +440,9 @@ import {
   Typography,
   Row,
   Col,
+  Pagination,
+  App,
 } from "antd";
-import { App } from "antd";
-
 import { SearchOutlined, EyeOutlined } from "@ant-design/icons";
 import { userService } from "@/src/services/userService";
 
@@ -170,50 +451,51 @@ const { Text } = Typography;
 
 interface UserTableProps {
   users: any[];
+  total: number;
+  currentPage: number;
+  loading: boolean;
+  onPageChange: (page: number) => void;
+  onSearch: (value: string) => void; // This is the prop we are using
   onView: (user: any) => void;
   refreshUsers: () => Promise<void>;
 }
 
 export default function UserTable({
-  users: initialUsers,
+  users,
+  total,
+  currentPage,
+  loading,
+  onPageChange,
+  onSearch,
   onView,
-  refreshUsers, // ✅ receive
+  refreshUsers,
 }: UserTableProps) {
-  const [dataSource, setDataSource] = useState(initialUsers);
-  const [searchText, setSearchText] = useState("");
   const { message } = App.useApp();
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
+  // 1. Create a local state to track what the user is typing
+  const [searchValue, setSearchValue] = useState("");
+
+  // 2. Use a Debounce Effect: This waits for the user to stop typing
+  // before calling the 'onSearch' prop to trigger the API.
   useEffect(() => {
-    setDataSource(initialUsers);
-  }, [initialUsers]);
+    const handler = setTimeout(() => {
+      onSearch(searchValue);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(handler); // Cleanup if the user types again within 500ms
+  }, [searchValue, onSearch]);
 
   const handleToggleStatus = async (checked: boolean, record: any) => {
-    const newStatus = checked ? "Active" : "Blocked";
-
     try {
-      // ✅ Call API
       await userService.toggleUserStatus(record.id);
-
-      message.success(`User ${record.name} updated`);
-
-      // ✅ re-fetch from backend (your requirement)
+      message.success(`User status updated`);
       await refreshUsers();
-
-      message.success(`User ${record.name} is now ${newStatus}`);
     } catch (error) {
       message.error("Failed to update user status");
     }
   };
-
-  const filteredData = useMemo(() => {
-    return dataSource.filter(
-      (item) =>
-        item.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        item.email.toLowerCase().includes(searchText.toLowerCase()),
-    );
-  }, [dataSource, searchText]);
 
   const columns = [
     {
@@ -222,16 +504,8 @@ export default function UserTable({
       key: "name",
       render: (text: string) => <span style={{ fontWeight: 500 }}>{text}</span>,
     },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "Phone",
-      dataIndex: "phone",
-      key: "phone",
-    },
+    { title: "Email", dataIndex: "email", key: "email" },
+    { title: "Phone", dataIndex: "phone", key: "phone" },
     {
       title: "Status",
       dataIndex: "status",
@@ -240,13 +514,11 @@ export default function UserTable({
         <Tag
           style={{
             backgroundColor: status === "Active" ? "#2ecc71" : "#000000",
-            color: "#ffffff",
+            color: "#fff",
             borderRadius: "6px",
-            padding: "2px 12px",
-            fontWeight: 600,
-            border: "none",
             width: "80px",
             textAlign: "center",
+            border: "none",
           }}
         >
           {status}
@@ -261,16 +533,12 @@ export default function UserTable({
           <Switch
             checked={record.status === "Active"}
             onChange={(checked) => handleToggleStatus(checked, record)}
-            style={{
-              backgroundColor:
-                record.status === "Active" ? "#2ecc71" : undefined,
-            }}
           />
           <Button
             icon={<EyeOutlined />}
             shape="circle"
             onClick={() => onView(record)}
-            style={{ border: "none", boxShadow: "none", color: "#666" }}
+            style={{ border: "none", color: "#666" }}
           />
         </Space>
       ),
@@ -283,76 +551,54 @@ export default function UserTable({
         background: isMobile ? "transparent" : "#fff",
         padding: isMobile ? "0" : "24px",
         borderRadius: "12px",
-        boxShadow: isMobile ? "none" : "0 2px 8px rgba(0,0,0,0.05)",
       }}
     >
-      {/* Responsive Search Input */}
+      {/* 3. Controlled Input linked to local state */}
       <Input
-        placeholder="Search users"
+        placeholder="Search users by name or email..."
         prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
-        style={{
-          borderRadius: "8px",
-          height: "50px",
-          marginBottom: "24px",
-          backgroundColor: "#f9f9f9",
-          border: "1px solid #f0f0f0",
-        }}
-        onChange={(e) => setSearchText(e.target.value)}
+        style={{ borderRadius: "8px", height: "50px", marginBottom: "24px" }}
+        value={searchValue}
+        onChange={(e) => setSearchValue(e.target.value)}
+        allowClear // Allows the user to clear search quickly
       />
 
       {!isMobile ? (
-        /* DESKTOP VIEW */
         <ConfigProvider
           theme={{
             components: {
-              Table: { headerBg: "#fafafa", headerColor: "#000" },
+              Table: { headerBg: "#fafafa" },
               Switch: { colorPrimary: "#2ecc71" },
             },
           }}
         >
           <Table
             columns={columns}
-            dataSource={filteredData}
-            pagination={{
-              pageSize: 5,
-              placement: ["bottom"] as any,
-              showTotal: (total, range) => (
-                <span style={{ fontWeight: 500, color: "#666" }}>
-                  Showing {range[0]} to {range[1]} of {total} results
-                </span>
-              ),
-            }}
+            dataSource={users}
+            loading={loading}
             rowKey="id"
-            style={{
-              border: "1px solid #f0f0f0",
-              borderRadius: "12px",
-              overflow: "hidden",
+            pagination={{
+              current: currentPage,
+              total: total,
+              pageSize: 5,
+              onChange: onPageChange,
+              showTotal: (total, range) =>
+                `Showing ${range[0]} to ${range[1]} of ${total} results`,
             }}
-            rowClassName="user-table-row"
           />
         </ConfigProvider>
       ) : (
-        /* MOBILE VIEW: Cards */
+        /* Mobile View Cards */
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {filteredData.map((user) => (
-            <Card
-              key={user.id}
-              style={{
-                borderRadius: "12px",
-                border: "none",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-              }}
-            >
-              <Row
-                justify="space-between"
-                align="top"
-                style={{ marginBottom: "8px" }}
-              >
+          {users.map((user) => (
+            <Card key={user.id} style={{ borderRadius: "12px" }}>
+              <Row justify="space-between">
                 <Col>
-                  <Text strong style={{ fontSize: "16px", display: "block" }}>
-                    {user.name}
-                  </Text>
-                  <Text type="secondary" style={{ fontSize: "12px" }}>
+                  <Text strong>{user.name}</Text>
+                  <Text
+                    type="secondary"
+                    style={{ display: "block", fontSize: "12px" }}
+                  >
                     {user.email}
                   </Text>
                 </Col>
@@ -361,63 +607,38 @@ export default function UserTable({
                     icon={<EyeOutlined />}
                     shape="circle"
                     onClick={() => onView(user)}
-                    style={{ backgroundColor: "#f0f0f0", border: "none" }}
                   />
                 </Col>
               </Row>
-
-              <div style={{ margin: "12px 0", fontSize: "13px" }}>
-                <Text type="secondary">Phone: </Text> <Text>{user.phone}</Text>
-              </div>
-
-              <Row
-                justify="space-between"
-                align="middle"
-                style={{ marginTop: "16px" }}
+              <div
+                style={{
+                  marginTop: "16px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
               >
-                <Col>
-                  <Tag
-                    style={{
-                      backgroundColor:
-                        user.status === "Active" ? "#2ecc71" : "#000000",
-                      color: "#ffffff",
-                      borderRadius: "6px",
-                      border: "none",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {user.status}
-                  </Tag>
-                </Col>
-                <Col>
-                  <Space>
-                    <Text type="secondary">Status</Text>
-                    <Switch
-                      size="small"
-                      checked={user.status === "Active"}
-                      onChange={(checked) => handleToggleStatus(checked, user)}
-                      style={{
-                        backgroundColor:
-                          user.status === "Active" ? "#2ecc71" : undefined,
-                      }}
-                    />
-                  </Space>
-                </Col>
-              </Row>
+                <Tag color={user.status === "Active" ? "green" : "black"}>
+                  {user.status}
+                </Tag>
+                <Switch
+                  size="small"
+                  checked={user.status === "Active"}
+                  onChange={(checked) => handleToggleStatus(checked, user)}
+                />
+              </div>
             </Card>
           ))}
-          {/* Mobile pagination summary */}
-          <div style={{ textAlign: "center", color: "#666", marginTop: "8px" }}>
-            Total {filteredData.length} users
-          </div>
+          <Pagination
+            current={currentPage}
+            total={total}
+            pageSize={5}
+            onChange={onPageChange}
+            style={{ textAlign: "center", marginTop: "16px" }}
+            simple
+          />
         </div>
       )}
-
-      <style jsx global>{`
-        .user-table-row td {
-          padding: 20px 16px !important;
-        }
-      `}</style>
     </div>
   );
 }

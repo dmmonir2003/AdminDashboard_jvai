@@ -128,23 +128,42 @@ export const categoryService = {
    * Fetch all categories with optional filtering
    * URL: /admin/categories/?category_for=auction
    */
-  getCategories: async (
-    categoryFor?: CategoryType,
-  ): Promise<PaginatedResponse<Category>> => {
-    try {
-      // We cast the return to 'any' then to our interface because the
-      // interceptor in axiosInstance.ts already stripped the .data wrapper
-      const response = await apiClient.get(API_ENDPOINTS.GET_CATEGORIES, {
-        params: {
-          category_for: categoryFor,
-        },
-      });
-      return response as any;
-    } catch (error) {
-      console.error("[Category Error] Fetch failed:", error);
-      throw error;
-    }
-  },
+  // getCategories: async (
+  //   page?: number | undefined,
+  //   categoryFor?: CategoryType,
+  // ): Promise<PaginatedResponse<Category>> => {
+  //   try {
+  //     const params: any = { page };
+  //     if (categoryFor) params.category_for = categoryFor;
+
+  //     const response = await apiClient.get(API_ENDPOINTS.GET_CATEGORIES, {
+  //       params,
+  //     });
+  //     // The interceptor returns the data directly
+  //     return response as any;
+  //   } catch (error) {
+  //     console.error("[Category Error] Fetch failed:", error);
+  //     throw error;
+  //   }
+  // },
+
+  // getCategories: async (
+  //   categoryFor?: CategoryType,
+  // ): Promise<PaginatedResponse<Category>> => {
+  //   try {
+  //     // We cast the return to 'any' then to our interface because the
+  //     // interceptor in axiosInstance.ts already stripped the .data wrapper
+  //     const response = await apiClient.get(API_ENDPOINTS.GET_CATEGORIES, {
+  //       params: {
+  //         category_for: categoryFor,
+  //       },
+  //     });
+  //     return response as any;
+  //   } catch (error) {
+  //     console.error("[Category Error] Fetch failed:", error);
+  //     throw error;
+  //   }
+  // },
 
   // getCategories: async (
   //   page: number = 1,
@@ -160,6 +179,25 @@ export const categoryService = {
   //   });
   //   return response as any;
   // },
+
+  getCategories: async (
+    params: {
+      page?: number;
+      category_for?: CategoryType;
+      search?: string;
+    } = {},
+  ): Promise<PaginatedResponse<Category>> => {
+    try {
+      // Axios automatically removes undefined keys from params
+      const response = await apiClient.get(API_ENDPOINTS.GET_CATEGORIES, {
+        params,
+      });
+      return response as any;
+    } catch (error) {
+      console.error("[Category Error] Fetch failed:", error);
+      throw error;
+    }
+  },
 
   /**
    * Create a new category

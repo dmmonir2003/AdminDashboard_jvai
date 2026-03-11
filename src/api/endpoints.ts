@@ -72,7 +72,12 @@ export const API_ENDPOINTS = {
   ADMIN_ANNOUNCEMENT_CREATE: "/admin/announcements/",
   ADMIN_ANNOUNCEMENT_DELETE: (id: number | string) =>
     `/admin/announcements/${id}/delete/`,
-
+  // Auction Orders (Admin)
+  ADMIN_AUCTION_ORDERS: "/winner-claim/auction-orders/",
+  ADMIN_AUCTION_ORDER_DETAIL: (id: number | string) =>
+    `/winner-claim/auction-orders/${id}/`,
+  ADMIN_MARK_AUCTION_DELIVERED: (id: number | string) =>
+    `/winner-claim/auction-orders/${id}/mark-delivered/`,
   // User Search for Specific Announcements
   ADMIN_USER_SEARCH: "/admin/users/search/",
 } as const;
