@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // // "use client";
@@ -1191,14 +1192,405 @@
 //   );
 // }
 
+//TODO
+
+// "use client";
+// import React, {
+//   useState,
+//   useMemo,
+//   useEffect,
+//   useCallback,
+//   useRef,
+// } from "react";
+// import {
+//   Row,
+//   Col,
+//   Input,
+//   Button,
+//   Tabs,
+//   Empty,
+//   Grid,
+//   Select,
+//   message,
+// } from "antd";
+// import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
+// import { AuctionFormModal } from "@/src/components/auctions/AuctionFormModal";
+// import AuctionCard from "./AuctionCard";
+// import { auctionService } from "@/src/services/auctionService";
+// import { useRouter, useSearchParams } from "next/navigation"; // ← add useSearchParams
+// import debounce from "lodash/debounce";
+// import Cookies from "js-cookie";
+// import { socketService } from "@/src/services/socketService";
+// const { useBreakpoint } = Grid;
+
+// const TAB_TO_STATUS = {
+//   publish: "publish",
+//   upcoming: "schedule",
+//   invalid: "invalid",
+//   ended: "ended",
+//   draft: "draft",
+// };
+
+// export default function AuctionManager({
+//   initialAuctions = [],
+// }: {
+//   initialAuctions: any[];
+// }) {
+//   const searchParams = useSearchParams(); // ← add this
+//   const initialTab = searchParams.get("tab") || "publish"; // ← read ?tab= from URL
+
+//   const [searchText, setSearchText] = useState("");
+//   const [activeTab, setActiveTab] = useState(initialTab); // ← use initialTab here
+//   const [auctions, setAuctions] = useState(initialAuctions);
+//   const [allAuctionsForCount, setAllAuctionsForCount] =
+//     useState<any[]>(initialAuctions);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [editingAuction, setEditingAuction] = useState<any>(null);
+//   const router = useRouter();
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+//   const screens = useBreakpoint();
+//   const isMobile = !screens.md;
+//   const isRefreshing = useRef(false);
+//   const token = Cookies.get("accessToken") || "";
+//   const [liveAuctions, setLiveAuctions] = useState<any[]>([]);
+//   const getStatusFromTab = (tab: string): string => {
+//     return TAB_TO_STATUS[tab as keyof typeof TAB_TO_STATUS] || tab;
+//   };
+
+//   // ← pass activeTab as ?from= so detail page knows where we came from
+//   const handleViewDetails = (auctionId: number) => {
+//     router.push(`/auctions/${auctionId}?from=${activeTab}`);
+//   };
+
+//   // Connect to socket and fetch live data
+//   useEffect(() => {
+//     if (!token) return;
+
+//     socketService.connect(token, () => {
+//       console.log("✅ Socket connected for auction live list");
+//     });
+
+//     const socket = socketService.getSocket();
+//     if (socket) {
+//       socket.on("all_countdowns", (data: any) => {
+//         console.log(
+//           "📊 All countdowns received:",
+//           data.auctions[0].remaining_seconds,
+//         );
+
+//         if (data) {
+//           // data is { auctions: [...], count: 2, timestamp: "..." }
+//           const auctionsArray = Array.isArray(data)
+//             ? data
+//             : (data.auctions ?? []);
+//           setLiveAuctions(auctionsArray);
+//         }
+//       });
+//     }
+
+//     console.log(liveAuctions, "sdfsdffasdafds");
+
+//     return () => {
+//       const socket = socketService.getSocket();
+//       if (socket) {
+//         socket.off("all_countdowns");
+//         socket.off("live_bid_users_response");
+//         socket.off("auction_state");
+//         // socket.off("countdown_update");
+//         socket.off("auction_ended");
+//       }
+//     };
+//   }, [token]);
+
+//   const refreshTabs = useCallback(
+//     debounce(async (statusesToRefresh: string[]) => {
+//       if (isRefreshing.current) return;
+//       isRefreshing.current = true;
+//       try {
+//         const fetchPromises = statusesToRefresh.map((status) =>
+//           auctionService.getAllAuctions(status),
+//         );
+//         const results = await Promise.all(fetchPromises);
+//         const allData = await auctionService.getAllAuctions("");
+//         setAllAuctionsForCount(Array.isArray(allData) ? allData : []);
+//         const currentStatus = getStatusFromTab(activeTab);
+//         const activeIndex = statusesToRefresh.indexOf(currentStatus);
+//         if (activeIndex !== -1) {
+//           setAuctions(results[activeIndex]);
+//         }
+//       } catch (error) {
+//         console.error("Failed to refresh auctions:", error);
+//       } finally {
+//         isRefreshing.current = false;
+//       }
+//     }, 500),
+//     [activeTab],
+//   );
+
+//   const handleCountdownComplete = useCallback(
+//     (newStatus: string) => {
+//       let statusesToRefresh: string[];
+//       if (newStatus === "publish") {
+//         statusesToRefresh = ["schedule", "publish"];
+//       } else if (newStatus === "ended") {
+//         statusesToRefresh = ["publish", "ended"];
+//       } else {
+//         return;
+//       }
+//       refreshTabs(statusesToRefresh);
+//     },
+//     [refreshTabs],
+//   );
+
+//   useEffect(() => {
+//     const fetchAllForCounts = async () => {
+//       try {
+//         const allData = await auctionService.getAllAuctions("");
+//         if (Array.isArray(allData)) {
+//           setAllAuctionsForCount(allData);
+//         }
+//       } catch (err) {
+//         console.error("Failed to fetch counts:", err);
+//       }
+//     };
+//     fetchAllForCounts();
+//   }, []);
+
+//   useEffect(() => {
+//     let isMounted = true;
+//     const fetchFilteredData = async () => {
+//       try {
+//         const status = getStatusFromTab(activeTab);
+//         const data = await auctionService.getAllAuctions(status);
+//         if (isMounted) {
+//           setAuctions(data);
+//         }
+//       } catch (err) {
+//         console.error("Failed to fetch filtered auctions:", err);
+//       }
+//     };
+//     fetchFilteredData();
+//     return () => {
+//       isMounted = false;
+//     };
+//   }, [activeTab]);
+
+//   console.log(auctions, "auctions in manager");
+
+//   const handleFormFinish = async (values: any) => {
+//     setIsSubmitting(true);
+//     const formData = new FormData();
+//     formData.append("product_name", values.product_name);
+//     formData.append("category", values.category);
+//     formData.append("description", values.description || "");
+//     formData.append("market_price", values.market_price);
+//     formData.append("auction_price", values.auction_price);
+//     formData.append("entry_fee_coins", values.entry_fee_coins);
+//     formData.append("status", values.status);
+//     if (values.scheduled_time) {
+//       formData.append(
+//         "scheduled_time",
+//         values.scheduled_time.format("YYYY-MM-DD HH:mm:ss"),
+//       );
+//     }
+//     if (values.auction_duration) {
+//       formData.append("auction_duration", values.auction_duration);
+//     }
+//     formData.append(
+//       "winning_claim_window",
+//       values.winning_claim_window || "02:00:00",
+//     );
+//     if (values.product_image?.fileList) {
+//       values.product_image.fileList.forEach((fileItem: any) => {
+//         if (fileItem.originFileObj) {
+//           formData.append("product_images", fileItem.originFileObj);
+//         }
+//       });
+//     } else if (values.product_image?.file) {
+//       formData.append("product_images", values.product_image.file);
+//     }
+//     try {
+//       if (editingAuction) {
+//         await auctionService.updateAuction(editingAuction.auction_id, formData);
+//         message.success("Auction updated successfully!");
+//       } else {
+//         await auctionService.createAuction(formData);
+//         message.success("Auction created successfully!");
+//       }
+//       refreshTabs([getStatusFromTab(activeTab)]);
+//     } catch (error) {
+//       console.error("Save failed:", error);
+//       message.error("Failed to save auction. Please check your connection.");
+//     } finally {
+//       setIsSubmitting(false);
+//       setIsModalOpen(false);
+//       setEditingAuction(null);
+//     }
+//   };
+
+//   // const counts = useMemo(() => {
+//   //   const data = allAuctionsForCount || [];
+//   //   console.log(data, "all auctions ");
+//   //   return {
+//   //     live: data.filter(
+//   //       (item: any) =>
+//   //         item.status === "publish" && item.remaining_time !== "Ended",
+//   //     ).length,
+//   //     upcoming: data.filter((item: any) => item.status === "schedule").length,
+//   //     invalid: data.filter((item: any) => item.status === "invalid").length,
+//   //     ended: data.filter((item: any) => item.status === "ended").length,
+//   //     draft: data.filter((item: any) => item.status === "draft").length,
+//   //   };
+//   // }, [allAuctionsForCount]);
+
+//   // const tabItems = [
+//   //   { label: `Live (${counts.live})`, value: "publish", key: "publish" },
+//   //   {
+//   //     label: `Upcoming (${counts.upcoming})`,
+//   //     value: "upcoming",
+//   //     key: "upcoming",
+//   //   },
+//   //   { label: `Invalid (${counts.invalid})`, value: "invalid", key: "invalid" },
+//   //   { label: `Ended (${counts.ended})`, value: "ended", key: "ended" },
+//   // ];
+
+//   const filteredData = (auctions || []).filter((item: any) =>
+//     item.product_name?.toLowerCase().includes(searchText.toLowerCase()),
+//   );
+
+//   return (
+//     <div style={{ padding: isMobile ? "16px" : "24px" }}>
+//       <Row
+//         gutter={[16, 16]}
+//         justify="space-between"
+//         align="middle"
+//         style={{ marginBottom: "24px" }}
+//       >
+//         <Col xs={24} md={18} flex="auto">
+//           <Input
+//             placeholder="Search Auctions"
+//             prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
+//             style={{ borderRadius: "8px", height: "45px", width: "100%" }}
+//             onChange={(e) => setSearchText(e.target.value)}
+//           />
+//         </Col>
+//         <Col xs={24} md={6} style={{ textAlign: isMobile ? "left" : "right" }}>
+//           <Button
+//             type="primary"
+//             block={isMobile}
+//             onClick={() => {
+//               setEditingAuction(null);
+//               setIsModalOpen(true);
+//             }}
+//             icon={<PlusOutlined />}
+//             size="large"
+//             style={{ borderRadius: "8px", height: "45px" }}
+//           >
+//             Add Auction
+//           </Button>
+//         </Col>
+//       </Row>
+//       {isMobile ? (
+//         <Select
+//           value={activeTab}
+//           onChange={setActiveTab}
+//           style={{ width: "100%", marginBottom: "16px" }}
+//           size="large"
+//           options={tabItems}
+//         />
+//       ) : (
+//         <Tabs
+//           activeKey={activeTab}
+//           onChange={setActiveTab}
+//           items={tabItems}
+//           style={{ marginBottom: "16px" }}
+//           className="custom-tabs"
+//         />
+//       )}
+//       <div
+//         style={{
+//           maxHeight: isMobile ? "calc(100vh - 320px)" : "calc(100vh - 250px)",
+//           overflowY: "auto",
+//         }}
+//       >
+//         {filteredData.length > 0 ? (
+//           filteredData.map((item) => {
+//             const liveData =
+//               activeTab === "publish"
+//                 ? liveAuctions.find(
+//                     (l: any) => l.auction_id === item.auction_id,
+//                   )
+//                 : null;
+//             const mergedItem = liveData
+//               ? { ...item, remaining_seconds: liveData.remaining_seconds }
+//               : item;
+//             return (
+//               <AuctionCard
+//                 key={item.auction_id}
+//                 item={mergedItem}
+//                 activeTab={activeTab}
+//                 onCountdownComplete={handleCountdownComplete}
+//                 onEdit={(auction: any) => {
+//                   const duration = auction.auction_duration;
+//                   const formattedDuration =
+//                     duration && typeof duration === "object"
+//                       ? `${String(duration.hours || 0).padStart(2, "0")}:${String(duration.minutes || 0).padStart(2, "0")}:00`
+//                       : duration;
+//                   setEditingAuction({
+//                     ...auction,
+//                     auction_duration: formattedDuration,
+//                   });
+//                   setIsModalOpen(true);
+//                 }}
+//                 onView={(auction: any) => handleViewDetails(auction.auction_id)}
+//               />
+//             );
+//           })
+//         ) : (
+//           <Empty
+//             description={`No ${activeTab} auctions found`}
+//             style={{ marginTop: "40px" }}
+//           />
+//         )}
+//       </div>
+//       <AuctionFormModal
+//         open={isModalOpen}
+//         initialValues={editingAuction}
+//         onCancel={() => setIsModalOpen(false)}
+//         onFinish={handleFormFinish}
+//         title={editingAuction ? "Edit Auction" : "Add Auction"}
+//         loading={isSubmitting}
+//       />
+//       <style jsx global>{`
+//         .custom-tabs .ant-tabs-nav::before {
+//           border-bottom: none !important;
+//         }
+//         .custom-tabs .ant-tabs-tab {
+//           background: #f0f2f5 !important;
+//           border-radius: 20px !important;
+//           padding: 6px 20px !important;
+//           margin-right: 8px !important;
+//           border: none !important;
+//           transition: all 0.3s;
+//         }
+//         .custom-tabs .ant-tabs-tab-active {
+//           background: #fff !important;
+//           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+//         }
+//         .custom-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+//           color: #1890ff !important;
+//           font-weight: 600 !important;
+//         }
+//         .custom-tabs .ant-tabs-ink-bar {
+//           display: none !important;
+//         }
+//       `}</style>
+//     </div>
+//   );
+// }
+
 "use client";
-import React, {
-  useState,
-  useMemo,
-  useEffect,
-  useCallback,
-  useRef,
-} from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Row,
   Col,
@@ -1214,10 +1606,11 @@ import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
 import { AuctionFormModal } from "@/src/components/auctions/AuctionFormModal";
 import AuctionCard from "./AuctionCard";
 import { auctionService } from "@/src/services/auctionService";
-import { useRouter, useSearchParams } from "next/navigation"; // ← add useSearchParams
+import { useRouter, useSearchParams } from "next/navigation";
 import debounce from "lodash/debounce";
 import Cookies from "js-cookie";
 import { socketService } from "@/src/services/socketService";
+
 const { useBreakpoint } = Grid;
 
 const TAB_TO_STATUS = {
@@ -1225,7 +1618,6 @@ const TAB_TO_STATUS = {
   upcoming: "schedule",
   invalid: "invalid",
   ended: "ended",
-  draft: "draft",
 };
 
 export default function AuctionManager({
@@ -1233,14 +1625,20 @@ export default function AuctionManager({
 }: {
   initialAuctions: any[];
 }) {
-  const searchParams = useSearchParams(); // ← add this
-  const initialTab = searchParams.get("tab") || "publish"; // ← read ?tab= from URL
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") || "publish";
 
   const [searchText, setSearchText] = useState("");
-  const [activeTab, setActiveTab] = useState(initialTab); // ← use initialTab here
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [auctions, setAuctions] = useState(initialAuctions);
-  const [allAuctionsForCount, setAllAuctionsForCount] =
-    useState<any[]>(initialAuctions);
+
+  const [counts, setCounts] = useState<{ [key: string]: number }>({
+    publish: 0,
+    upcoming: 0,
+    invalid: 0,
+    ended: 0,
+  });
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAuction, setEditingAuction] = useState<any>(null);
   const router = useRouter();
@@ -1250,33 +1648,85 @@ export default function AuctionManager({
   const isRefreshing = useRef(false);
   const token = Cookies.get("accessToken") || "";
   const [liveAuctions, setLiveAuctions] = useState<any[]>([]);
+
   const getStatusFromTab = (tab: string): string => {
     return TAB_TO_STATUS[tab as keyof typeof TAB_TO_STATUS] || tab;
   };
 
-  // ← pass activeTab as ?from= so detail page knows where we came from
-  const handleViewDetails = (auctionId: number) => {
-    router.push(`/auctions/${auctionId}?from=${activeTab}`);
-  };
+  // 1. INITIAL FETCH FOR ALL TAB COUNTS
+  useEffect(() => {
+    const fetchAllCounts = async () => {
+      try {
+        const statuses = Object.keys(TAB_TO_STATUS);
+        const countPromises = statuses.map(async (tabKey) => {
+          const status = getStatusFromTab(tabKey);
+          const data = await auctionService.getAllAuctions(status);
+          return { tabKey, count: data.length };
+        });
 
-  // Connect to socket and fetch live data
+        const results = await Promise.all(countPromises);
+        const newCounts: any = {};
+        results.forEach(({ tabKey, count }) => {
+          newCounts[tabKey] = count;
+        });
+        setCounts(newCounts);
+      } catch (err) {
+        console.error("Failed to fetch initial counts:", err);
+      }
+    };
+    fetchAllCounts();
+  }, []);
+
+  const tabItems = [
+    {
+      label: `Live (${counts.publish || 0})`,
+      value: "publish",
+      key: "publish",
+    },
+    {
+      label: `Upcoming (${counts.upcoming || 0})`,
+      value: "upcoming",
+      key: "upcoming",
+    },
+    {
+      label: `Invalid (${counts.invalid || 0})`,
+      value: "invalid",
+      key: "invalid",
+    },
+    { label: `Ended (${counts.ended || 0})`, value: "ended", key: "ended" },
+  ];
+
+  // 2. FETCH DATA FOR ACTIVE TAB (ON MOUNT & ON CHANGE)
+  useEffect(() => {
+    let isMounted = true;
+    const fetchFilteredData = async () => {
+      try {
+        const status = getStatusFromTab(activeTab);
+        const data = await auctionService.getAllAuctions(status);
+        if (isMounted) {
+          setAuctions(data);
+          setCounts((prev) => ({ ...prev, [activeTab]: data.length }));
+        }
+      } catch (err) {
+        console.error("Failed to fetch filtered auctions:", err);
+      }
+    };
+    fetchFilteredData();
+    return () => {
+      isMounted = false;
+    };
+  }, [activeTab]);
+
+  // Socket logic (Unchanged)
   useEffect(() => {
     if (!token) return;
-
     socketService.connect(token, () => {
       console.log("✅ Socket connected for auction live list");
     });
-
     const socket = socketService.getSocket();
     if (socket) {
       socket.on("all_countdowns", (data: any) => {
-        console.log(
-          "📊 All countdowns received:",
-          data.auctions[0].remaining_seconds,
-        );
-
         if (data) {
-          // data is { auctions: [...], count: 2, timestamp: "..." }
           const auctionsArray = Array.isArray(data)
             ? data
             : (data.auctions ?? []);
@@ -1284,16 +1734,12 @@ export default function AuctionManager({
         }
       });
     }
-
-    console.log(liveAuctions, "sdfsdffasdafds");
-
     return () => {
       const socket = socketService.getSocket();
       if (socket) {
         socket.off("all_countdowns");
         socket.off("live_bid_users_response");
         socket.off("auction_state");
-        // socket.off("countdown_update");
         socket.off("auction_ended");
       }
     };
@@ -1304,17 +1750,28 @@ export default function AuctionManager({
       if (isRefreshing.current) return;
       isRefreshing.current = true;
       try {
-        const fetchPromises = statusesToRefresh.map((status) =>
-          auctionService.getAllAuctions(status),
-        );
-        const results = await Promise.all(fetchPromises);
-        const allData = await auctionService.getAllAuctions("");
-        setAllAuctionsForCount(Array.isArray(allData) ? allData : []);
+        // Refresh all requested statuses to keep counts accurate
+        const refreshPromises = statusesToRefresh.map(async (status) => {
+          const data = await auctionService.getAllAuctions(status);
+          return { status, data };
+        });
+
+        const results = await Promise.all(refreshPromises);
         const currentStatus = getStatusFromTab(activeTab);
-        const activeIndex = statusesToRefresh.indexOf(currentStatus);
-        if (activeIndex !== -1) {
-          setAuctions(results[activeIndex]);
-        }
+
+        results.forEach(({ status, data }) => {
+          // Find which tabKey matches this status to update counts
+          const tabKey = Object.keys(TAB_TO_STATUS).find(
+            (key) => getStatusFromTab(key) === status,
+          );
+          if (tabKey) {
+            setCounts((prev) => ({ ...prev, [tabKey]: data.length }));
+          }
+          // Update the list if it's the active tab
+          if (status === currentStatus) {
+            setAuctions(data);
+          }
+        });
       } catch (error) {
         console.error("Failed to refresh auctions:", error);
       } finally {
@@ -1339,39 +1796,6 @@ export default function AuctionManager({
     [refreshTabs],
   );
 
-  useEffect(() => {
-    const fetchAllForCounts = async () => {
-      try {
-        const allData = await auctionService.getAllAuctions("");
-        if (Array.isArray(allData)) {
-          setAllAuctionsForCount(allData);
-        }
-      } catch (err) {
-        console.error("Failed to fetch counts:", err);
-      }
-    };
-    fetchAllForCounts();
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-    const fetchFilteredData = async () => {
-      try {
-        const status = getStatusFromTab(activeTab);
-        const data = await auctionService.getAllAuctions(status);
-        if (isMounted) {
-          setAuctions(data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch filtered auctions:", err);
-      }
-    };
-    fetchFilteredData();
-    return () => {
-      isMounted = false;
-    };
-  }, [activeTab]);
-
   const handleFormFinish = async (values: any) => {
     setIsSubmitting(true);
     const formData = new FormData();
@@ -1382,6 +1806,7 @@ export default function AuctionManager({
     formData.append("auction_price", values.auction_price);
     formData.append("entry_fee_coins", values.entry_fee_coins);
     formData.append("status", values.status);
+
     if (values.scheduled_time) {
       formData.append(
         "scheduled_time",
@@ -1391,19 +1816,14 @@ export default function AuctionManager({
     if (values.auction_duration) {
       formData.append("auction_duration", values.auction_duration);
     }
-    formData.append(
-      "winning_claim_window",
-      values.winning_claim_window || "02:00:00",
-    );
+
     if (values.product_image?.fileList) {
       values.product_image.fileList.forEach((fileItem: any) => {
-        if (fileItem.originFileObj) {
+        if (fileItem.originFileObj)
           formData.append("product_images", fileItem.originFileObj);
-        }
       });
-    } else if (values.product_image?.file) {
-      formData.append("product_images", values.product_image.file);
     }
+
     try {
       if (editingAuction) {
         await auctionService.updateAuction(editingAuction.auction_id, formData);
@@ -1412,10 +1832,10 @@ export default function AuctionManager({
         await auctionService.createAuction(formData);
         message.success("Auction created successfully!");
       }
-      refreshTabs([getStatusFromTab(activeTab)]);
+      // Refresh current status and related statuses
+      refreshTabs(["publish", "schedule", "invalid", "ended"]);
     } catch (error) {
-      console.error("Save failed:", error);
-      message.error("Failed to save auction. Please check your connection.");
+      message.error("Failed to save auction.");
     } finally {
       setIsSubmitting(false);
       setIsModalOpen(false);
@@ -1423,33 +1843,13 @@ export default function AuctionManager({
     }
   };
 
-  const counts = useMemo(() => {
-    const data = allAuctionsForCount || [];
-    return {
-      live: data.filter((item: any) => item.status === "publish").length,
-      upcoming: data.filter((item: any) => item.status === "schedule").length,
-      invalid: data.filter((item: any) => item.status === "invalid").length,
-      ended: data.filter((item: any) => item.status === "ended").length,
-      draft: data.filter((item: any) => item.status === "draft").length,
-    };
-  }, [allAuctionsForCount]);
-
-  console.log(counts.live);
-
-  const tabItems = [
-    { label: `Live (${counts.live})`, value: "publish", key: "publish" },
-    {
-      label: `Upcoming (${counts.upcoming})`,
-      value: "upcoming",
-      key: "upcoming",
-    },
-    { label: `Invalid (${counts.invalid})`, value: "invalid", key: "invalid" },
-    { label: `Ended (${counts.ended})`, value: "ended", key: "ended" },
-  ];
-
   const filteredData = (auctions || []).filter((item: any) =>
     item.product_name?.toLowerCase().includes(searchText.toLowerCase()),
   );
+
+  const handleViewDetails = (auctionId: number) => {
+    router.push(`/auctions/${auctionId}?from=${activeTab}`);
+  };
 
   return (
     <div style={{ padding: isMobile ? "16px" : "24px" }}>
@@ -1483,6 +1883,7 @@ export default function AuctionManager({
           </Button>
         </Col>
       </Row>
+
       {isMobile ? (
         <Select
           value={activeTab}
@@ -1500,6 +1901,7 @@ export default function AuctionManager({
           className="custom-tabs"
         />
       )}
+
       <div
         style={{
           maxHeight: isMobile ? "calc(100vh - 320px)" : "calc(100vh - 250px)",
@@ -1546,6 +1948,7 @@ export default function AuctionManager({
           />
         )}
       </div>
+
       <AuctionFormModal
         open={isModalOpen}
         initialValues={editingAuction}
@@ -1554,6 +1957,7 @@ export default function AuctionManager({
         title={editingAuction ? "Edit Auction" : "Add Auction"}
         loading={isSubmitting}
       />
+
       <style jsx global>{`
         .custom-tabs .ant-tabs-nav::before {
           border-bottom: none !important;

@@ -2887,11 +2887,22 @@ export default function ProductFormModal({
               </Form.Item>
             </Col>
 
-            <Col span={productType === "Physical" ? 8 : 12}>
+            {productType === "Physical" && (
+              <Col span={productType === "Physical" ? 8 : 12}>
+                <Form.Item
+                  name="discount"
+                  label={<strong>Discount (%)</strong>}
+                >
+                  <Input placeholder="0" style={inputStyle} />
+                </Form.Item>
+              </Col>
+            )}
+            {/* <Col span={productType === "Physical" ? 8 : 12}>
+
               <Form.Item name="discount" label={<strong>Discount (%)</strong>}>
                 <Input placeholder="0" style={inputStyle} />
               </Form.Item>
-            </Col>
+            </Col> */}
 
             {productType === "Physical" && (
               <>
@@ -2937,12 +2948,15 @@ export default function ProductFormModal({
                       fileList={imageFileList}
                       onChange={handleImageChange}
                       beforeUpload={() => false}
+                      multiple
                       maxCount={3}
                     >
-                      <div>
-                        <PlusOutlined />
-                        <div style={{ marginTop: 8 }}>Upload</div>
-                      </div>
+                      {imageFileList.length >= 3 ? null : (
+                        <div>
+                          <PlusOutlined />
+                          <div style={{ marginTop: 8 }}>Upload</div>
+                        </div>
+                      )}
                     </Upload>
                   </Form.Item>
                 </Col>
@@ -3005,12 +3019,15 @@ export default function ProductFormModal({
                       fileList={imageFileList}
                       onChange={handleImageChange}
                       beforeUpload={() => false}
-                      maxCount={1}
+                      multiple
+                      maxCount={3}
                     >
-                      <div>
-                        <PlusOutlined />
-                        <div style={{ marginTop: 8 }}>Upload</div>
-                      </div>
+                      {imageFileList.length >= 3 ? null : (
+                        <div>
+                          <PlusOutlined />
+                          <div style={{ marginTop: 8 }}>Upload</div>
+                        </div>
+                      )}
                     </Upload>
                   </Form.Item>
                 </Col>

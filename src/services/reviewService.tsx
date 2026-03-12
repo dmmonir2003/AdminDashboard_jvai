@@ -21,6 +21,19 @@ export const reviewService = {
     }
   },
 
+  getProductsForReview: async () => {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.REVIEW_PRODUCT);
+      return response as any;
+    } catch (error) {
+      console.error(
+        "[Review Service] Failed to fetch products for review:",
+        error,
+      );
+      throw error;
+    }
+  },
+
   getReviewById: async (id: number | string) => {
     try {
       const response = await apiClient.get(

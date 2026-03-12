@@ -782,7 +782,10 @@ export default function ReviewsTable() {
   // Fetch Products for dropdown
   const fetchFilterProducts = async () => {
     try {
-      const res = await productService.getProducts(1);
+      // const res = await productService.getProducts(1);
+
+      const res = await reviewService.getProductsForReview();
+      console.log(res, "data");
       setProducts(res.results || []);
     } catch (err) {
       console.error("Filter products load failed");
@@ -929,7 +932,7 @@ export default function ReviewsTable() {
           style={{ width: isMobile ? "100%" : "200px" }}
         >
           {products.map((p) => (
-            <Select.Option key={p.product_id} value={p.product_id}>
+            <Select.Option key={p.id} value={p.id}>
               {p.name}
             </Select.Option>
           ))}

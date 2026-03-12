@@ -56,6 +56,8 @@ export const API_ENDPOINTS = {
   PRODUCT_DETAIL: (id: number | string) => `/products/${id}`, // GET
   PRODUCT_UPDATE: (id: number | string) => `/products/${id}/`, // PATCH (multipart/form-data)
   PRODUCT_DELETE: (id: number | string) => `/products/${id}/`, // DELETE
+
+  REVIEW_PRODUCT: "/admin/products/names/",
   // Shop Orders (Admin)
   ADMIN_ORDERS: "/admin/orders/",
   ADMIN_ORDER_DETAIL: (id: number | string) => `/admin/orders/${id}/`,
