@@ -1816,6 +1816,9 @@ export default function AuctionManager({
     if (values.auction_duration) {
       formData.append("auction_duration", values.auction_duration);
     }
+    if (values.winning_claim_window) {
+      formData.append("winning_claim_window", values.winning_claim_window);
+    }
 
     if (values.product_image?.fileList) {
       values.product_image.fileList.forEach((fileItem: any) => {

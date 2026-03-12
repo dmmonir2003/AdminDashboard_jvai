@@ -643,6 +643,7 @@ export const AuctionFormModal: React.FC<AuctionFormProps> = ({
 
   const handleSubmit = () => {
     form.validateFields().then((values) => {
+      console.log(values, "ddsdsfsflj");
       onFinish(values);
     });
   };
