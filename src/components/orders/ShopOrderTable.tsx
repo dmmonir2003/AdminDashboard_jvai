@@ -401,12 +401,22 @@ export default function ShopOrderTable({
       ),
     },
     {
-      title: "Created At",
-      key: "created_at",
-      render: (_: any, record: any) => (
-        <span>{new Date(record.created_at).toLocaleDateString()}</span>
-      ),
+      title: "Color",
+      key: "color",
+      render: (_: any, record: any) => <span>{record.product.color}</span>,
     },
+    {
+      title: "Size",
+      key: "size",
+      render: (_: any, record: any) => <span>{record.product.size}</span>,
+    },
+    // {
+    //   title: "Created At",
+    //   key: "created_at",
+    //   render: (_: any, record: any) => (
+    //     <span>{new Date(record.created_at).toLocaleDateString()}</span>
+    //   ),
+    // },
     {
       title: "Status",
       dataIndex: "status",
