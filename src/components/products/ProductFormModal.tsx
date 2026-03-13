@@ -2942,21 +2942,26 @@ export default function ProductFormModal({
                   </Form.Item>
                 </Col>
                 <Col span={24}>
-                  <Form.Item label={<strong>Product Images (max 3)</strong>}>
+                  <Form.Item label={<strong>Product Images </strong>}>
                     <Upload
                       listType="picture-card"
                       fileList={imageFileList}
                       onChange={handleImageChange}
                       beforeUpload={() => false}
                       multiple
-                      maxCount={3}
+                      // maxCount={3}
                     >
-                      {imageFileList.length >= 3 ? null : (
+                      {/* {imageFileList.length >= 3 ? null : (
                         <div>
                           <PlusOutlined />
                           <div style={{ marginTop: 8 }}>Upload</div>
                         </div>
-                      )}
+                      )} */}
+
+                      <div>
+                        <PlusOutlined />
+                        <div style={{ marginTop: 8 }}>Upload</div>
+                      </div>
                     </Upload>
                   </Form.Item>
                 </Col>
@@ -3020,14 +3025,19 @@ export default function ProductFormModal({
                       onChange={handleImageChange}
                       beforeUpload={() => false}
                       multiple
-                      maxCount={3}
+                      // maxCount={3}
                     >
-                      {imageFileList.length >= 3 ? null : (
+                      {/* {imageFileList.length >= 3 ? null : (
                         <div>
                           <PlusOutlined />
                           <div style={{ marginTop: 8 }}>Upload</div>
                         </div>
-                      )}
+                      )} */}
+
+                      <div>
+                        <PlusOutlined />
+                        <div style={{ marginTop: 8 }}>Upload</div>
+                      </div>
                     </Upload>
                   </Form.Item>
                 </Col>
