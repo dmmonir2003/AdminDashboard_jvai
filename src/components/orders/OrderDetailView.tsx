@@ -796,7 +796,7 @@ export default function OrderDetailView({
             {orderType === "auction" ? (
               <div style={{ marginTop: "24px" }}>
                 <Text strong style={{ fontSize: "16px" }}>
-                  <HistoryOutlined /> Auction History
+                  <HistoryOutlined /> Transaction History
                 </Text>
                 <div style={{ marginTop: "16px" }}>
                   {order?.auction_history?.map((history: any, idx: number) => (
