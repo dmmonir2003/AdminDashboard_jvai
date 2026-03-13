@@ -1767,7 +1767,7 @@ export default function AuctionManager({
           if (tabKey) {
             setCounts((prev) => ({ ...prev, [tabKey]: data.length }));
           }
-          // Update the list if it's the active tab
+
           if (status === currentStatus) {
             setAuctions(data);
           }
